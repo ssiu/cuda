@@ -49,7 +49,7 @@ int main() {
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
     for (int i=0; i< N; i++){
         for (int j=0; j< N; j++){
-            std::cout << h_C[i*N+j] ;
+            std::cout << h_C[i*N+j] << " " ;
         }
         std::cout << std::endl;
     }
