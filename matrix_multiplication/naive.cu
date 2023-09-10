@@ -43,7 +43,7 @@ int main() {
     dim3 dimBlock(16, 16);
 
     // Launch the matrix multiplication kernel
-    matrixMultiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
+    matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
 
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
