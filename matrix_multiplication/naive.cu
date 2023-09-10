@@ -1,16 +1,16 @@
 // naive kernel where each thread computes a single value
-
+#include <iostream>
 
 __global__ void matrix_multiplication(float* A, float* B, float* C, int N) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int column = blockIdx.x * blockDim.x + threadIdx.x;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (row < N && col < N) {
         float sum = 0.0f;
         for (int i=0; i< N; i++){
             sum += A[row * N + i] * B[i*N + col];
         }
-        C[row * N + col] = sum
+        C[row * N + col] = sum;
     }
 }
 
@@ -25,8 +25,8 @@ int main() {
 
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< N*N; i++){
-        A[i] = 1.0f;
-        B[i] = 2.0f;
+        h_A[i] = 1.0f;
+        h_B[i] = 2.0f;
     }
     // Allocate memory on the device
     float *d_A, *d_B, *d_C;
@@ -49,7 +49,7 @@ int main() {
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
     for (int i=0; i< N; i++){
         for (int j=0; j< N; j++){
-            std::cout << C[i*N+j] ;
+            std::cout << h_C[i*N+j] ;
         }
         std::cout << std::endl;
     }
