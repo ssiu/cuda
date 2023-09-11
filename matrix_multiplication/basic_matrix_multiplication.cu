@@ -26,7 +26,7 @@ int main() {
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< N*N; i++){
         h_A[i] = 1.0f;
-        h_B[i] = 2.0f;
+        h_B[i] = 1.0f;
     }
     // Allocate memory on the device
     float *d_A, *d_B, *d_C;
