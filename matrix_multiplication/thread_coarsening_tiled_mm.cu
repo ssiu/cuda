@@ -74,7 +74,7 @@ int main() {
 
     // Define the grid and block dimensions for the kernel launch
     //
-    dim3 dimGrid(N/16, N/(16 * COARSE_FACTOR)); // You can adjust this based on your GPU's capability
+    dim3 dimGrid(N/(16 * COARSE_FACTOR), N/16); // You can adjust this based on your GPU's capability
     dim3 dimBlock(16, 16);
 
     // Launch the matrix multiplication kernel
