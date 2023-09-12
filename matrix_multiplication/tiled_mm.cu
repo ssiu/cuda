@@ -21,7 +21,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int N) {
         Bds[ty][tx] = B[WIDTH * (ph * TILE_WIDTH + ty) + col]
         __syncthreads();
 
-        for (int k; k<TILE_WIDTH; k++){
+        for (int k; k < TILE_WIDTH; k++){
             s += Ads[ty][k] * Bds[k][ty];
         }
         __syncthreads();
