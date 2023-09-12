@@ -14,10 +14,14 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
 
     int row = by * TILE_WIDTH + ty;
     // the starting column that this thread computes
-    int col_start = bx * TILE_WIDTH + tx;
+    int col_start = bx * TILE_WIDTH * COARSE_FACTOR + tx;
 
 
     float s[COARSE_FACTOR];
+    for (int c = 0; c < COARSE_FACTOR; c++) {
+        s[c] = 0.0f;
+    }
+
     for ( int tile = 0; tile < WIDTH / TILE_WIDTH; tile++){
 
         Ads[ty][tx] = A[row * WIDTH + tile * TILE_WIDTH + tx];
