@@ -16,7 +16,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
     int col = bx * TILE_WIDTH + tx;
 
     float s = 0;
-    for ( int tile = 0; tile < WIDTH / TILE_WIDTH; ph++){
+    for ( int tile = 0; tile < WIDTH / TILE_WIDTH; tile++){
         Ads[ty][tx] = A[row * WIDTH + tile * TILE_WIDTH + tx];
         Bds[ty][tx] = B[WIDTH * (tile * TILE_WIDTH + ty) + col];
         __syncthreads();
@@ -27,10 +27,9 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
         __syncthreads();
     }
 
-    if (row < WIDTH) && (col < N) {
+    if (row < WIDTH) && (col < WIDTH) {
         C[row * WIDTH + col] = s;
     }
-
 
 }
 
