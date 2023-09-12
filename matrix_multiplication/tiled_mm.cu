@@ -3,10 +3,10 @@
 
 #define TILE_WIDTH 16
 
-__global__ void matrix_multiplication(float* A, float* B, float* C, int N) {
+__global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
 
     __shared__ float Ads[TILE_WIDTH][TILE_WIDTH];
-    __shared__ float Ads[TILE_WIDTH][TILE_WIDTH];
+    __shared__ float Bds[TILE_WIDTH][TILE_WIDTH];
 
     int bx = blockIdx.x; int by = blockIdx.y;
     int tx = threadIdx.x; int ty = threadIdx.y;
@@ -16,18 +16,19 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int N) {
     int col = bx * TILE_WIDTH + tx;
 
     float s = 0;
-    for (int ph = 0; ph < WIDTH / TILE_WIDTH, ph++){
-        Ads[ty][tx] = A[row*WIDTH + ph*TILE_WIDTH+tx];
-        Bds[ty][tx] = B[WIDTH * (ph * TILE_WIDTH + ty) + col]
+    for ( int tile = 0; tile < WIDTH / TILE_WIDTH; ph++){
+        Ads[ty][tx] = A[row * WIDTH + tile * TILE_WIDTH + tx];
+        Bds[ty][tx] = B[WIDTH * (tile * TILE_WIDTH + ty) + col];
         __syncthreads();
 
-        for (int k; k < TILE_WIDTH; k++){
+        for ( int k = 0; k < TILE_WIDTH; k++){
             s += Ads[ty][k] * Bds[k][ty];
         }
         __syncthreads();
     }
-    if (row < WIDTH) && (col < WIDTH){
-        C[row*WIDTH + col] = s;
+
+    if (row < WIDTH) && (col < N) {
+        C[row * WIDTH + col] = s;
     }
 
 
