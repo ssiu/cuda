@@ -27,7 +27,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
         __syncthreads();
     }
 
-    if (row < WIDTH) && (col < WIDTH) {
+    if (row < WIDTH && col < WIDTH) {
         C[row * WIDTH + col] = s;
     }
 
