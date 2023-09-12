@@ -23,7 +23,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
         Ads[ty][tx] = A[row * WIDTH + tile * TILE_WIDTH + tx];
 
         for (int c = 0; c < COARSE_FACTOR; c++) {
-            col = col_start + TILE_WIDTH * c;
+            int col = col_start + TILE_WIDTH * c;
             Bds[ty][tx] = B[WIDTH * (tile * TILE_WIDTH + ty) + col];
             __syncthreads();
 
