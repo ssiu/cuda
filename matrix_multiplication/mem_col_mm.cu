@@ -2,8 +2,8 @@
 #include <iostream>
 
 __global__ void matrix_multiplication(float* A, float* B, float* C, int N) {
-    int row = blockIdx.x * blockDim.x + threadIdx.x;
-    int col = blockIdx.y * blockDim.y + threadIdx.y;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (row < N && col < N) {
         float sum = 0.0f;
