@@ -68,12 +68,12 @@ int main() {
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
 
-    for (int i=0; i< N; i++){
-        for (int j=0; j< N; j++){
-            std::cout << h_C[i*N+j] << " " ;
-        }
-        std::cout << std::endl;
-    }
+//    for (int i=0; i< N; i++){
+//        for (int j=0; j< N; j++){
+//            std::cout << h_C[i*N+j] << " " ;
+//        }
+//        std::cout << std::endl;
+//    }
     // Free device and host memory
     cudaFree(d_A);
     cudaFree(d_B);
