@@ -53,7 +53,8 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
 
 
 int main() {
-    int N = 32; // Size of the square matrices
+    int N = 256; // Size of the square matrices
+    int M = 16;
     int size = N * N * sizeof(float);
 
     // Allocate memory on the host

@@ -36,6 +36,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
 
 int main() {
     int N = 256; // Size of the square matrices
+    int M = 16;
     int size = N * N * sizeof(float);
 
     // Allocate memory on the host
@@ -67,6 +68,7 @@ int main() {
 
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
+
     for (int i=0; i< N; i++){
         for (int j=0; j< N; j++){
             std::cout << h_C[i*N+j] << " " ;
