@@ -9,102 +9,60 @@
  */
 
 int main(int argc, char *argv[]) {
-  int m = 2;
-  int k = 3;
-  int n = 4;
-  int print = 1;
-  cudaError_t cudaStat;  // cudaMalloc status
-  cublasStatus_t stat;   // cuBLAS functions status
-  cublasHandle_t handle; // cuBLAS context
 
-  int i, j;
+    int N = 2048; // Size of the square matrices
+    int size = N * N * sizeof(float);
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
 
-  float *a, *b, *c;
 
-  // malloc for a,b,c...
-  a = (float *)malloc(m * k * sizeof(float));
-  b = (float *)malloc(k * n * sizeof(float));
-  c = (float *)malloc(m * n * sizeof(float));
+    float *h_A = (float*)malloc(size);
+    float *h_B = (float*)malloc(size);
+    float *h_C = (float*)malloc(size);
 
-  int ind = 11;
-  for (j = 0; j < m * k; j++) {
-    a[j] = (float)ind++;
-  }
-
-  ind = 11;
-  for (j = 0; j < k * n; j++) {
-    b[j] = (float)ind++;
-  }
-
-  ind = 11;
-  for (j = 0; j < m * n; j++) {
-    c[j] = (float)ind++;
-  }
-
-  // DEVICE
-  float *d_a, *d_b, *d_c;
-
-  // cudaMalloc for d_a, d_b, d_c...
-  cudaMalloc((void **)&d_a, m * k * sizeof(float));
-  cudaMalloc((void **)&d_b, k * n * sizeof(float));
-  cudaMalloc((void **)&d_c, m * n * sizeof(float));
-
-  stat = cublasCreate(&handle); // initialize CUBLAS context
-
-  cudaMemcpy(d_a, a, m * k * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_b, b, k * n * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_c, c, m * n * sizeof(float), cudaMemcpyHostToDevice);
-
-  float alpha = 1.0f;
-  float beta = 0.5f;
-
-  if (print == 1) {
-    printf("alpha = %4.0f, beta = %4.0f\n", alpha, beta);
-    printf("A = (mxk: %d x %d)\n", m, k);
-    for (i = 0; i < m; i++) {
-      for (j = 0; j < k; j++) {
-        printf("%4.1f ", a[i * m + j]);
-      }
-      printf("\n");
+    // Initialize matrices h_A and h_B with data
+    for (int i=0; i< N*N; i++){
+        h_A[i] = 1.0f;
+        h_B[i] = 1.0f;
+        h_C[i] = 0.0f;
     }
-    printf("B = (kxn: %d x %d)\n", k, n);
-    for (i = 0; i < k; i++) {
-      for (j = 0; j < n; j++) {
-        printf("%4.1f ", b[i * n + j]);
-      }
-      printf("\n");
+
+    // Allocate memory on the device
+    float *d_A, *d_B, *d_C;
+    cudaMalloc((void**)&d_A, size);
+    cudaMalloc((void**)&d_B, size);
+    cudaMalloc((void**)&d_C, size);
+
+    stat = cublasCreate(&handle); // initialize CUBLAS context
+
+    // Copy matrices h_A and h_B from host to device
+    cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
+
+    float alpha = 1.0f;
+    float beta = 1.0f;
+
+    stat = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N,
+                     d_B, N, &beta, d_C, N);
+
+    cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
+
+    for (int i=0; i< N; i++){
+        for (int j=0; j< N; j++){
+            std::cout << h_C[i*N+j] << " " ;
+        }
+        std::cout << std::endl;
     }
-    printf("C = (mxn: %d x %d)\n", m, n);
-    for (i = 0; i < m; i++) {
-      for (j = 0; j < n; j++) {
-        printf("%4.1f ", c[i * n + j]);
-      }
-      printf("\n");
-    }
-  }
 
-  stat = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, m, k, &alpha, d_b, n,
-                     d_a, k, &beta, d_c, n);
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+    cublasDestroy(handle); // destroy CUBLAS context
+    free(h_A);
+    free(h_B);
+    free(h_C);
 
-  cudaMemcpy(c, d_c, m * n * sizeof(float), cudaMemcpyDeviceToHost);
-
-  if (print == 1) {
-    printf("\nC after SGEMM = \n");
-    for (i = 0; i < m; i++) {
-      for (j = 0; j < n; j++) {
-        printf("%4.1f ", c[i * n + j]);
-      }
-      printf("\n");
-    }
-  }
-
-  cudaFree(d_a);
-  cudaFree(d_b);
-  cudaFree(d_c);
-  cublasDestroy(handle); // destroy CUBLAS context
-  free(a);
-  free(b);
-  free(c);
-
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
