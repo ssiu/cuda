@@ -1,5 +1,5 @@
 //https://github.com/siboehm/SGEMM_CUDA/blob/master/cuBLAS_sgemm.cu
-
+#include <iostream>
 #include <cstdio>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
