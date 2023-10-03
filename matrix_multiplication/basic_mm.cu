@@ -39,8 +39,8 @@ int main() {
     cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
 
     // Define the grid and block dimensions for the kernel launch
-    dim3 dimGrid(N/16, N/16); // You can adjust this based on your GPU's capability
-    dim3 dimBlock(16, 16);
+    dim3 dimGrid(N/32, N/32); // You can adjust this based on your GPU's capability
+    dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
     matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);

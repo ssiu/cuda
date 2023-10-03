@@ -1,7 +1,7 @@
 // naive kernel where each thread computes a single value
 #include <iostream>
 
-#define TILE_WIDTH 16
+#define TILE_WIDTH 32
 #define COARSE_FACTOR 2
 __global__ void matrix_multiplication(float* A, float* B, float* C, int WIDTH) {
 
@@ -78,8 +78,8 @@ int main() {
 
     // Define the grid and block dimensions for the kernel launch
     //
-    dim3 dimGrid(N/(16 * COARSE_FACTOR), N/16); // You can adjust this based on your GPU's capability
-    dim3 dimBlock(16, 16);
+    dim3 dimGrid(N/(32 * COARSE_FACTOR), N/32); // You can adjust this based on your GPU's capability
+    dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
     matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
