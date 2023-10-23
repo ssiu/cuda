@@ -9,8 +9,8 @@ int main() {
     print_layout(layout);
 
 
-//    Layout layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
-//                              make_stride(4, make_stride(2,1)));
+    Layout layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
+                              make_stride(4, make_stride(2,1)));
 //
 //    print_layout(layout_2x4)
 
