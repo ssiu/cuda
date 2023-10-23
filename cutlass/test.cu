@@ -9,13 +9,18 @@ int main() {
     print_layout(layout);
 
 
-    Layout ThrID = Layout<Shape <_4, _2>,
-                       Stride<_1,_16>>;
-    print_layout(ThrID);
+    Layout layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
+                              make_stride(4, make_stride(2,1)));
 
-    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
-                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>;
-    print(CLayout);
+    print_layout(layout_2x4)
+
+//    Layout ThrID = Layout<Shape <_4, _2>,
+//                       Stride<_1,_16>>;
+//    print_layout(ThrID);
+//
+//    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
+//                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>;
+//    print(CLayout);
     return 0;
 }
 
