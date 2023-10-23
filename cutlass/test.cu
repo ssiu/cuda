@@ -24,6 +24,11 @@ int main() {
     Layout layout1 = Layout<Shape <Shape <_4, _3>, _1>,
                          Stride<Stride<_3, _1>, _0>>{};
     print_layout(layout1);
+
+
+    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
+                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>;
+    print_layout(CLayout);
     //Layout flat_layout = flatten(layout);
     return 0;
 }
