@@ -25,7 +25,7 @@ int main() {
     print_layout(threadID);
 
     Layout Clayout = make_layout(make_shape(make_shape(2,2,2), make_shape(2,2,2)), make_stride(make_stride(1,16,4), make_stride(8,2,32)));
-    print(CLayout);
+    print_layout(CLayout);
     return 0;
 }
 
