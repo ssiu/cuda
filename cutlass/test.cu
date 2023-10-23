@@ -1,6 +1,6 @@
 #include <cute/layout.hpp>
 #include <cute/tensor.hpp>
-//using namespace cute;
+using namespace cute;
 
 
 int main() {
