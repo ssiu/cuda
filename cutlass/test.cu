@@ -21,6 +21,8 @@ int main() {
 //    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
 //                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>;
 //    print(CLayout);
+    Layout threadID = make_layout(make_shape(4,2), make_stride(1,16));
+    print_layout(threadID);
     return 0;
 }
 
