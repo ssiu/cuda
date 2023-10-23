@@ -18,9 +18,12 @@ int main() {
                                 make_stride(1,16));
     print_layout(threadID);
 
-    Layout Clayout = make_layout(make_shape(make_shape(2,2,2), make_shape(2,2,2)),
-                                make_stride(make_stride(1,16,4), make_stride(8,2,32)));
-    print_layout(CLayout);
+//    Layout Clayout = make_layout(make_shape(make_shape(2,2,2), make_shape(2,2,2)),
+//                                make_stride(make_stride(1,16,4), make_stride(8,2,32)));
+//    print_layout(CLayout);
+    Layout layout = Layout<Shape <Shape <_4, _3>, _1>,
+                         Stride<Stride<_3, _1>, _0>>{};
+    Layout flat_layout = flatten(layout);
     return 0;
 }
 
