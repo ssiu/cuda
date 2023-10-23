@@ -27,7 +27,7 @@ int main() {
 
 
     Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
-                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>;
+                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>{};
     print_layout(CLayout);
     //Layout flat_layout = flatten(layout);
     return 0;
