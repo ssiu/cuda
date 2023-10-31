@@ -30,6 +30,10 @@ int main() {
                          Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>{};
     print_layout(CLayout);
     //Layout flat_layout = flatten(layout);
+
+    Layout smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
+    print_layout(smem_atom);
+
     return 0;
 }
 
