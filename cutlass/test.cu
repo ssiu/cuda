@@ -31,7 +31,7 @@ int main() {
     print_layout(CLayout);
     //Layout flat_layout = flatten(layout);
 
-    Layout smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
+    auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
     print_layout(smem_atom);
 
     return 0;
