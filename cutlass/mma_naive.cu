@@ -89,6 +89,12 @@ int main() {
     // Launch the matrix multiplication kernel
     matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
 
+    cudaError_t cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "someKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        //goto Error; // Use appropriate error handling here
+    }
+
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
 
