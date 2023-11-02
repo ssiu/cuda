@@ -8,8 +8,8 @@
 
 __global__ void matrix_multiplication(float* A, float* B, float* C) {
 
-    printf("thread id %d\n", threadIdx.x;)
-    int col = blockIdx.y * blockDim.y + threadIdx.y;
+    printf("thread id %d\n", threadIdx.x);
+    //int col = blockIdx.y * blockDim.y + threadIdx.y;
 
 
 //struct SM70_8x8x4_F32F16F16F32_TN
