@@ -71,8 +71,8 @@ int main() {
     cudaMalloc((void**)&d_C, size);
 
     // Copy matrices h_A and h_B from host to device
-    cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, h_A, M*K*sizeof(half), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, N*K*sizeof(half), cudaMemcpyHostToDevice);
 
     // Define the grid and block dimensions for the kernel launch
     dim3 dimGrid(N/32, N/32); // You can adjust this based on your GPU's capability
@@ -82,14 +82,8 @@ int main() {
 
 
     // Copy the result matrix d_C from device to host
-    cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
-//    for (int i=0; i< N; i++){
-//        for (int j=0; j< N; j++){
-//            std::cout << h_C[i*N+j] << " " ;
-//        }
-//        std::cout << std::endl;
-//    }
-    // Free device and host memory
+    cudaMemcpy(h_C, d_C, M*N*sizeof(half), cudaMemcpyDeviceToHost);
+
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
