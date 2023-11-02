@@ -68,7 +68,7 @@ int main() {
     float *d_A, *d_B, *d_C;
     cudaMalloc((void**)&d_A, M*K*sizeof(half));
     cudaMalloc((void**)&d_B, N*K*sizeof(half));
-    cudaMalloc((void**)&d_C, M*N*sizeof(half));
+    cudaMalloc((void**)&d_C, M*N*sizeof(float));
 
     // Copy matrices h_A and h_B from host to device
     cudaMemcpy(d_A, h_A, M*K*sizeof(half), cudaMemcpyHostToDevice);
@@ -81,7 +81,7 @@ int main() {
     // Launch the matrix multiplication kernel
 
     // Copy the result matrix d_C from device to host
-    cudaMemcpy(h_C, d_C, M*N*sizeof(half), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_C, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(d_A);
     cudaFree(d_B);
