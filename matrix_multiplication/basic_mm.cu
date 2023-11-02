@@ -45,6 +45,11 @@ int main() {
     // Launch the matrix multiplication kernel
     matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
 
+    cudaError_t cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "someKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        //goto Error; // Use appropriate error handling here
+    }
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
     for (int i=0; i< N; i++){
