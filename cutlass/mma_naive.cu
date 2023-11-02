@@ -7,7 +7,7 @@
 
 
 __global__ void matrix_multiplication(float* A, float* B, float* C) {
-//    int idx = threadIdx.x;
+    int idx = threadIdx.x;
 //    printf("thread id %d\n", idx);
     //int col = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -83,11 +83,11 @@ int main() {
     cudaMemcpy(d_B, h_B, N*K*sizeof(half), cudaMemcpyHostToDevice);
 
     // Define the grid and block dimensions for the kernel launch
-//    dim3 dimGrid(1); // You can adjust this based on your GPU's capability
-//    dim3 dimBlock(32);
+    dim3 dimGrid(1, 1); // You can adjust this based on your GPU's capability
+    dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
-    matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
+    matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
