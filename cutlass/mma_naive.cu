@@ -59,11 +59,18 @@ int main() {
     float *h_C = (float*)malloc(M*N*sizeof(float));
 
     // Initialize matrices h_A and h_B with data
-    for (int i=0; i< N*N; i++){
+    for (int i=0; i< M*K; i++){
         h_A[i] = __float2half(1.0f);
-        h_B[i] = __float2half(1.0f);
-        h_C[i] = 1.0f;
     }
+
+    for (int i=0; i< N*K; i++){
+        h_A[i] = __float2half(1.0f);
+    }
+
+    for (int i=0; i< M*N; i++){
+        h_C[i] = 0.0f;
+    }
+
     // Allocate memory on the device
     float *d_A, *d_B, *d_C;
     cudaMalloc((void**)&d_A, M*K*sizeof(half));
