@@ -77,19 +77,19 @@ int main() {
     cudaMalloc((void**)&d_B, N*K*sizeof(half));
     cudaMalloc((void**)&d_C, M*N*sizeof(float));
 
-//    // Copy matrices h_A and h_B from host to device
-//    cudaMemcpy(d_A, h_A, M*K*sizeof(half), cudaMemcpyHostToDevice);
-//    cudaMemcpy(d_B, h_B, N*K*sizeof(half), cudaMemcpyHostToDevice);
-//
-//    // Define the grid and block dimensions for the kernel launch
-////    dim3 dimGrid(N/32, N/32); // You can adjust this based on your GPU's capability
-////    dim3 dimBlock(32, 32);
-//
-//    // Launch the matrix multiplication kernel
-//
-//    // Copy the result matrix d_C from device to host
-//    cudaMemcpy(h_C, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
-//
+    // Copy matrices h_A and h_B from host to device
+    cudaMemcpy(d_A, h_A, M*K*sizeof(half), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, N*K*sizeof(half), cudaMemcpyHostToDevice);
+
+    // Define the grid and block dimensions for the kernel launch
+//    dim3 dimGrid(N/32, N/32); // You can adjust this based on your GPU's capability
+//    dim3 dimBlock(32, 32);
+
+    // Launch the matrix multiplication kernel
+
+    // Copy the result matrix d_C from device to host
+    cudaMemcpy(h_C, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
+
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
