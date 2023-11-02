@@ -7,8 +7,8 @@
 
 
 __global__ void matrix_multiplication(float* A, float* B, float* C) {
-    int idx = threadIdx.x;
-    printf("thread id %d\n", idx);
+//    int idx = threadIdx.x;
+//    printf("thread id %d\n", idx);
     //int col = blockIdx.y * blockDim.y + threadIdx.y;
 
 
