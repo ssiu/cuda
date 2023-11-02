@@ -80,7 +80,6 @@ int main() {
 
     // Launch the matrix multiplication kernel
 
-
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, M*N*sizeof(half), cudaMemcpyDeviceToHost);
 
