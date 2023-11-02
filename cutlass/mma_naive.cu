@@ -66,9 +66,9 @@ int main() {
     }
     // Allocate memory on the device
     float *d_A, *d_B, *d_C;
-    cudaMalloc((void**)&d_A, size);
-    cudaMalloc((void**)&d_B, size);
-    cudaMalloc((void**)&d_C, size);
+    cudaMalloc((void**)&d_A, M*K*sizeof(half));
+    cudaMalloc((void**)&d_B, N*K*sizeof(half));
+    cudaMalloc((void**)&d_C, M*N*sizeof(half));
 
     // Copy matrices h_A and h_B from host to device
     cudaMemcpy(d_A, h_A, M*K*sizeof(half), cudaMemcpyHostToDevice);
