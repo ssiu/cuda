@@ -54,9 +54,9 @@ int main() {
 
 
     // Allocate memory on the host
-    half *h_A = (float*)malloc(M*K);
-    half *h_B = (float*)malloc(N*K);
-    float *h_C = (float*)malloc(size);
+    half *h_A = (half*)malloc(M*K);
+    half *h_B = (half*)malloc(N*K);
+    float *h_C = (float*)malloc(M*N);
 
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< N*N; i++){
@@ -79,7 +79,7 @@ int main() {
     dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
-    matrix_multiplication<<<dimGrid, dimBlock>>>(d_A, d_B, d_C, N);
+
 
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
