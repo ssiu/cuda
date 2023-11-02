@@ -54,9 +54,9 @@ int main() {
 
 
     // Allocate memory on the host
-    half *h_A = (half*)malloc(M*K);
-    half *h_B = (half*)malloc(N*K);
-    float *h_C = (float*)malloc(M*N);
+    half *h_A = (half*)malloc(M*K*sizeof(half));
+    half *h_B = (half*)malloc(N*K*sizeof(half));
+    float *h_C = (float*)malloc(M*N*sizeof(float));
 
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< N*N; i++){
