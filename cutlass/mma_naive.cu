@@ -122,7 +122,6 @@ int main() {
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< M*K; i++){
         h_A[i] = __float2half(1.0f);
-        print(h_A[i]);
     }
 
     for (int i=0; i< N*K; i++){
