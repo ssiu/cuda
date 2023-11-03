@@ -122,12 +122,13 @@ int main() {
         h_A[i] = __float2half(1.0f);
     }
 
-    for (int i=0; i< M*N; i++){
-        h_C[i] = 0.0f;
-    }
+//    for (int i=0; i< M*N; i++){
+//        h_C[i] = 0.0f;
+//    }
 
     // Allocate memory on the device
-    float *d_A, *d_B, *d_C;
+    half *d_A, *d_B;
+    float *d_C;
     cudaMalloc((void**)&d_A, M*K*sizeof(half));
     cudaMalloc((void**)&d_B, N*K*sizeof(half));
     cudaMalloc((void**)&d_C, M*N*sizeof(float));
