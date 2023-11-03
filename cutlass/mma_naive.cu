@@ -153,6 +153,13 @@ int main() {
     // Copy the result matrix d_C from device to host
     cudaMemcpy(h_C, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
 
+    for (int i=0; i< M; i++){
+        for (int j=0; j< N; j++){
+            std::cout << h_C[i*N+j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
