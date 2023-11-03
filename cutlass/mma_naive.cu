@@ -16,7 +16,7 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
     //
     // matrix A fragments
     //
-    if {idx < 4 or (idx > 16 and idx < 20)}:
+    if {idx < 4 or (idx > 16 and idx < 20)}{
         uint a[2] = { 0 };
         half* a_16 = reinterpret_cast<half*>(a);
         for (int i = 0; i< K; i++){
@@ -53,6 +53,7 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
             printf("thread id %d, (%d, %d)\n", idx, row, column);
             C[row*8 + column] = c[i];
         }
+    }
 //        uint MultiB[2] = { 0 };
 //
 //        half* test1 = reinterpret_cast<half*>(MultiA);
