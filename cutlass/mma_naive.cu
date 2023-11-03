@@ -47,8 +47,8 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
           "f"(c[4]),  "f"(c[5]),  "f"(c[6]),  "f"(c[7]));
 
     for (int i = 0; i < 8; i++){
-        int row = (idx & 0b1) + (i & 0b10)
-        int column = (i & 0b100) + (idx & 0b10) + (i & 0b1)
+        int row = (idx & 0b1) + (i & 0b10);
+        int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
         printf("thread id %d, (%d, %d)\n", idx, row, column);
         C[row*8 + column] = c[i];
     }
