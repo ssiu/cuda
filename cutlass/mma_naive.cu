@@ -10,7 +10,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C) {
     int idx = threadIdx.x;
     printf("thread id %d\n", idx);
     //int col = blockIdx.y * blockDim.y + threadIdx.y;
-
+    // need to figure out how to store two half into a single float
 
 //struct SM70_8x8x4_F32F16F16F32_TN
 //{
