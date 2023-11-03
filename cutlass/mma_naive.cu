@@ -16,44 +16,44 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
     //
     // matrix A fragments
     //
-//    if {idx < 4 or (idx > 16 and idx < 20)}{
-//        uint a[2] = { 0 };
-//        half* a_16 = reinterpret_cast<half*>(a);
-//        for (int i = 0; i< K; i++){
-//            a_16[i] = A[M*idx + i];
-//        }
-//        //
-//        // matrix B fragments
-//        //
-//        uint b[2] = { 0 };
-//        half* b_16 = reinterpret_cast<half*>(b);
-//        for (int i = 0; i < K; i++){
-//            b_16[i] = B[N*i + idx];
-//        }
-//        //
-//        // matrix C fragments
-//        //
-//        float c[8] = {0.0f};
-//
-//        asm volatile("mma.sync.aligned.m8n8k4.row.col.f32.f16.f16.f32"
-//                     "{%0,  %1,  %2,  %3,  %4,  %5,  %6,  %7},"
-//                     "{%8,  %9},"
-//                     "{%10, %11},"
-//                     "{%12, %13, %14, %15, %16, %17, %18, %19};\n"
-//            : "=f"(c[0]), "=f"(c[1]), "=f"(c[2]), "=f"(c[3]),
-//              "=f"(c[4]), "=f"(c[5]), "=f"(c[6]), "=f"(c[7])
-//            : "r"(a[0]),  "r"(a[1]),
-//              "r"(b[0]),  "r"(b[1]),
-//              "f"(c[0]),  "f"(c[1]),  "f"(c[2]),  "f"(c[3]),
-//              "f"(c[4]),  "f"(c[5]),  "f"(c[6]),  "f"(c[7]));
-//
-//        for (int i = 0; i < 8; i++){
-//            int row = (idx & 0b1) + (i & 0b10);
-//            int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
-//            printf("thread id %d, (%d, %d)\n", idx, row, column);
-//            C[row*8 + column] = c[i];
-//        }
-//    }
+    if (idx < 4 or (idx > 16 and idx < 20)){
+        uint a[2] = { 0 };
+        half* a_16 = reinterpret_cast<half*>(a);
+        for (int i = 0; i< K; i++){
+            a_16[i] = A[M*idx + i];
+        }
+        //
+        // matrix B fragments
+        //
+        uint b[2] = { 0 };
+        half* b_16 = reinterpret_cast<half*>(b);
+        for (int i = 0; i < K; i++){
+            b_16[i] = B[N*i + idx];
+        }
+        //
+        // matrix C fragments
+        //
+        float c[8] = {0.0f};
+
+        asm volatile("mma.sync.aligned.m8n8k4.row.col.f32.f16.f16.f32"
+                     "{%0,  %1,  %2,  %3,  %4,  %5,  %6,  %7},"
+                     "{%8,  %9},"
+                     "{%10, %11},"
+                     "{%12, %13, %14, %15, %16, %17, %18, %19};\n"
+            : "=f"(c[0]), "=f"(c[1]), "=f"(c[2]), "=f"(c[3]),
+              "=f"(c[4]), "=f"(c[5]), "=f"(c[6]), "=f"(c[7])
+            : "r"(a[0]),  "r"(a[1]),
+              "r"(b[0]),  "r"(b[1]),
+              "f"(c[0]),  "f"(c[1]),  "f"(c[2]),  "f"(c[3]),
+              "f"(c[4]),  "f"(c[5]),  "f"(c[6]),  "f"(c[7]));
+
+        for (int i = 0; i < 8; i++){
+            int row = (idx & 0b1) + (i & 0b10);
+            int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
+            printf("thread id %d, (%d, %d)\n", idx, row, column);
+            C[row*8 + column] = c[i];
+        }
+    }
 
 
 
