@@ -16,7 +16,7 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
     //
     // matrix A fragments
     //
-    if (idx < 4 or (idx > 16 and idx < 20)){
+    if (idx < 4 or (idx >= 16 and idx < 20)){
         uint a[2] = { 0 };
         half* a_16 = reinterpret_cast<half*>(a);
         for (int i = 0; i< K; i++){
@@ -50,7 +50,7 @@ __global__ void matrix_multiplication(half* A, half* B, float* C) {
         for (int i = 0; i < 8; i++){
             int row = (idx & 0b1) + (i & 0b10);
             int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
-            printf("thread id %d, (%d, %d)\n", idx, row, column);
+            //printf("thread id %d, (%d, %d)\n", idx, row, column);
             C[row*8 + column] = c[i];
         }
     }
@@ -122,6 +122,7 @@ int main() {
     // Initialize matrices h_A and h_B with data
     for (int i=0; i< M*K; i++){
         h_A[i] = __float2half(1.0f);
+        print(h_A[i]);
     }
 
     for (int i=0; i< N*K; i++){
