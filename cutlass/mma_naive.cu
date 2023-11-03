@@ -3,12 +3,68 @@
 //#include "cutlass/cutlass.h"
 #include <cuda_fp16.h>
 
+const int M = 8;
+const int N = 8;
+const int K = 4;
 
-
-
-__global__ void matrix_multiplication(float* A, float* B, float* C) {
+//https://forums.developer.nvidia.com/t/wrong-answer-with-mma-sync-aligned-m8n8k4/248442
+__global__ void matrix_multiplication(half* A, half* B, float* C) {
+    //matrix multiplication of a single quadpair
+    //threads 0-3, 16-19
     int idx = threadIdx.x;
-    printf("thread id %d\n", idx);
+
+    //
+    // matrix A fragments
+    //
+    uint a[2] = { 0 };
+    half* a_16 = reinterpret_cast<half*>(a);
+    for (int i = 0; i< K; i++){
+        a_16[i] = A[M*idx + i]
+    }
+    //
+    // matrix B fragments
+    //
+    uint b[2] = { 0 };
+    half* b_16 = reinterpret_cast<half*>(b);
+    for (int i = 0; i < K; i++){
+        b_16[i] = B[N*i + idx]
+    }
+    //
+    // matrix C fragments
+    //
+    float c[8] = {0.0f};
+
+    asm volatile("mma.sync.aligned.m8n8k4.row.col.f32.f16.f16.f32"
+                 "{%0,  %1,  %2,  %3,  %4,  %5,  %6,  %7},"
+                 "{%8,  %9},"
+                 "{%10, %11},"
+                 "{%12, %13, %14, %15, %16, %17, %18, %19};\n"
+        : "=f"(c[0]), "=f"(c[1]), "=f"(c[2]), "=f"(c[3]),
+          "=f"(c[4]), "=f"(c[5]), "=f"(c[6]), "=f"(c[7])
+        : "r"(a[0]),  "r"(a[1]),
+          "r"(b[0]),  "r"(b[1]),
+          "f"(c[0]),  "f"(c[1]),  "f"(c[2]),  "f"(c[3]),
+          "f"(c[4]),  "f"(c[5]),  "f"(c[6]),  "f"(c[7]));
+
+    for (int i = 0; i < 8; i++){
+        row = (idx & 0b1) + (i & 0b10)
+        column = (i & 0b100) + (idx & 0b10) + (i & 0b1)
+        printf("thread id %d, (%d, %d)\n", idx, row, column);
+        C[row*8 + column] = C[i]
+    }
+//        uint MultiB[2] = { 0 };
+//
+//        half* test1 = reinterpret_cast<half*>(MultiA);
+//        half* test2 = reinterpret_cast<half*>(MultiB);
+//        test1[0] = 0.8;
+//        test1[1] = 0.8;
+//        test1[2] = 0.8;
+//        test1[3] = 0.8;
+//        test2[0] = 0.7;
+//        test2[1] = 0.7;
+//        test2[2] = 0.7;
+//        test2[3] = 0.7;
+
     //int col = blockIdx.y * blockDim.y + threadIdx.y;
     // need to figure out how to store two half into a single float
 
@@ -49,9 +105,7 @@ __global__ void matrix_multiplication(float* A, float* B, float* C) {
 
 int main() {
 
-    const int M = 8;
-    const int N = 8;
-    const int K = 4;
+
 
 
     // Allocate memory on the host
