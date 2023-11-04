@@ -54,6 +54,7 @@ __global__ void mma_test(float* C) {
             C[row*8 + column] = c[i];
         }
     }
+}
 
 //https://forums.developer.nvidia.com/t/wrong-answer-with-mma-sync-aligned-m8n8k4/248442
 __global__ void matrix_multiplication(half* A, half* B, float* C) {
