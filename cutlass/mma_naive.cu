@@ -50,7 +50,7 @@ __global__ void mma_test(float* C) {
         for (int i = 0; i < 8; i++) {
             int row = (idx & 0b1) + (i & 0b10) + (i & 0b10000);
             int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
-            //printf("thread id %d, (%d, %d)\n", idx, row, column);
+            printf("thread id %d, (%d, %d)\n", idx, row, column);
             C[row*8 + column] = c[i];
         }
     }
