@@ -48,18 +48,10 @@ __global__ void mma_test(float* C) {
               "f"(c[4]),  "f"(c[5]),  "f"(c[6]),  "f"(c[7]));
 
         for (int i = 0; i < 8; i++){
-            int row = 0;
-            if (idx < 16) {
-                printf("thread id =  %d, idx = \n", threadIdx.x, idx);
-                int row = (idx & 0b1) + (i & 0b10);
-
-            } else {
-                printf("thread id =  %d, idx = \n", threadIdx.x, idx);
-                int row = (idx & 0b1) + (i & 0b10) + 4;
-            }
+            int row = (idx & 0b1) + (i & 0b10) + (i & 0b10000);
             int column = (i & 0b100) + (idx & 0b10) + (i & 0b1);
-                //printf("thread id %d, (%d, %d)\n", idx, row, column);
-                C[row*8 + column] = c[i];
+            //printf("thread id %d, (%d, %d)\n", idx, row, column);
+            C[row*8 + column] = c[i];
         }
     }
 }
