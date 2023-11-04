@@ -197,7 +197,7 @@ int main() {
 //    dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
-    //matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
+    matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
     //mma_test<<1, 32>>(d_C);
 
 
