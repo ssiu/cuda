@@ -1,4 +1,4 @@
-// naive kernel where each thread computes a single value
+// naive tensor core kernel
 #include <iostream>
 //#include "cutlass/cutlass.h"
 #include <cuda_fp16.h>
