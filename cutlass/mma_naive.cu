@@ -8,7 +8,7 @@ const int N = 8;
 const int K = 4;
 
 
-__global__ void mma_test(float* C) {
+__global__ void mma_test(half* A, half* B, float* C) {
     //matrix multiplication of a single quadpair
     //threads 0-3, 16-19
     int idx = threadIdx.x;
@@ -198,7 +198,7 @@ int main() {
 
     // Launch the matrix multiplication kernel
     //matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
-    mma_test<<1, 32>>(d_C);
+    mma_test<<<1, 32>>>(d_C);
 
 
     cudaError_t cudaStatus = cudaGetLastError();
