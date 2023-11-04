@@ -20,7 +20,7 @@ __global__ void mma_test(float* C) {
         uint a[2] = { 0 };
         half* a_16 = reinterpret_cast<half*>(a);
         for (int i = 0; i< K; i++){
-            a_16[i] = 2.0;
+            a_16[i] = 1.0;
         }
         //
         // matrix B fragments
@@ -28,7 +28,7 @@ __global__ void mma_test(float* C) {
         uint b[2] = { 0 };
         half* b_16 = reinterpret_cast<half*>(b);
         for (int i = 0; i < K; i++){
-            b_16[i] = 2.0;
+            b_16[i] = 1.0;
         }
         //
         // matrix C fragments
