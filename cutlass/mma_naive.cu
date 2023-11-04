@@ -198,7 +198,7 @@ int main() {
 
     // Launch the matrix multiplication kernel
     //matrix_multiplication<<<1, 32>>>(d_A, d_B, d_C);
-    mma_test<<1, 32>>(d_C);
+    //mma_test<<1, 32>>(d_C);
 
 
     cudaError_t cudaStatus = cudaGetLastError();
