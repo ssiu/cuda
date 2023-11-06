@@ -17,7 +17,7 @@ int main() {
 
     // kBlockKSmem = 32
     // kSwizzle = 2
-    auto SmemLayoutAtomQ = composition(Swizzle<2, 1, 1>{},Layout<Shape<_8, _32>,Stride<_32, _1>>{});
+    auto SmemLayoutAtomQ = composition(Swizzle<2, 2, 2>{},Layout<Shape<_8, _32>,Stride<_32, _1>>{});
 
     //auto SmemLayoutQ = tile_to_shape(SmemLayoutAtomQ{},Shape<_4, _32>{});
 
