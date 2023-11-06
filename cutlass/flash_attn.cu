@@ -7,23 +7,24 @@ int main() {
     // flash_fwd_kernel.h
     // kBlockKSmem is either 64 or 32
     // if kBlockKSmem = 32 then kSwizzle = 2 else 3
-    int kBlockKSmem = 64;
-    int kSwizzle = 3;
-    auto SmemLayoutAtomQ = composition(Swizzle<kSwizzle, 3, 3>{},
+
+    // kBlockKSmem = 64
+    // kSwizzle = 3
+    auto SmemLayoutAtomQ_1 = composition(Swizzle<3, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
-                    Layout<Shape<_8, Int<kBlockKSmem>>,
-                           Stride<Int<kBlockKSmem>, _1>>{});
+                    Layout<Shape<_8, _64>,
+                           Stride<_64, _1>>{});
 
-    print_layout(SmemLayoutAtomQ);
+    print_layout(SmemLayoutAtomQ_1);
 
-    int kBlockKSmem = 32;
-    int kSwizzle = 2;
-    auto SmemLayoutAtomQ = composition(Swizzle<kSwizzle, 3, 3>{},
+    // kBlockKSmem = 32
+    // kSwizzle = 2
+    auto SmemLayoutAtomQ_2 = composition(Swizzle<2, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
-                    Layout<Shape<_8, Int<kBlockKSmem>>,
-                           Stride<Int<kBlockKSmem>, _1>>{});
+                    Layout<Shape<_8, _32>,
+                           Stride<_32, _1>>{});
 
-    print_layout(SmemLayoutAtomQ);
+    print_layout(SmemLayoutAtomQ_2);
     return 0;
 }
 
