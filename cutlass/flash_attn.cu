@@ -18,9 +18,7 @@ int main() {
     // kSwizzle = 2
     auto SmemLayoutAtomQ = composition(Swizzle<2, 3, 3>{},Layout<Shape<_8, _32>,Stride<_32, _1>>{});
 
-    auto SmemLayoutQ = decltype(tile_to_shape(
-        SmemLayoutAtomQ{},
-        Shape<4, 32>{}));
+    auto SmemLayoutQ = tile_to_shape(SmemLayoutAtomQ{},Shape<4, 32>{});
 
     print_layout(SmemLayoutAtomQ);
     print_layout(SmemLayoutQ);
