@@ -4,7 +4,7 @@ using namespace cute;
 
 int main() {
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{});
 
@@ -12,7 +12,7 @@ int main() {
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     Layout<Shape<_2,_2>>{},      // 2x2 layout of atoms (threads)
@@ -24,7 +24,7 @@ int main() {
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     composition(Swizzle<1,0,-1>{},
@@ -38,7 +38,7 @@ int main() {
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     Layout<Shape<_2,_2>>{},      // 2x2 tile of atoms (threads)
@@ -51,6 +51,18 @@ int main() {
         print_latex(tiled_mma);
     }
     #endif
+
+    #if 1
+    {
+        auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
+                                    Layout<Shape<_4,_1,_1>>{},
+                                    Layout<Shape<_1, _2, _2>>{});
+
+        print_latex(tiled_mma);
+    }
+    #endif
+
+
     return 0;
 
 }
