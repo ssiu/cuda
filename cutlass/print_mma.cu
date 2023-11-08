@@ -10,7 +10,7 @@ int main() {
                                     Tile<Layout<Shape <_4,_2>,   // Permutation in M
                                                 Stride<_1,_8>>>{});
 
-    print_layout_mma(tiled_mma);
+    print_latex(tiled_mma);
     return 0;
 
 }
