@@ -4,7 +4,7 @@ using namespace cute;
 
 int main() {
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{});
 
@@ -24,7 +24,7 @@ int main() {
     }
     #endif
 
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     composition(Swizzle<1,0,-1>{},
