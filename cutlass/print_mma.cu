@@ -4,7 +4,7 @@ using namespace cute;
 
 int main() {
 
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{});
 
@@ -45,14 +45,13 @@ int main() {
                                     Layout<Shape<_2,_2>>{},      // 2x2 tile of atoms (data)
                                     Tile<Layout<Shape <_4,_2>,
                                                 Stride<_1,_16>>, // Permutation of M
-                                         Layout<_1,
-                                                _1>>{});         // Permutation of N
+                                         Layout<_1,_1>>{});         // Permutation of N
 
         print_latex(tiled_mma);
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                     Layout<Shape<_1,_1,_1>>{},
