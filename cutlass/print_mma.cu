@@ -10,6 +10,8 @@ int main() {
 
         print_latex(tiled_mma);
     }
+    #endif
+
     #if 0
     {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
@@ -18,6 +20,8 @@ int main() {
 
         print_latex(tiled_mma);
     }
+    #endif
+
     #if 0
     {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
@@ -26,6 +30,7 @@ int main() {
 
         print_latex(tiled_mma);
     }
+    #endif
 
     #if 0
     {
