@@ -12,7 +12,6 @@
 // copy 1x1x1 matrix
 // copy traits
 using namespace cute;
-using
 
 __global__ void mma(float* d_A, float* d_B, float* d_C) {
     printf("A = %f, B = %f\n", d_A[0], d_B[0]);
