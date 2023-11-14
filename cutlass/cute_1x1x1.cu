@@ -1,7 +1,8 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <cute/tensor.hpp>
-
+#include <cute/algorithm/gemm.hpp>
+#include <cute/arch/mma.hpp>
 // using cute machinery to for 1x1x1
 
 
@@ -10,9 +11,12 @@
 
 // copy 1x1x1 matrix
 // copy traits
+using namespace cute;
 
 __global__ void mma(float* A, float* B, float* C) {
     printf("A = %f, B = %f\n", A[0], B[0]);
+    gemm(C[0], A[0], B[0], C[0]);
+
 }
 // do mma
 // mma traits
@@ -42,6 +46,12 @@ int main() {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         //goto Error; // Use appropriate error handling here
     }
+
+
+    thrust::host_vector<float> h_C = d_C;
+    printf("C = \n", h_C[0]);
+
+
 
     return 0;
 }
