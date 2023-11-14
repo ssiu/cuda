@@ -21,10 +21,11 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(1,1), make_stride(1,1));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(1,1), make_stride(1,1));      // (M,N)
 
-    rA = make_fragment_like(gA);
-    rB = make_fragment_like(gB);
-    rC = make_fragment_like(gC);
+    auto rA = make_fragment_like(gA);
+    auto rB = make_fragment_like(gB);
+    auto rC = make_fragment_like(gC);
 
+    copy(gA, rA);
 
     algorithm::gemm(rA, rB, rC);
 
