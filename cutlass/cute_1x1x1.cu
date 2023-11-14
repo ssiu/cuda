@@ -21,6 +21,7 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{},Int<1>{}), make_stride(Int<1>{},Int<1>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<1>{},Int<1>{}), make_stride(Int<1>{},Int<1>{}));      // (M,N)
 
+    print_tensor(gA);
     auto rA = make_fragment_like(gA);
     auto rB = make_fragment_like(gB);
     auto rC = make_fragment_like(gC);
