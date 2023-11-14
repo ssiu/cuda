@@ -35,7 +35,7 @@ int main() {
     thrust::device_vector<float> d_C = h_C;
 
     //call mma
-    mma<<<1,1>>>(d_A.data.get(), d_B.data.get(), d_C.data.get());
+    mma<<<1,1>>>(d_A, d_B, d_C.);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
