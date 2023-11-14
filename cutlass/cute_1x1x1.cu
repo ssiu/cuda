@@ -19,7 +19,7 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 
     auto mA = make_tensor(make_gmem_ptr(dA), make_shape(1,1), make_stride(1, 1));      // (M,K)
     auto mB = make_tensor(make_gmem_ptr(dB), make_shape(1,1), make_stride(1, 1));      // (N,K)
-    auto mC = make_tensor(make_gmem_ptr(dC), make_shape(1,1), make_stride(1, 1);      // (M,N)
+    auto mC = make_tensor(make_gmem_ptr(dC), make_shape(1,1), make_stride(1, 1));      // (M,N)
 //
 //    rA = make_fragment_like(mA);
 //    rB = make_fragment_like(mB);
