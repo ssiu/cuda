@@ -25,6 +25,7 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     auto rB = make_fragment_like(gB);
     auto rC = make_fragment_like(gC);
 
+    print_tensor(rA);
     //copy(gA, rA);
 
     //gemm(rA, rB, rC);
