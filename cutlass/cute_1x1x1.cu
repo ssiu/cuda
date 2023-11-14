@@ -26,15 +26,16 @@ int main() {
     thrust::host_vector<float> h_C(1);
 
     // Initialize matrices h_A and h_B with data
-    h_A[0] = 2;
-    h_B[0] = 3;
+    h_A[0] = 2.0f;
+    h_B[0] = 3.0f;
+    h_C[0] = 0.0;f
 
     thrust::device_vector<float> d_A = h_A;
     thrust::device_vector<float> d_B = h_B;
     thrust::device_vector<float> d_C = h_C;
 
     //call mma
-    mma<<<1,1>>>(d_A.data.get(), d_B.data.get())
+    mma<<<1,1>>>(d_A.data.get(), d_B.data.get(), d_C.data.get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
