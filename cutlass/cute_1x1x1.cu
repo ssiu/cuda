@@ -48,7 +48,7 @@ int main() {
     }
 
 
-    thrust::host_vector<float> h_C = d_C;
+    h_C = d_C;
     printf("C = \n", h_C[0]);
 
 
