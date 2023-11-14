@@ -36,21 +36,21 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 int main() {
 
     // Allocate memory on the host
-    thrust::host_vector<float> h_A(1);
-    thrust::host_vector<float> h_B(1);
-    thrust::host_vector<float> h_C(1);
+    thrust::host_vector<float> hA(1);
+    thrust::host_vector<float> hB(1);
+    thrust::host_vector<float> hC(1);
 
     // Initialize matrices h_A and h_B with data
-    h_A[0] = 2.0f;
-    h_B[0] = 3.0f;
-    h_C[0] = 0.0f;
+    hA[0] = 2.0f;
+    hB[0] = 3.0f;
+    hC[0] = 0.0f;
 
-    thrust::device_vector<float> d_A = h_A;
-    thrust::device_vector<float> d_B = h_B;
-    thrust::device_vector<float> d_C = h_C;
+    thrust::device_vector<float> dA = hA;
+    thrust::device_vector<float> dB = hB;
+    thrust::device_vector<float> dC = hC;
 
     //call mma
-    mma<<<1,1>>>(d_A.data().get(), d_B.data().get(), d_C.data().get());
+    mma<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
@@ -59,8 +59,8 @@ int main() {
     }
 
 
-    h_C = d_C;
-    printf("C = %f \n", h_C[0]);
+    hC = dC;
+    printf("C = %f \n", hC[0]);
 
 
 
