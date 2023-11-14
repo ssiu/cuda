@@ -19,7 +19,7 @@ __global__ void mma(float* A, float* B, float* C) {
 
 
 int main() {
-    int size = sizeof(float);
+
     // Allocate memory on the host
     thrust::host_vector<float> h_A(1);
     thrust::host_vector<float> h_B(1);
@@ -28,7 +28,7 @@ int main() {
     // Initialize matrices h_A and h_B with data
     h_A[0] = 2.0f;
     h_B[0] = 3.0f;
-    h_C[0] = 0.0;f
+    h_C[0] = 0.0f;
 
     thrust::device_vector<float> d_A = h_A;
     thrust::device_vector<float> d_B = h_B;
