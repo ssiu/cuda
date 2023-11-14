@@ -13,8 +13,8 @@
 // copy traits
 using namespace cute;
 
-__global__ void mma(float* d_A, float* d_B, float* d_C) {
-    printf("A = %f, B = %f\n", d_A[0], d_B[0]);
+__global__ void mma(float* dA, float* dB, float* dC) {
+    printf("A = %f, B = %f\n", dA[0], dB[0]);
     //gemm(C[0], A[0], B[0], C[0]);
 
 //    auto mA = make_tensor(make_gmem_ptr(dA), make_shape(1,1), make_stride(1, 1));      // (M,K)
