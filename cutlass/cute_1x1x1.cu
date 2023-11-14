@@ -12,7 +12,7 @@
 // copy traits
 
 __global__ void mma(float* A, float* B, float* C) {
-    printf("A = %f, B = %f", A[0], B[0]);
+    printf("A = %f, B = %f\n", A[0], B[0]);
 }
 // do mma
 // mma traits
@@ -35,7 +35,7 @@ int main() {
     thrust::device_vector<float> d_C = h_C;
 
     //call mma
-    mma<<<1,1>>>(thrust::raw_pointer_cast(d_A.data()), thrust::raw_pointer_cast(d_B.data()), thrust::raw_pointer_cast(d_C.data()));
+    mma<<<1,1>>>(d_A.data().get(), d_B.data().get(), d_C.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
