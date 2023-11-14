@@ -2,6 +2,7 @@
 #include <thrust/device_vector.h>
 #include <cute/tensor.hpp>
 #include <cute/algorithm/gemm.hpp>
+#include <cute/algorithm/copy.hpp>
 #include <cute/arch/mma.hpp>
 // using cute machinery to for 1x1x1
 
@@ -26,8 +27,9 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     auto rB = make_fragment_like(gB);
     auto rC = make_fragment_like(gC);
 
+
+    copy(gA, rA);
     print_tensor(rA);
-    //copy(gA, rA);
 
     //gemm(rA, rB, rC);
 
