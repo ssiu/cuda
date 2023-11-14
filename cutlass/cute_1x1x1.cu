@@ -31,7 +31,7 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     copy(gA, rA);
     print_tensor(rA);
 
-    //gemm(rA, rB, rC);
+    gemm(rA, rB, rC);
 
 }
 // do mma
