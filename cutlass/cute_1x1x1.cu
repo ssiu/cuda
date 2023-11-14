@@ -15,7 +15,7 @@ using namespace cute;
 
 __global__ void mma(float* A, float* B, float* C) {
     printf("A = %f, B = %f\n", A[0], B[0]);
-    gemm(C[0], A[0], B[0], C[0]);
+    //gemm(C[0], A[0], B[0], C[0]);
 
 }
 // do mma
@@ -49,7 +49,7 @@ int main() {
 
 
     h_C = d_C;
-    printf("C = \n", h_C[0]);
+    printf("C = %f \n", h_C[0]);
 
 
 
