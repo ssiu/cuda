@@ -31,11 +31,18 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
 
     auto thr_mma = tiled_mma.get_thread_slice(threadIdx.x);
     Tensor rA  = thr_mma.partition_fragment_A(gA);
-    Tensor rB  = thr_mma.partition_fragment_A(gB);
-    Tensor rC  = thr_mma.partition_fragment_A(gC);
-    print_tensor(rA);
-    print_tensor(rB);
-    print_tensor(rC);
+    Tensor rB  = thr_mma.partition_fragment_B(gB);
+    Tensor rC  = thr_mma.partition_fragment_C(gC);
+
+    copy(gA, rA);
+    copy(gB, rB);
+
+    if {threadIdx.x == 0} {
+        print_tensor(rA);
+        print_tensor(rB);
+        print_tensor(rC);
+    }
+
 
 //    print_tensor(gA);
 //    auto rA = make_fragment_like(gA);
