@@ -29,6 +29,9 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 
 
     copy(gA, rA);
+    cp_async_fence();
+    cp_async_wait<0>();
+
     print_tensor(rA);
 
     gemm(rA, rB, rC);
