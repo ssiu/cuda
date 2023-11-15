@@ -29,13 +29,11 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 
 
     copy(gA, rA);
-    cp_async_fence();
-    cp_async_wait<0>();
 
     print_tensor(rA);
 
-    gemm(rC, rA, rB, rC);
-    printf("rC = %f\n", rC[0]);
+    gemm(rA, rB, rC);
+    printf("rA = %f, rB = %f, rC = %f\n", rA[0], rB[0], rC[0]);
 
 }
 // do mma
