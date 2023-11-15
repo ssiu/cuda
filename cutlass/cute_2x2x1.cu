@@ -43,7 +43,8 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
         print_tensor(rC);
     }
 
-
+    gemm(tiled_mma, rA, rB, rC);
+    copy(rC, gC);
 //    print_tensor(gA);
 //    auto rA = make_fragment_like(gA);
 //    auto rB = make_fragment_like(gB);
@@ -95,7 +96,7 @@ int main() {
 
 
     hC = dC;
-    printf("C = %f \n", hC[0]);
+    printf("C = %f %f\n %f %f \n", hC[0], hC[2], hC[1], hC[3]);
 
 
 
