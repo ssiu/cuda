@@ -34,6 +34,8 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     print_tensor(rA);
 
     gemm(rA, rB, rC);
+    copy(rC, gC);
+
     printf("rA = %f, rB = %f, rC = %f\n", rA[0], rB[0], rC[0]);
 
 }
