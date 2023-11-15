@@ -79,8 +79,8 @@ int main() {
     thrust::host_vector<float> hC(1);
 
     // Initialize matrices h_A and h_B with data
-    hA[0] = 2.0f;
-    hB[0] = 3.0f;
+    hA[0] = 4.0f;
+    hB[0] = 5.0f;
     hC[0] = 0.0f;
 
     thrust::device_vector<float> dA = hA;
