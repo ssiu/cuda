@@ -4,7 +4,7 @@ using namespace cute;
 
 int main() {
     // basic fma
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{});
 
