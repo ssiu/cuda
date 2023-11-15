@@ -41,6 +41,34 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 }
 // do mma
 // mma traits
+__global__ void mma_atom(float* dA, float* dB, float* dC) {
+    printf("A = %f, B = %f\n", dA[0], dB[0]);
+    //gemm(C[0], A[0], B[0], C[0]);
+
+    using MMA = MMA_Atom<MMA_Traits<UniversalFMA<float,float,float,float>>>;
+    MMA mma{};
+
+    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<1>{}));      // (M,K)
+    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{}));      // (N,K)
+    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<1>{}));      // (M,N)
+
+    print_tensor(gA);
+    auto rA = make_fragment_like(gA);
+    auto rB = make_fragment_like(gB);
+    auto rC = make_fragment_like(gC);
+
+
+    copy(gA, rA);
+    copy(gB, rB);
+
+    print_tensor(rA);
+
+    gemm(mma, rA, rB, rC);
+    copy(rC, gC);
+
+    printf("rA = %f, rB = %f, rC = %f\n", rA[0], rB[0], rC[0]);
+
+}
 
 
 int main() {
@@ -60,7 +88,7 @@ int main() {
     thrust::device_vector<float> dC = hC;
 
     //call mma
-    mma<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
+    mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
