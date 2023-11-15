@@ -3,6 +3,18 @@
 using namespace cute;
 
 int main() {
+    // basic fma
+    #if 0
+    {
+        auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{});
+
+        print_latex(tiled_mma);
+    }
+    #endif
+
+
+
+
     // flash attention
     #if 0
     {
@@ -32,7 +44,7 @@ int main() {
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     Layout<Shape<_1, _1,_1>>{},      // 2x2 layout of atoms (threads)
