@@ -18,9 +18,9 @@ __global__ void mma(float* dA, float* dB, float* dC) {
     printf("A = %f, B = %f\n", dA[0], dB[0]);
     //gemm(C[0], A[0], B[0], C[0]);
 
-    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<1>{},Int<1>{}), make_stride(Int<1>{},Int<1>{}));      // (M,K)
-    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{},Int<1>{}), make_stride(Int<1>{},Int<1>{}));      // (N,K)
-    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<1>{},Int<1>{}), make_stride(Int<1>{},Int<1>{}));      // (M,N)
+    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<1>{}));      // (M,K)
+    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{}));      // (N,K)
+    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<1>{}));      // (M,N)
 
     print_tensor(gA);
     auto rA = make_fragment_like(gA);
