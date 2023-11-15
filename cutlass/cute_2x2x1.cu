@@ -37,7 +37,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     copy(gA, rA);
     copy(gB, rB);
 
-    if (threadIdx.x == 0) {
+    if (threadIdx.x == 4) {
         print_tensor(rA);
         print_tensor(rB);
         print_tensor(rC);
