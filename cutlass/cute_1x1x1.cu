@@ -29,6 +29,7 @@ __global__ void mma(float* dA, float* dB, float* dC) {
 
 
     copy(gA, rA);
+    copy(gB, rB);
 
     print_tensor(rA);
 
