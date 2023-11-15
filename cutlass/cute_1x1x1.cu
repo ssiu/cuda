@@ -46,7 +46,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     //gemm(C[0], A[0], B[0], C[0]);
 
     using MMA = MMA_Atom<MMA_Traits<UniversalFMA<float,float,float,float>>>;
-    MMA mma{};
+    MMA mma;
 
     auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<1>{}));      // (M,K)
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{}));      // (N,K)
