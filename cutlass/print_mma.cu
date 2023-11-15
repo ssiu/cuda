@@ -7,10 +7,11 @@ int main() {
     #if 1
     {
         auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{},
-                                           Layout<Shape<_2,_2,_2>>{},
+                                           Layout<Shape<_2,_2,_1>>{},
                                            Layout<Shape<_1, _1, _1>>{});
 
         print_latex(tiled_mma);
+        print_layout(tiled_mma.thr_layout_mnk);
     }
     #endif
 
