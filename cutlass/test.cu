@@ -28,9 +28,9 @@ int main() {
 //    print_layout(layout1);
 //
 //
-    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
-                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>{};
-    print_layout(CLayout);
+//    Layout CLayout = Layout<Shape <Shape <_2, _2,_2>, Shape <_2,_2, _2>>,
+//                         Stride<Stride<_1,_16,_4>, Stride<_8,_2,_32>>>{};
+//    print_layout(CLayout);
 //    //Layout flat_layout = flatten(layout);
 //
 
@@ -39,8 +39,8 @@ int main() {
 
 //    auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
 //    print_layout(smem_atom);
-    auto atom = composition(Swizzle<1,0,-1>{}, Layout<Shape <Shape <_2,_2>,Shape <_2,_2>>, Stride<Stride<_1,_4>,Stride<_2,_8>>>{});
-    print_layout(atom);
+//    auto atom = composition(Swizzle<1,0,-1>{}, Layout<Shape <Shape <_2,_2>,Shape <_2,_2>>, Stride<Stride<_1,_4>,Stride<_2,_8>>>{});
+//    print_layout(atom);
 
 
 // from cutlass sm70
