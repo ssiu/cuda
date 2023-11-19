@@ -33,8 +33,8 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     auto thr_mma = tiled_mma.get_thread_slice(threadIdx.x);
 
     auto tAgA = thr_mma.partition_A(gA);
-    auto tBgB = thr_mma.partition_A(gB);
-    auto tCgC = thr_mma.partition_A(gC);
+    auto tBgB = thr_mma.partition_B(gB);
+    auto tCgC = thr_mma.partition_C(gC);
 
     Tensor tArA  = thr_mma.partition_fragment_A(gA);
     Tensor tBrB  = thr_mma.partition_fragment_B(gB);
