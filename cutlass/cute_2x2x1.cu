@@ -54,7 +54,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
 
     gemm(tiled_mma, tArA, tBrB, tCrC);
 
-    copy(tCrC, gC);
+    copy(tCrC, tCgC);
 
     printf("thread id = %d\n", threadIdx.x);
     printf("tAgA = %f, tBgB = %f, tCgC = %f\n", tAgA[0], tBgB[0], tCgC[0]);
