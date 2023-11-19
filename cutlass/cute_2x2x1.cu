@@ -27,20 +27,29 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
       Layout<Shape<_2,_2,_1>>,  // 2x2x1 thread group
       Layout<Shape<_1,_1,_1>>>; // 1x2x1 value group for 16x16x16 MMA and LDSM
 
+
     TiledMma tiled_mma;
 
     auto thr_mma = tiled_mma.get_thread_slice(threadIdx.x);
-    Tensor rA  = thr_mma.partition_fragment_A(gA);
-    Tensor rB  = thr_mma.partition_fragment_B(gB);
-    Tensor rC  = thr_mma.partition_fragment_C(gC);
 
-    copy(gA, rA);
-    copy(gB, rB);
+    auto tAgA = thr_mma.partition_A(gA);
+    auto tBgB = thr_mma.partition_A(gB);
+    auto tCgC = thr_mma.partition_A(gC);
 
-    printf("thread id is %d\n", threadIdx.x);
-    print_tensor(rA);
-    print_tensor(rB);
-    print_tensor(rC);
+    Tensor tArA  = thr_mma.partition_fragment_A(gA);
+    Tensor tBrB  = thr_mma.partition_fragment_B(gB);
+    Tensor tCrC  = thr_mma.partition_fragment_C(gC);
+
+    copy(tAgA, tArA);
+    copy(tBgB, tBrB);
+
+    if (threadIdx.x == 0) {
+        print_tensor(tArA);
+        print_tensor(tBrB);
+        print_tensor(tCrC);
+    }
+
+
 
 
     gemm(tiled_mma, rA, rB, rC);
