@@ -10,8 +10,8 @@ int main() {
                                            Layout<Shape<_2,_2,_1>>{},
                                            Layout<Shape<_1, _1, _1>>{});
 
-        //print_latex(tiled_mma);
-        print_layout();
+        print_latex(tiled_mma);
+        //print_layout();
     }
     #endif
 
@@ -21,8 +21,8 @@ int main() {
                                            Layout<Shape<_2,_2,_1>>{},
                                            Layout<Shape<_1, _1, _2>>{});
 
-        //print_latex(tiled_mma);
-        print_layout();
+        print_latex(tiled_mma);
+        //print_layout();
     }
     #endif
 
