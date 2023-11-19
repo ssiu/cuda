@@ -57,8 +57,8 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     copy(tCrC, tCgC);
 
     printf("thread id = %d\n", threadIdx.x);
-    printf("tAgA = %f, tBgB = %f, tCgC = %f\n", tAgA[0], tAgA[1], tBgB[0], tBgB[1], tCgC[0]);
-    printf("tArA = %f, tBrB = %f, tCrC = %f\n", tArA[0], tAgA[1], tBrB[0], tBgB[1], tCrC[0]);
+    printf("tAgA[0] = %f, tAgA[1] = %f, tBgB[0] = %f, tBgB[1] = %f, tCgC = %f\n", tAgA[0], tAgA[1], tBgB[0], tBgB[1], tCgC[0]);
+    printf("tArA[0] = %f, tArA[1] = %f, tBrB[0] = %f, tBgB[1] = %f, tCrC = %f\n", tArA[0], tAgA[1], tBrB[0], tBgB[1], tCrC[0]);
 //    print_tensor(gA);
 //    auto rA = make_fragment_like(gA);
 //    auto rB = make_fragment_like(gB);
