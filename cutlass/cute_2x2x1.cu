@@ -40,17 +40,24 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     Tensor tBrB  = thr_mma.partition_fragment_B(gB);
     Tensor tCrC  = thr_mma.partition_fragment_C(gC);
 
-    copy(tAgA, tArA);
-    copy(tBgB, tBrB);
+    printf("thread id = %d\n", threadIdx.x);
+    printf("tAgA = %f, tBgB = %f, tCgC = %f\n", tAgA[0], tBgB[0], tCgC[0]);
+    printf("tArA = %f, tBrB = %f, tCrC = %f\n", tArA[0], tBrB[0], tCrC[0]);
 
     if (threadIdx.x == 0) {
+        print_tensor(tAgA);
+        print_tensor(tBgB);
+        print_tensor(tCgC);
         print_tensor(tArA);
         print_tensor(tBrB);
         print_tensor(tCrC);
     }
 
+    copy(tAgA, tArA);
+    copy(tBgB, tBrB);
+
     gemm(tiled_mma, tArA, tBrB, tCrC);
-    printf("thread id = %d, rA = %f, rB = %f, rC = %f\n", threadIdx.x, tArA[0], tBrB[0], tCrC[0]);
+
     copy(tCrC, gC);
 //    print_tensor(gA);
 //    auto rA = make_fragment_like(gA);
