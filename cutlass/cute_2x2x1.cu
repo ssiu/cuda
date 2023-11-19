@@ -37,11 +37,11 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     copy(gA, rA);
     copy(gB, rB);
 
-    if (threadIdx.x == 4) {
-        print_tensor(rA);
-        print_tensor(rB);
-        print_tensor(rC);
-    }
+    printf("thread id is %d", threadIdx.x);
+    print_tensor(rA);
+    print_tensor(rB);
+    print_tensor(rC);
+
 
     gemm(tiled_mma, rA, rB, rC);
     printf("rA = %f, rB = %f, rC = %f\n", rA[0], rB[0], rC[0]);
