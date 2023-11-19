@@ -37,7 +37,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     copy(gA, rA);
     copy(gB, rB);
 
-    printf("thread id is %d", threadIdx.x);
+    printf("thread id is %d\n", threadIdx.x);
     print_tensor(rA);
     print_tensor(rB);
     print_tensor(rC);
