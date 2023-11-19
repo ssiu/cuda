@@ -49,11 +49,8 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
         print_tensor(tCrC);
     }
 
-
-
-
     gemm(tiled_mma, tArA, tBrB, tCrC);
-    printf("rA = %f, rB = %f, rC = %f\n", tArA[0], tBrB[0], tCrC[0]);
+    printf("thread id = %d, rA = %f, rB = %f, rC = %f\n", threadIdx.x, tArA[0], tBrB[0], tCrC[0]);
     copy(tCrC, gC);
 //    print_tensor(gA);
 //    auto rA = make_fragment_like(gA);
