@@ -40,6 +40,10 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     Tensor tBrB  = thr_mma.partition_fragment_B(gB);
     Tensor tCrC  = thr_mma.partition_fragment_C(gC);
 
+
+    copy(tAgA, tArA);
+    copy(tBgB, tBrB);
+
     if (threadIdx.x == 0) {
         print_tensor(tAgA);
         print_tensor(tBgB);
@@ -49,8 +53,6 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
         print_tensor(tCrC);
     }
 
-    copy(tAgA, tArA);
-    copy(tBgB, tBrB);
 
     gemm(tiled_mma, tArA, tBrB, tCrC);
 
