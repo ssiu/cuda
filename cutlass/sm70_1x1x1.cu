@@ -73,8 +73,16 @@ int main() {
 
     // Initialize matrices h_A and h_B with data
     for (int i=0; i<32; i++) {
-        hA[i] = 1;
-        hB[i] = 1;
+        if (i % 8 == 0) {
+            hA[i] = 1;
+        } else {
+            hA[i] = 0;
+        }
+        if (i < 4) {
+            hB[i] = 1;
+        } else {
+            hB[i] = 0;
+        }
         hC[i] = 0;
     }
 
