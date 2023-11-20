@@ -22,7 +22,6 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     print(gA);
     print(gC);
     using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
-//
     using TiledMma = TiledMMA<
         Mma_atom,
         Layout<Shape<_1,_1,_1>>,  // 2x2x1 thread group
@@ -49,13 +48,13 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
         print_tensor(tBrB);
         print_tensor(tCrC);
     }
-//
-//    copy(tAgA, tArA);
-//    copy(tBgB, tBrB);
-//
-//    gemm(tiled_mma, tArA, tBrB, tCrC);
-//
-//    copy(tCrC, tCgC);
+
+    copy(tAgA, tArA);
+    copy(tBgB, tBrB);
+
+    gemm(tiled_mma, tArA, tBrB, tCrC);
+
+    copy(tCrC, tCgC);
 //
 //    printf("thread id = %d\n", threadIdx.x);
 //    printf("tAgA = %f, tBgB = %f, tCgC = %f\n", tAgA[0], tBgB[0], tCgC[0]);
@@ -82,20 +81,25 @@ int main() {
     thrust::device_vector<half_t> dA = hA;
     thrust::device_vector<half_t> dB = hB;
     thrust::device_vector<float> dC = hC;
-//
-//    //call mma
+
+    //call mma
     mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
-//
+
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         //goto Error; // Use appropriate error handling here
     }
-//
-//
-//    hC = dC;
-//    printf("C = %f %f\n %f %f \n", hC[0], hC[2], hC[1], hC[3]);
-//
+
+    hC = dC;
+    for (int i=0; i< 8; i++){
+        for (int j=0; j< 8; j++){
+            std::cout << hC[i*N+j] << " " ;
+        }
+        std::cout << std::endl;
+    }
+
+
 
 
     return 0;
