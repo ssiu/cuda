@@ -13,7 +13,7 @@ using namespace cute;
 //   layout of A and B and/or the thread_idx that is requesting the partition.
 // For these reasons, they should not be used in a static context.
 // See TiledMMA::get_slice(thr_idx).partition_fragment_A(tensorA) instead.
-__global__ void mma_atom(float* dA, float* dB, float* dC) {
+__global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
 
     auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<8>{}, Int<4>{}), make_stride(Int<1>{}, Int<8>{}));      // (M,K)
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<8>{}, Int<4>{}), make_stride(Int<1>{}, Int<8>{}));      // (N,K)
