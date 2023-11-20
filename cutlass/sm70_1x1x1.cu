@@ -21,34 +21,34 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
 
     print(gA);
     print(gC);
-//    using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
+    using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
 //
-//    using TiledMma = TiledMMA<
-//      Mma_atom,
-//      Layout<Shape<_1,_1,_1>>,  // 2x2x1 thread group
-//      Layout<Shape<_1,_1,_1>>>; // 1x2x1 value group for 16x16x16 MMA and LDSM
-//
-//
-//    TiledMma tiled_mma;
-//
-//    auto thr_mma = tiled_mma.get_thread_slice(threadIdx.x);
-//
-//    auto tAgA = thr_mma.partition_A(gA);
-//    auto tBgB = thr_mma.partition_B(gB);
-//    auto tCgC = thr_mma.partition_C(gC);
-//
-//    Tensor tArA  = thr_mma.partition_fragment_A(gA);
-//    Tensor tBrB  = thr_mma.partition_fragment_B(gB);
-//    Tensor tCrC  = thr_mma.partition_fragment_C(gC);
-//
-//    if (threadIdx.x == 0) {
-//        print_tensor(tAgA);
-//        print_tensor(tBgB);
-//        print_tensor(tCgC);
-//        print_tensor(tArA);
-//        print_tensor(tBrB);
-//        print_tensor(tCrC);
-//    }
+    using TiledMma = TiledMMA<
+        Mma_atom,
+        Layout<Shape<_1,_1,_1>>,  // 2x2x1 thread group
+        Layout<Shape<_1,_1,_1>>>; // 1x2x1 value group for 16x16x16 MMA and LDSM
+
+
+    TiledMma tiled_mma;
+
+    auto thr_mma = tiled_mma.get_thread_slice(threadIdx.x);
+
+    auto tAgA = thr_mma.partition_A(gA);
+    auto tBgB = thr_mma.partition_B(gB);
+    auto tCgC = thr_mma.partition_C(gC);
+
+    Tensor tArA  = thr_mma.partition_fragment_A(gA);
+    Tensor tBrB  = thr_mma.partition_fragment_B(gB);
+    Tensor tCrC  = thr_mma.partition_fragment_C(gC);
+
+    if (threadIdx.x == 0) {
+        print_tensor(tAgA);
+        print_tensor(tBgB);
+        print_tensor(tCgC);
+        print_tensor(tArA);
+        print_tensor(tBrB);
+        print_tensor(tCrC);
+    }
 //
 //    copy(tAgA, tArA);
 //    copy(tBgB, tBrB);
