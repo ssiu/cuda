@@ -72,7 +72,7 @@ int main() {
     thrust::host_vector<float> hC(64);
 
     // Initialize matrices h_A and h_B with data
-    for (i=0; i<32; i++) {
+    for (int i=0; i<32; i++) {
         hA[i] = 1;
         hB[i] = 1;
     }
