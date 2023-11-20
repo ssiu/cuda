@@ -20,6 +20,7 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<8>{}, Int<8>{}), make_stride(Int<1>{}, Int<8>{}));      // (M,N)
 
     print(gA);
+    print(gC);
 //    using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
 //
 //    using TiledMma = TiledMMA<
