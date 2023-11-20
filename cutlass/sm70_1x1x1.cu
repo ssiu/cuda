@@ -83,13 +83,13 @@ int main() {
     thrust::device_vector<float> dC = hC;
 //
 //    //call mma
-//    mma_atom<<<1,4>>>(dA.data().get(), dB.data().get(), dC.data().get());
+    mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
 //
-//    cudaError_t cudaStatus = cudaGetLastError();
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-//        //goto Error; // Use appropriate error handling here
-//    }
+    cudaError_t cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        //goto Error; // Use appropriate error handling here
+    }
 //
 //
 //    hC = dC;
