@@ -75,6 +75,7 @@ int main() {
     for (int i=0; i<32; i++) {
         hA[i] = 1;
         hB[i] = 1;
+        hC[i] = 0;
     }
 
 
@@ -83,7 +84,7 @@ int main() {
     thrust::device_vector<float> dC = hC;
 
     //call mma
-    mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
+    mma_atom<<<1,32>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
