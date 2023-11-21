@@ -50,7 +50,7 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
 //        print_tensor(gB);
         print_tensor(tAgA);
         print_tensor(tBgB);
-        print_tensor(tCgC);
+        print_tensor(tCrC);
 //        print_tensor(tArA);
 //        print_tensor(tBrB);
 //        print_tensor(tCrC);
