@@ -46,8 +46,8 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     gemm(tiled_mma, tArA, tBrB, tCrC);
 
     if (threadIdx.x == 0) {
-        print_tensor(gA);
-        print_tensor(gB);
+//        print_tensor(gA);
+//        print_tensor(gB);
         print_tensor(tAgA);
         print_tensor(tBgB);
         print_tensor(tCgC);
