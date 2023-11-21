@@ -77,12 +77,9 @@ int main() {
     for (int i=0; i<32; i++) {
         if (i % 8 == 0) {
             hA[i] = i;
-        } else {
-            hA[i] = 0;
-        }
-        if (i < 4) {
             hB[i] = 1;
         } else {
+            hA[i] = 0;
             hB[i] = 0;
         }
         hC[i] = 0;
