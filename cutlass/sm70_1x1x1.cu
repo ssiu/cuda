@@ -77,7 +77,7 @@ int main() {
     // Initialize matrices h_A and h_B with data
     for (int i=0; i<32; i++) {
         if (i % 8 == 0) {
-            hA[i] = i;
+            hA[i] = 1;
             hB[i] = 1;
         } else {
             hA[i] = 0;
