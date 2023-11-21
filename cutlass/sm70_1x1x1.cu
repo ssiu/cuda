@@ -19,9 +19,7 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<8>{}, Int<4>{}), make_stride(Int<1>{}, Int<8>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<8>{}, Int<8>{}), make_stride(Int<1>{}, Int<8>{}));      // (M,N)
 
-    print_tensor(gA);
-    print_tensor(gB);
-    print_tensor(gC);
+
     using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
     using TiledMma = TiledMMA<
         Mma_atom,
@@ -46,6 +44,8 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     copy(tBgB, tBrB);
 
     if (threadIdx.x == 0) {
+        print_tensor(gA);
+        print_tensor(gB);
         print_tensor(tAgA);
         print_tensor(tBgB);
         print_tensor(tCgC);
