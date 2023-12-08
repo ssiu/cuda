@@ -3,3 +3,4 @@
 *.o
 *.ncu-rep
 *.ipynb_checkpoints/
+*.tex

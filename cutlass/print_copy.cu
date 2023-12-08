@@ -4,7 +4,7 @@ using namespace cute;
 
 int main()
 {
-#if 1
+#if 0
   {
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
@@ -15,6 +15,20 @@ int main()
     print_latex(tiled_copy);
   }
 #endif
+
+
+#if 0
+  {
+    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+
+    auto tiled_copy = make_tiled_copy(copy_atom,
+                                      Layout<Shape<_32,_1>>{},  // 32x1 threads
+                                      Layout<Shape< _1,_4>>{}); //  1x4 values
+
+    print_latex(tiled_copy);
+  }
+#endif
+
 
 #if 0
   {
