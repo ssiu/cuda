@@ -30,7 +30,7 @@ int main()
 #endif
 
 
-#if 1
+#if 0
   {
     // The canonical LDSM_N image
     Copy_Atom<SM75_U32x1_LDSM_N, uint32_t> copy_atom;
@@ -55,7 +55,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   {
     // Generate a TiledCopy layout from a TiledMMA
     SM80_16x8x16_F32F16F16F32_TN mma;
