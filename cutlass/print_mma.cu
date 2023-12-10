@@ -5,13 +5,14 @@ using namespace cute;
 int main() {
     #if 1
     {
-    auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT,
+        auto tiled_mma = make_tiled_mma(SM70_8x8x4_F32F16F16F32_NT{},
                                     composition(Swizzle<1,0,-1>{},
                                                 Layout<Shape <Shape <_2,_2>,Shape <_2,_2>>,
                                                        Stride<Stride<_1,_4>,Stride<_2,_8>>>{}),
                                     Layout<Shape<_2,_2>>{},
                                     Tile<Layout<Shape<_4,_2,_2>,Stride<_1,_32,_8>>,
                                          Layout<Shape<_4,_2,_2>,Stride<_1,_32,_8>>>{});
+         print_latex(tiled_mma);
 
     }
     #endif
