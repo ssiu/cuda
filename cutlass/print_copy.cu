@@ -55,7 +55,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   {
     // Generate a TiledCopy layout from a TiledMMA
     SM80_16x8x16_F32F16F16F32_TN mma;
