@@ -13,6 +13,7 @@ int main() {
                                     Tile<Layout<Shape<_4,_2,_2>,Stride<_1,_32,_8>>,
                                          Layout<Shape<_4,_2,_2>,Stride<_1,_32,_8>>>{});
 
+    }
     #endif
     // basic fma
     #if 0
