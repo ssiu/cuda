@@ -13,10 +13,10 @@ int main() {
     #endif
     #if 1
     {
-        Layout layout = composition(Swizzle<3, 3, 3>{},
+        Layout layout = make_layout(composition(Swizzle<3, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
                     Layout<Shape<_8, Int<64>>,
-                           Stride<Int<64>, _1>>{});
+                           Stride<Int<64>, _1>>{}));
         print_latex(layout);
     }
     #endif
