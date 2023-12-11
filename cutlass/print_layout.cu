@@ -4,14 +4,22 @@ using namespace cute;
 
 
 int main() {
-    #if 1
+    #if 0
     {
         Layout layout = make_layout(make_shape (_8{}, _64{}),
                                make_stride(_64{}, _1{}));
         print_latex(layout);
     }
     #endif
-
+    #if 1
+    {
+        Layout layout = composition(Swizzle<3, 3, 3>{},
+                    // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
+                    Layout<Shape<_8, Int<64>>,
+                           Stride<Int<64>, _1>>{});
+        print_latex(layout);
+    }
+    #endif
 
 
 //    print_layout(layout);
