@@ -4,8 +4,17 @@ using namespace cute;
 
 
 int main() {
-    Layout layout = make_layout(make_shape (_2{}, _2{}));
-    print_layout(layout);
+    #if 1
+    {
+        Layout layout = make_layout(make_shape (_8{}, _64{}),
+                               make_stride(_64{}, _1{}));
+        print_latex(layout);
+    }
+    #endif
+
+
+
+//    print_layout(layout);
 //    Layout layout = make_layout(make_shape (_2{}, _3{}),
 //                            make_stride(_3{}, _1{}));
 //    print_layout(layout);
