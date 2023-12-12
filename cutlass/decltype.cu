@@ -31,8 +31,10 @@ int main() {
         SmemLayoutAtomQ{},
         Shape<Int<kBlockN>, Int<kHeadDim>>{}));
 
+    static constexpr int kSmemQAtomCount = size(SmemLayoutAtomQ{});
     static constexpr int kSmemQCount = size(SmemLayoutQ{});
 
+    std::cout << "kSmemQAtomCount: " << kSmemQAtomCount << std::endl;
     std::cout << "kSmemQCount: " << kSmemQCount << std::endl;
 
     return 0;
