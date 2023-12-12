@@ -4,10 +4,10 @@ using namespace cute;
 
 
 int main() {
-    int kHeadDim = 64;
-    int kBlockKSmem = kHeadDim % 64 == 0 ? 64 : 32;
-    int kBlockM = 128;
-    int kBlockN = 128;
+    static constexpr int kHeadDim = 64;
+    static constexpr int kBlockKSmem = kHeadDim % 64 == 0 ? 64 : 32;
+    static constexpr int kBlockM = 128;
+    static constexpr int kBlockN = 128;
     using SmemLayoutAtomQ = decltype(
         composition(Swizzle<kSwizzle, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
