@@ -14,6 +14,8 @@ int main() {
     static constexpr int kBlockKSmem = kHeadDim % 64 == 0 ? 64 : 32;
     static constexpr int kBlockM = 128;
     static constexpr int kBlockN = 128;
+    static constexpr int kSwizzle = kBlockKSmem == 32 ? 2 : 3;
+
     using SmemLayoutAtomQ = decltype(
         composition(Swizzle<kSwizzle, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
