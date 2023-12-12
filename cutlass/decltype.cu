@@ -1,4 +1,5 @@
 #include <iostream>
+#include <typeinfo>
 #include <cute/layout.hpp>
 #include <cute/tensor.hpp>
 #include "cute/algorithm/copy.hpp"
@@ -36,6 +37,9 @@ int main() {
 
     std::cout << "kSmemQAtomCount: " << kSmemQAtomCount << std::endl;
     std::cout << "kSmemQCount: " << kSmemQCount << std::endl;
+
+    std::cout << "Type of SmemLayoutQ: " << typeid(SmemLayoutQ).name() << std::endl;
+
 
     return 0;
 }
