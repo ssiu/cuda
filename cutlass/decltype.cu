@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cute/layout.hpp>
 #include <cute/tensor.hpp>
 #include "cute/algorithm/copy.hpp"
@@ -29,6 +30,10 @@ int main() {
     using SmemLayoutKV = decltype(tile_to_shape(
         SmemLayoutAtomQ{},
         Shape<Int<kBlockN>, Int<kHeadDim>>{}));
+
+    static constexpr int kSmemQCount = size(SmemLayoutQ{});
+
+    std::cout << "kSmemQCount: " << kSmemQCount << std::endl;
 
     return 0;
 }
