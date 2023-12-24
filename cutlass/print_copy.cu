@@ -13,8 +13,8 @@ int main()
                                       Layout<Shape< _1,_4>>{}); //  1x4 values
     //const int
     auto thr_copy = tiled_copy.get_thread_slice(0);
-
-    print_latex(thr_copy);
+    thr_copy.print_all();
+    //print_latex(thr_copy);
   }
 #endif
 
