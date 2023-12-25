@@ -26,9 +26,9 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
 
 
-    Tensor tQgQ = gmem_thr_copy.partition_S(gQ);
+    Tensor tAgA = gmem_thr_copy.partition_S(gA);
     if (cute::thread0()) {
-         print_tensor(tQgQ);
+         print_tensor(tAgA);
     }
     //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
 
