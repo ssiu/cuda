@@ -11,9 +11,15 @@ using namespace cute;
 
 __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
 
-    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,K)
-    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
-    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
+    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+
+    auto tiled_copy = make_tiled_copy(copy_atom,
+                                      Layout<Shape<_32,_1>>{},  // 32x1 threads
+                                      Layout<Shape< _1,_4>>{}); //  1x4 values
+
+    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,K)
+    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
+    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 
     if (cute::thread0()) {
          print_tensor(gA);
@@ -70,15 +76,15 @@ int main() {
     // initialise 2 32x32 matrices in float
     // convert them into 16b
     // define copy operation
-
-    static int N = 32;
+    static int M = 32;
+    static int N = 4;
     // Allocate memory on the host
-    thrust::host_vector<half_t> hA(N*N);
-    thrust::host_vector<half_t> hB(N*N);
-    thrust::host_vector<float> hC(N*N);
+    thrust::host_vector<half_t> hA(M*N);
+    thrust::host_vector<half_t> hB(M*N);
+    thrust::host_vector<float> hC(M*N);
 
     // Initialize matrices h_A and h_B with data
-    for (int i=0; i<1024; i++) {
+    for (int i=0; i<M*N; i++) {
         hA[i] = __float2half(i*1.0);
         hA[i] = __float2half(i*1.0);
         hC[i] = 0;
@@ -98,13 +104,13 @@ int main() {
         //goto Error; // Use appropriate error handling here
     }
 
-    hC = dC;
-    for (int i=0; i< N; i++){
-        for (int j=0; j< N; j++){
-            std::cout << hC[i*N+j] << " " ;
-        }
-        std::cout << std::endl;
-    }
+//    hC = dC;
+//    for (int i=0; i< N; i++){
+//        for (int j=0; j< N; j++){
+//            std::cout << hC[i*N+j] << " " ;
+//        }
+//        std::cout << std::endl;
+//    }
 
 
 
