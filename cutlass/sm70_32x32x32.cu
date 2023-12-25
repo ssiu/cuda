@@ -21,6 +21,17 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 
+    const int tidx = threadIdx.x;
+
+    auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
+
+
+    Tensor tQgQ = gmem_thr_copy.partition_S(gQ);
+    if (cute::thread0()) {
+         print_tensor(tQgQ);
+    }
+    //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
+
 //    if (cute::thread0()) {
 //         print_tensor(gA);
 //    }
