@@ -16,14 +16,14 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto tiled_copy = make_tiled_copy(copy_atom,
                                       Layout<Shape<_32,_1>>{},  // 32x1 threads
                                       Layout<Shape< _1,_4>>{}); //  1x4 values
-
+    print_layout(tiled_copy);
     auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,K)
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 
-    if (cute::thread0()) {
-         print_tensor(gA);
-    }
+//    if (cute::thread0()) {
+//         print_tensor(gA);
+//    }
 
 
 //    using Mma_atom = MMA_Atom<MMA_Traits<SM70_8x8x4_F16F16F16F16_NT>>;
