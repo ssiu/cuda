@@ -16,20 +16,20 @@ __global__ void mma_atom(half_t* dA, half_t* dB, float* dC) {
     auto tiled_copy = make_tiled_copy(copy_atom,
                                       Layout<Shape<_32,_1>>{},  // 32x1 threads
                                       Layout<Shape< _1,_4>>{}); //  1x4 values
-    print_layout(tiled_copy);
+
     auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,K)
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 
-//    const int tidx = threadIdx.x;
-//
-//    auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
-//
-//
-//    Tensor tAgA = gmem_thr_copy.partition_S(gA);
-//    if (cute::thread0()) {
-//         print_tensor(tAgA);
-//    }
+    const int tidx = threadIdx.x;
+
+    auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
+
+
+    Tensor tAgA = gmem_thr_copy.partition_S(gA);
+    if (cute::thread0()) {
+         print_tensor(tAgA);
+    }
 
     //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
 
