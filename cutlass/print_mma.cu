@@ -3,7 +3,7 @@
 using namespace cute;
 
 int main() {
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM80_16x8x16_F32F16F16F32_TN{},
                     Layout<Shape<_4, _1, _1>>{},  // 4x1x1 or 8x1x1 thread group
@@ -11,7 +11,7 @@ int main() {
         print_latex(tiled_mma);
     }
     #endif
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(SM80_16x8x16_F32F16F16F32_TN{});
         print_latex(tiled_mma);
