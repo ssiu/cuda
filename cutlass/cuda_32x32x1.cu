@@ -34,7 +34,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
 //
 //    Tensor tAgA = gmem_thr_copy.partition_S(gA);
     if (cute::thread0()) {
-         print_tensor(tiled_copy);
+         print_layout(tiled_copy);
     }
 //
 //    //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
