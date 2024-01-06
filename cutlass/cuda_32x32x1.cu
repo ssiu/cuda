@@ -16,17 +16,16 @@
 using namespace cute;
 
 
-__global__ void mma_atom(float* dA, float* dB, float* dC, int M, int N) {
+__global__ void mma_atom(float* dA, float* dB, float* dC) {
 
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto tiled_copy = make_tiled_copy(copy_atom,
-                                      Layout<Shape<M,_1>>{},  // 32x1 threads
-                                      Layout<Shape< _1, N>>{}); //  1x4 values
+                                      Layout<Shape<_32,_1>>{}); //  1x4 values
 
-    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<M>{}, Int<N>{}), make_stride(Int<1>{}, Int<M>{}));      // (M,K)
-//    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (N,K)
-//    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<4>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
+    auto gA = make_tensor(make_gmem_ptr(dA), make_shape(Int<32>{}, Int<1>{}));      // (M,K)
+    auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<1>{}, Int<32>{}));      // (N,K)
+    auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 //
 //    const int tidx = threadIdx.x;
 //
@@ -34,9 +33,9 @@ __global__ void mma_atom(float* dA, float* dB, float* dC, int M, int N) {
 //
 //
 //    Tensor tAgA = gmem_thr_copy.partition_S(gA);
-//    if (cute::thread0()) {
-//         print_tensor(tAgA);
-//    }
+    if (cute::thread0()) {
+         print_tensor(tiled_copy);
+    }
 //
 //    //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
 //
@@ -96,12 +95,11 @@ int main() {
     // A an MxN matrix
     // B an NxM matrix
     // C an MxM matrix
-    static int M = 32;
-    static int N = 1;
+
     // Allocate memory on the host
-    thrust::host_vector<float> hA(M*N);
-    thrust::host_vector<float> hB(M*N);
-    thrust::host_vector<float> hC(M*N);
+    thrust::host_vector<float> hA(32);
+    thrust::host_vector<float> hB(32);
+    thrust::host_vector<float> hC(32*32);
 
     // Initialize matrices h_A and h_B with data
     for (int i=0; i<M*N; i++) {
