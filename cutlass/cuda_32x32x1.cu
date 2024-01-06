@@ -116,7 +116,7 @@ int main() {
     thrust::device_vector<float> dC = hC;
 
     //call mma
-    mma_atom<<<1,32>>>(dA.data().get(), dB.data().get(), dC.data().get(), M, N);
+    mma_atom<<<1,32>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
