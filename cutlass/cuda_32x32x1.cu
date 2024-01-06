@@ -27,14 +27,15 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<1>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 //
-//    const int tidx = threadIdx.x;
+    const int tidx = threadIdx.x;
 //
-//    auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
+    auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
 //
 //
-//    Tensor tAgA = gmem_thr_copy.partition_S(gA);
+    Tensor tAgA = gmem_thr_copy.partition_S(gA);
     if (cute::thread0()) {
-         print_latex(tiled_copy);
+         print_tensor(tAgA);
+         //print_latex(tiled_copy);
     }
 //
 //    //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
@@ -109,7 +110,6 @@ int main() {
             hC[i*j] = 0;
         }
     }
-
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
