@@ -102,10 +102,12 @@ int main() {
     thrust::host_vector<float> hC(32*32);
 
     // Initialize matrices h_A and h_B with data
-    for (int i=0; i<M*N; i++) {
+    for (int i=0; i<32; i++) {
         hA[i] = i;
         hB[i] = i;
-        hC[i] = 0;
+        for (int j=0; j<32; j++) {
+            hC[i*j] = 0;
+        }
     }
 
 
