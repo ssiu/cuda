@@ -19,9 +19,9 @@ int main()
 
     auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
                               make_stride(4, make_stride(2,1)));
-    //Layout flat_layout = flatten(layout_2x4);
+    auto flat_layout = flatten(layout_2x4);
     print_layout(layout_2x4);
-    //print_layout(flat_layout);
+    print_layout(flat_layout);
   }
 #endif
 
