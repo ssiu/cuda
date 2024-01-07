@@ -33,7 +33,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
 
     auto sA = make_tensor(make_smem_ptr(smemA), make_shape(Int<32>{}, Int<1>{}));
     auto sB = make_tensor(make_smem_ptr(smemB), make_shape(Int<32>{}, Int<1>{}));
-
+    print_tensor(sA);
     const int tidx = threadIdx.x;
 //
     auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
