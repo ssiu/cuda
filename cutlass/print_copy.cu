@@ -14,12 +14,12 @@ int main()
     //const int
 //    auto thr_copy = tiled_copy.get_thread_slice(0);
 //    print_layout(thr_copy);
-    print_latex(tiled_copy);
+   // print_latex(tiled_copy);
 
 
     auto layout_test = make_layout(make_shape(make_shape (32,1), 1),
                               make_stride(make_stride(2,1), 1));
-    print_layout(layout_test)
+    print_layout(layout_test);
   }
 #endif
 
