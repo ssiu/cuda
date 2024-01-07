@@ -17,11 +17,11 @@ int main()
    // print_latex(tiled_copy);
 
 
-//    auto layout_test = make_layout(make_shape(make_shape(4,2)),
-//                              make_stride(make_stride(1,4)));
-    auto layout_test = make_layout(make_shape(32,1,1),
-                             make_stride(2,1,1));
-    print_layout(layout_test);
+    auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
+                              make_stride(4, make_stride(2,1)));
+    Layout flat_layout = flatten(layout_2x4);
+    print_layout(layout_2x4);
+    print_layout(flat_layout);
   }
 #endif
 
