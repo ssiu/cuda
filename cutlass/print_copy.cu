@@ -21,7 +21,8 @@ int main()
 //                              make_stride(4, make_stride(2,1)));
 //    auto layout_2x4 = make_layout(make_shape (1, make_shape (2,2)),
 //                              make_stride(4, make_stride(2,1)));
-    auto layout_2x4 = make_layout(make_shape ( make_shape (2,2), 1),
+    auto layout_2x4 = make
+    _layout(make_shape ( make_shape (2,2), 1),
                               make_stride(make_stride(2,1), 4));
     auto flat_layout = flatten(layout_2x4);
     print_layout(layout_2x4);
@@ -34,8 +35,8 @@ int main()
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto tiled_copy = make_tiled_copy(copy_atom,
-                                      Layout<Shape<_32, _1>>{},  // 32x1 threads
-                                      Layout<Shape< _1,_2>>{}); //  1x4 values
+                                      Layout<Shape<_32, _2>>{},  // 32x1 threads
+                                      Layout<Shape< _1,_1>>{}); //  1x4 values
 
     print_latex(tiled_copy);
   }
