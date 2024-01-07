@@ -35,7 +35,7 @@ int main()
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto tiled_copy = make_tiled_copy(copy_atom,
-                                      Layout<Shape<Shape<_4, _4>, _2>, Stride<Stride<_2, _1>, _16>>{},  // 8x4 threads
+                                      Layout<Shape<Shape<_2, _8>, _2>, Stride<Stride<_2, _1>, _16>>{},  // 8x4 threads
                                       Layout<Shape< _1,_1>>{}); //  1x4 values
 
     print_latex(tiled_copy);
