@@ -49,6 +49,12 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
          //print_latex(tiled_copy);
     }
 //
+    using Mma_atom = MMA_Atom<MMA_Traits<UniversalFMA<float,float,float,float>>>;
+
+    using TiledMma = TiledMMA<
+      Mma_atom,
+      Layout<Shape<_32,_32,_1>>,  // 2x2x1 thread group
+      Layout<Shape<_1,_1,_1>>>; // 1x2x1 value group for 16x16x16 MMA and LDSM
 //    //Tensor tQsQ = gmem_thr_copy.partition_D(sQ);
 //
 //    if (cute::thread0()) {
