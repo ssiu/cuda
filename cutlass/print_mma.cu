@@ -31,10 +31,45 @@ int main() {
     }
     #endif
     // basic fma
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{},
                                            Layout<Shape<_32,_32,_1>>{},
+                                           Layout<Shape<_1, _1, _1>>{});
+
+        print_latex(tiled_mma);
+        //print_layout();
+    }
+    #endif
+    // custom fma
+    #if 1
+    {
+        template <class D, class A, class B, class C>
+        struct MMA_Traits<custom_32x32x1<D,A,B,C>>
+        {
+          using ElementDVal = D;
+          using ElementAVal = A;
+          using ElementBVal = B;
+          using ElementCVal = C;
+
+          // Logical shape of the MMA
+          using Shape_MNK = Shape<_32,_32,_1>;
+
+          // Logical thread id (tid) -> tidx
+          using ThrID   = Layout<_1>;
+
+          // (Logical thread id (tid), Logical value id (vid)) -> coord
+
+          // (tid,vid) -> (m,k)
+          using ALayout = Layout<Shape<_1,_32>>;
+          // (tid,vid) -> (n,k)
+          using BLayout = Layout<Shape<_1,_32>>;
+          // (tid,vid) -> (m,n)
+          using CLayout = Layout<Shape<_32,_32>, Stride<_1, _32>>;
+        };
+
+        auto tiled_mma = make_tiled_mma(custom_32x32x1<float,float,float,float>{},
+                                           Layout<Shape<_1,_1,_1>>{},
                                            Layout<Shape<_1, _1, _1>>{});
 
         print_latex(tiled_mma);
