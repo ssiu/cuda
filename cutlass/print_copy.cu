@@ -17,8 +17,10 @@ int main()
    // print_latex(tiled_copy);
 
 
-    auto layout_test = make_layout(make_shape(make_shape (4,2)),
-                              make_stride(make_stride(1,4)));
+//    auto layout_test = make_layout(make_shape(make_shape(4,2)),
+//                              make_stride(make_stride(1,4)));
+    auto layout_test = make_layout(make_shape(make_shape(32,1,1)),
+                              make_stride(make_stride(2,1,1)));
     print_layout(layout_test);
   }
 #endif
