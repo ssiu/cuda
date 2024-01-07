@@ -45,7 +45,7 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     copy(tAgA, tAsA);
     __syncthreads();
     if (cute::thread0()) {
-         print_tensor(tAsA);
+         print_tensor(sA);
          //print_latex(tiled_copy);
     }
 //
