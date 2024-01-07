@@ -18,6 +18,9 @@ using namespace cute;
 
 __global__ void mma_atom(float* dA, float* dB, float* dC) {
 
+    __shared__ float smemA[32];
+    __shared__ float smemB[32];
+
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto tiled_copy = make_tiled_copy(copy_atom,
@@ -27,14 +30,22 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
     auto gB = make_tensor(make_gmem_ptr(dB), make_shape(Int<32>{}, Int<1>{}));      // (N,K)
     auto gC = make_tensor(make_gmem_ptr(dC), make_shape(Int<32>{}, Int<32>{}), make_stride(Int<1>{}, Int<32>{}));      // (M,N)
 //
+
+    auto sA = make_tensor(make_smem_ptr(smemA), make_shape(Int<32>{}, Int<1>{}));
+    auto sB = make_tensor(make_smem_ptr(smemB), make_shape(Int<32>{}, Int<1>{}));
+
     const int tidx = threadIdx.x;
 //
     auto gmem_thr_copy = tiled_copy.get_thread_slice(tidx);
 //
 //
     Tensor tAgA = gmem_thr_copy.partition_S(gA);
+    Tensor tAsA = gmem_thr_copy.partition_D(sA);
+//    auto tArA = make_fragment_like(tAgA);
+    copy(tAgA, tAsA);
+    __syncthreads();
     if (cute::thread0()) {
-         print_tensor(tAgA);
+         print_tensor(tAsA);
          //print_latex(tiled_copy);
     }
 //
