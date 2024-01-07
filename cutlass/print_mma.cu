@@ -31,7 +31,7 @@ int main() {
     }
     #endif
     // basic fma
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{},
                                            Layout<Shape<_2, _1, _1>>{},
