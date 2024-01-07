@@ -25,7 +25,7 @@ int main()
                               make_stride(make_stride(2,1), 4));
     auto flat_layout = flatten(layout_2x4);
     print_layout(layout_2x4);
-    //print_layout(flat_layout);
+    print_layout(flat_layout);
   }
 #endif
 
