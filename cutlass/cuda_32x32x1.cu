@@ -49,6 +49,30 @@ __global__ void mma_atom(float* dA, float* dB, float* dC) {
          //print_latex(tiled_copy);
     }
 //
+    template <class D, class A, class B, class C>
+    struct MMA_Traits<UniversalFMA<D,A,B,C>>
+    {
+      using ElementDVal = D;
+      using ElementAVal = A;
+      using ElementBVal = B;
+      using ElementCVal = C;
+
+      // Logical shape of the MMA
+      using Shape_MNK = Shape<_1,_1,_1>;
+
+      // Logical thread id (tid) -> tidx
+      using ThrID   = Layout<_1>;
+
+      // (Logical thread id (tid), Logical value id (vid)) -> coord
+
+      // (tid,vid) -> (m,k)
+      using ALayout = Layout<Shape<_1,_1>>;
+      // (tid,vid) -> (n,k)
+      using BLayout = Layout<Shape<_1,_1>>;
+      // (tid,vid) -> (m,n)
+      using CLayout = Layout<Shape<_1,_1>>;
+    };
+
     using Mma_atom = MMA_Atom<MMA_Traits<UniversalFMA<float,float,float,float>>>;
 
     using TiledMma = TiledMMA<

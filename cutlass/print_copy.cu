@@ -9,12 +9,12 @@ int main()
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto tiled_copy = make_tiled_copy(copy_atom,
-                                      Layout<Shape<_32,_1>>{},  // 32x1 threads
-                                      Layout<Shape< _1,_4>>{}); //  1x4 values
+                                      Layout<Shape<_1,_1>>{},  // 32x1 threads
+                                      Layout<Shape< _1,_1>>{}); //  1x4 values
     //const int
-    auto thr_copy = tiled_copy.get_thread_slice(0);
-    print_layout(thr_copy);
-    //print_latex(thr_copy);
+//    auto thr_copy = tiled_copy.get_thread_slice(0);
+//    print_layout(thr_copy);
+    print_latex(tiled_copy);
   }
 #endif
 
