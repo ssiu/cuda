@@ -6,41 +6,19 @@ int main()
 {
 #if 1
   {
-    using Element = float;
-
-     // auto thr_layout = Layout(make_shape(Int<32>{}, Int< 8>{}));
-    auto thr_layout = Layout<Shape<_32, _8>>;
-
-    // Vector dimensions
-    //auto vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
-    auto vec_layout = Layout<Shape<_4, _1>>;
-
-    using AccessType = cutlass::AlignedArray<Element, size(shape(vec_layout{}))>;
-
-    using Atom = Copy_Atom<UniversalCopy<AccessType>, Element>;
 
 
-    auto tiled_copy =
-    make_tiled_copy(
-      Atom{},                       // access size
-      thr_layout{},               // thread layout
-      vec_layout{});
+
+//    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+
+    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, cutlass::half_t>,
+                                      Layout<Shape<_32,_8>>{},  // 32x1 threads
+                                      Layout<Shape< _4,_1>>{}); //  1x4 values
+//    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>,
+//                                      Layout<Shape<_32,_8>>{},  // 32x1 threads
+//                                      Layout<Shape< _4,_1>>{}); //  1x4 values
 
     print_latex(tiled_copy);
-//    auto tiled_copy = make_tiled_copy(copy_atom,
-//                                      Layout<Shape<Shape<_32,_1>,_1>, Stride<Stride<_2,_1>,_1>>{},  // 32x1 threads
-//                                      Layout<Shape< _1,_1>>{}); //  1x4 values
-    //const int
-//    auto thr_copy = tiled_copy.get_thread_slice(0);
-//    print_layout(thr_copy);
-   // print_latex(tiled_copy);
-
-
-//    auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
-//                              make_stride(4, make_stride(2,1)));
-//    auto layout_2x4 = make_layout(make_shape (1, make_shape (2,2)),
-//                              make_stride(4, make_stride(2,1)));
-
   }
 #endif
 
