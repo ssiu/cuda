@@ -9,10 +9,10 @@ int main()
     using Element = float;
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
-    Layout thr_layout = make_layout(make_shape(Int<32>{}, Int< 8>{}));
+    auto thr_layout = make_layout(make_shape(Int<32>{}, Int< 8>{}));
 
     // Vector dimensions
-    Layout vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
+    auto vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
 
     using AccessType = cutlass::AlignedArray<Element, size(shape(VecLayout{}))>;
 
