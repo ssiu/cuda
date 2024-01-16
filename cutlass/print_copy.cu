@@ -4,6 +4,46 @@ using namespace cute;
 
 int main()
 {
+#if 1
+  {
+    using Element = float;
+    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+
+    Layout thr_layout = make_layout(make_shape(Int<32>{}, Int< 8>{}));
+
+    // Vector dimensions
+    Layout vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
+
+    using AccessType = cutlass::AlignedArray<Element, size(shape(VecLayout{}))>;
+
+    using Atom = Copy_Atom<UniversalCopy<AccessType>, Element>;
+
+
+    auto tiled_copy =
+    make_tiled_copy(
+      Atom{},                       // access size
+      ThreadLayout{},               // thread layout
+      VecLayout{});
+
+    print_latex(tiled_copy);
+//    auto tiled_copy = make_tiled_copy(copy_atom,
+//                                      Layout<Shape<Shape<_32,_1>,_1>, Stride<Stride<_2,_1>,_1>>{},  // 32x1 threads
+//                                      Layout<Shape< _1,_1>>{}); //  1x4 values
+    //const int
+//    auto thr_copy = tiled_copy.get_thread_slice(0);
+//    print_layout(thr_copy);
+   // print_latex(tiled_copy);
+
+
+//    auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
+//                              make_stride(4, make_stride(2,1)));
+//    auto layout_2x4 = make_layout(make_shape (1, make_shape (2,2)),
+//                              make_stride(4, make_stride(2,1)));
+
+  }
+#endif
+
+
 #if 0
   {
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
@@ -30,7 +70,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   {
     Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
