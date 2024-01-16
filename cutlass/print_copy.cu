@@ -7,7 +7,6 @@ int main()
 #if 1
   {
     using Element = float;
-    Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
     auto thr_layout = make_layout(make_shape(Int<32>{}, Int< 8>{}));
 
@@ -46,27 +45,27 @@ int main()
 
 #if 0
   {
-    Copy_Atom<UniversalCopy<double>, double> copy_atom;
-
-//    auto tiled_copy = make_tiled_copy(copy_atom,
-//                                      Layout<Shape<Shape<_32,_1>,_1>, Stride<Stride<_2,_1>,_1>>{},  // 32x1 threads
-//                                      Layout<Shape< _1,_1>>{}); //  1x4 values
-    //const int
-//    auto thr_copy = tiled_copy.get_thread_slice(0);
-//    print_layout(thr_copy);
-   // print_latex(tiled_copy);
-
-
-//    auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
-//                              make_stride(4, make_stride(2,1)));
-//    auto layout_2x4 = make_layout(make_shape (1, make_shape (2,2)),
-//                              make_stride(4, make_stride(2,1)));
-    auto layout_2x4 = make
-    _layout(make_shape ( make_shape (2,2), 1),
-                              make_stride(make_stride(2,1), 4));
-    auto flat_layout = flatten(layout_2x4);
-    print_layout(layout_2x4);
-    print_layout(flat_layout);
+//    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+//
+////    auto tiled_copy = make_tiled_copy(copy_atom,
+////                                      Layout<Shape<Shape<_32,_1>,_1>, Stride<Stride<_2,_1>,_1>>{},  // 32x1 threads
+////                                      Layout<Shape< _1,_1>>{}); //  1x4 values
+//    //const int
+////    auto thr_copy = tiled_copy.get_thread_slice(0);
+////    print_layout(thr_copy);
+//   // print_latex(tiled_copy);
+//
+//
+////    auto layout_2x4 = make_layout(make_shape (2, make_shape (2,2)),
+////                              make_stride(4, make_stride(2,1)));
+////    auto layout_2x4 = make_layout(make_shape (1, make_shape (2,2)),
+////                              make_stride(4, make_stride(2,1)));
+//    auto layout_2x4 = make
+//    _layout(make_shape ( make_shape (2,2), 1),
+//                              make_stride(make_stride(2,1), 4));
+//    auto flat_layout = flatten(layout_2x4);
+//    print_layout(layout_2x4);
+//    print_layout(flat_layout);
   }
 #endif
 
