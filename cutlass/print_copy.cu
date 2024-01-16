@@ -7,11 +7,9 @@ int main()
 #if 1
   {
 
-
-
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
-    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, cutlass::half_t>,
+    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, cutlass::half_t>{},
                                       Layout<Shape<_32,_8>>{},  // 32x1 threads
                                       Layout<Shape< _4,_1>>{}); //  1x4 values
 //    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>,
