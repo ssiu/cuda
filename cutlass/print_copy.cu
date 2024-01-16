@@ -8,10 +8,12 @@ int main()
   {
     using Element = float;
 
-    auto thr_layout = make_layout(make_shape(Int<32>{}, Int< 8>{}));
+     // auto thr_layout = Layout(make_shape(Int<32>{}, Int< 8>{}));
+    auto thr_layout = Layout<Shape<_32, _8>>;
 
     // Vector dimensions
-    auto vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
+    //auto vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
+    auto vec_layout = Layout<Shape<_4, _1>>;
 
     using AccessType = cutlass::AlignedArray<Element, size(shape(vec_layout{}))>;
 
