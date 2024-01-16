@@ -14,7 +14,7 @@ int main()
 //                                      Layout<Shape< _4,_1>>{}); //  1x4 values
     auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
                                       Layout<Shape<_32,_8>>{},  // 32x1 threads
-                                      Layout<Shape< _4,_1>>{}); //  1x4 values
+                                      Layout<Shape< _1,_8>>{}); //  1x4 values
 
     print_latex(tiled_copy);
   }
