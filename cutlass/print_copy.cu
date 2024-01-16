@@ -14,7 +14,7 @@ int main()
     // Vector dimensions
     auto vec_layout = make_layout(make_shape(Int<4>{}, Int<1>{}));
 
-    using AccessType = cutlass::AlignedArray<Element, size(shape(VecLayout{}))>;
+    using AccessType = cutlass::AlignedArray<Element, size(shape(vec_layout{}))>;
 
     using Atom = Copy_Atom<UniversalCopy<AccessType>, Element>;
 
@@ -22,8 +22,8 @@ int main()
     auto tiled_copy =
     make_tiled_copy(
       Atom{},                       // access size
-      ThreadLayout{},               // thread layout
-      VecLayout{});
+      thr_layout{},               // thread layout
+      vec_layout{});
 
     print_latex(tiled_copy);
 //    auto tiled_copy = make_tiled_copy(copy_atom,
