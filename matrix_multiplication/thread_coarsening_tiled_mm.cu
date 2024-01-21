@@ -1,4 +1,3 @@
-// naive kernel where each thread computes a single value
 #include <iostream>
 
 #define TILE_WIDTH 32
