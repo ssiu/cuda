@@ -4,9 +4,9 @@
 
 
 int main() {
-    const int N = 2048:
+    const int N = 2048;
     // Allocate memory on the host
-    thrust::host_vector<float> hA(N*N);
+    thrust::host_vector<float> hA(32);
     thrust::host_vector<float> hB(N*N);
     thrust::host_vector<float> hC(N*N);
 
