@@ -6,7 +6,7 @@ int main() {
     float b[SIZE];
 
     // Copying elements from array1 to array2
-    reinterpret_cast<float4*>(b)[0] = reinterpret_cast<float4*>(a)[0]
+    reinterpret_cast<float4*>(b)[0] = reinterpret_cast<float4*>(a)[0];
 
     // Displaying elements of array2
     std::cout << "Elements of b: ";
