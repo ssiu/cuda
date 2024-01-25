@@ -14,26 +14,57 @@
 #define WIDTH 2048
 #define OUTER_TILE_WIDTH 128
 #define INNER_TILE_WIDTH 32
+// This is needed for computing the addresses as float4 arrays
+#define SHRINK_FACTOR = sizeof(float4) / sizeof(float)
 
 __global__ void basic_mm(float* A, float* B, float* C, int N) {
-    const int OUTER_TILE_WIDTH = 128;
-    const int INNER_TILE_WIDTH = 32;
+
 
     //global memory coalescing
-    int row = blockIdx.x * blockDim.x + threadIdx.x;
-    int col = blockIdx.y * blockDim.y + threadIdx.y;
-    tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+
+    int tid = threadIdx.x + threadIdx.y * blockDim.x;
+
     __shared__ float sA[OUTER_TILE_WIDTH*INNER_TILE_WIDTH];
     __shared__ float sB[OUTER_TILE_WIDTH*INNER_TILE_WIDTH];
 
     for (int tile = 0; tile < WIDTH/INNER_TILE_WIDTH; tile++) {
         //global -> shared
         //each thread load 4 numbers for each A,B, so 8 numbers in total
-        reinterpret_cast<float4*>(sA)[add?] = reinterpret_cast<float4*>(A)[add?];
+        //After casting sA is now a float4 array of length 1024
+        //global memory offset for A and B, we need to divide by 4 because we need the address wrt
+        //to A,B as float4 arrays
+
+        offset_A = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.y * blockIdx.y * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
+        offset_B = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.x * blockIdx.x * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
+        //as float4*, the matrix has size 2048x512 and the tile width is now 8
+        reinterpret_cast<float4*>(sA)[tid] = reinterpret_cast<float4*>(A)[offset_A + tid * 512 / 8 + tid % 8 ];
+        reinterpret_cast<float4*>(sB)[tid] = reinterpret_cast<float4*>(B)[offset_B + tid * 512 / 8 + tid % 8 ];
         __syncthreads();
 
         //shared -> register
+         for (int i = 0; i < 32; i++) {
+            float* rA[4];
+            float* rB[4];
+            //load A and B fragments
+            for (j = 0; j < 4; j ++){
+                rA[j] = sA[(threadIdx.y * 4 + j) * INNER_TILE_WIDTH + i]
+                rB[j] = sA[(threadIdx.x * 4 + j) * INNER_TILE_WIDTH + i]
+            }
+         }
+        int row = blockIdx.y * blockDim.y * OUTER_TILE_WIDTH + threadIdx.y;
+        int col = blockIdx.x * blockDim.x * OUTER_TILE_WIDTH + threadIdx.x;
 
+        float sum = 0.0f;
+
+        for (i = 0; i < 4; i++) {
+            for (j=0; j < 4; j++) {
+                 sum += rA[i] * rB[j];
+            }
+        }
+
+        C[(row + i) * OUTER_TILE_WIDTH + (col + j)] = sum;
+        __syncthreads();
     }
 
     if (row < N && col < N) {
@@ -48,15 +79,14 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
 
 
 int main() {
-    const int N = 2048;
     // Assume column major
     // Allocate memory on the host
-    thrust::host_vector<float> hA(N*N);
-    thrust::host_vector<float> hB(N*N);
-    thrust::host_vector<float> hC(N*N);
+    thrust::host_vector<float> hA(WIDTH * WIDTH);
+    thrust::host_vector<float> hB(WIDTH * WIDTH);
+    thrust::host_vector<float> hC(WIDTH * WIDTH);
 
     // Initialize matrices h_A and h_B with data
-    for (int i=0; i< N*N; i++){
+    for (int i=0; i< WIDTH * WIDTH; i++){
         hA[i] = 1.0f;
         hB[i] = 1.0f;
     }
