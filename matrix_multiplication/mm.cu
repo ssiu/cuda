@@ -44,8 +44,8 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
 
         //shared -> register
          for (int i = 0; i < 32; i++) {
-            float* rA[4];
-            float* rB[4];
+            float rA[4];
+            float rB[4];
             //load A and B fragments
             for (int j = 0; j < 4; j++) {
                 rA[j] = sA[(threadIdx.y * 4 + j) * INNER_TILE_WIDTH + i]
