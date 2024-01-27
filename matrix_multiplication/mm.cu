@@ -51,20 +51,22 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
                 rA[j] = sA[(threadIdx.y * 4 + j) * INNER_TILE_WIDTH + i]
                 rB[j] = sB[(threadIdx.x * 4 + j) * INNER_TILE_WIDTH + i]
             }
-         }
-        int row = blockIdx.y * blockDim.y * OUTER_TILE_WIDTH + threadIdx.y;
-        int col = blockIdx.x * blockDim.x * OUTER_TILE_WIDTH + threadIdx.x;
 
-        float sum = 0.0f;
+            int row = blockIdx.y * blockDim.y * OUTER_TILE_WIDTH + threadIdx.y;
+            int col = blockIdx.x * blockDim.x * OUTER_TILE_WIDTH + threadIdx.x;
 
-        for (int i = 0; i < 4; i++) {
-            for (int j=0; j < 4; j++) {
-                 sum += rA[i] * rB[j];
+            float sum = 0.0f;
+
+            for (int i = 0; i < 4; i++) {
+                for (int j=0; j < 4; j++) {
+                     sum += rA[i] * rB[j];
+                }
             }
+
+            C[(row + i) * OUTER_TILE_WIDTH + (col + j)] = sum;
+            __syncthreads();
         }
 
-        C[(row + i) * OUTER_TILE_WIDTH + (col + j)] = sum;
-        __syncthreads();
     }
 
 }
