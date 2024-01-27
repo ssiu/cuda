@@ -28,15 +28,15 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
     __shared__ float sA[OUTER_TILE_WIDTH*INNER_TILE_WIDTH];
     __shared__ float sB[OUTER_TILE_WIDTH*INNER_TILE_WIDTH];
 
-    for (int tile = 0; tile < WIDTH/INNER_TILE_WIDTH; tile++) {
+    for (int TILE = 0; TILE < WIDTH/INNER_TILE_WIDTH; TILE++) {
         //global -> shared
         //each thread load 4 numbers for each A,B, so 8 numbers in total
         //After casting sA is now a float4 array of length 1024
         //global memory offset for A and B, we need to divide by 4 because we need the address wrt
         //to A,B as float4 arrays
 
-        offset_A = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.y * blockIdx.y * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
-        offset_B = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.x * blockIdx.x * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
+        int offset_A = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.y * blockIdx.y * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
+        int offset_B = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.x * blockIdx.x * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
         //as float4*, the matrix has size 2048x512 and the tile width is now 8
         reinterpret_cast<float4*>(sA)[tid] = reinterpret_cast<float4*>(A)[offset_A + tid * 512 / 8 + tid % 8 ];
         reinterpret_cast<float4*>(sB)[tid] = reinterpret_cast<float4*>(B)[offset_B + tid * 512 / 8 + tid % 8 ];
@@ -47,9 +47,9 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
             float* rA[4];
             float* rB[4];
             //load A and B fragments
-            for (j = 0; j < 4; j ++){
+            for (int j = 0; j < 4; j++) {
                 rA[j] = sA[(threadIdx.y * 4 + j) * INNER_TILE_WIDTH + i]
-                rB[j] = sA[(threadIdx.x * 4 + j) * INNER_TILE_WIDTH + i]
+                rB[j] = sB[(threadIdx.x * 4 + j) * INNER_TILE_WIDTH + i]
             }
          }
         int row = blockIdx.y * blockDim.y * OUTER_TILE_WIDTH + threadIdx.y;
@@ -57,8 +57,8 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
 
         float sum = 0.0f;
 
-        for (i = 0; i < 4; i++) {
-            for (j=0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j=0; j < 4; j++) {
                  sum += rA[i] * rB[j];
             }
         }
