@@ -34,12 +34,12 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
         //After casting sA is now a float4 array of length 1024
         //global memory offset for A and B, we need to divide by 4 because we need the address wrt
         //to A,B as float4 arrays
-        int offset_test = TILE ;//* INNER_TILE_WIDTH / SHRINK_FACTOR;
+        int offset_test = TILE * INNER_TILE_WIDTH;// / SHRINK_FACTOR;
         //int offset_A = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.y * blockIdx.y * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
         //int offset_B = TILE * INNER_TILE_WIDTH / SHRINK_FACTOR + blockDim.x * blockIdx.x * OUTER_TILE_WIDTH * WIDTH / SHRINK_FACTOR;
         //as float4*, the matrix has size 2048x512 and the tile width is now 8
-        reinterpret_cast<float4*>(sA)[tid] = reinterpret_cast<float4*>(A)[offset_A + tid * 512 / 8 + tid % 8 ];
-        reinterpret_cast<float4*>(sB)[tid] = reinterpret_cast<float4*>(B)[offset_B + tid * 512 / 8 + tid % 8 ];
+        //reinterpret_cast<float4*>(sA)[tid] = reinterpret_cast<float4*>(A)[offset_A + tid * 512 / 8 + tid % 8 ];
+        //reinterpret_cast<float4*>(sB)[tid] = reinterpret_cast<float4*>(B)[offset_B + tid * 512 / 8 + tid % 8 ];
         __syncthreads();
 
         //shared -> register
