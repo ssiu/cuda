@@ -101,8 +101,9 @@ int main() {
     dim3 dimGrid(WIDTH/OUTER_TILE_WIDTH, WIDTH/OUTER_TILE_WIDTH); // You can adjust this based on your GPU's capability
     dim3 dimBlock(32, 32);
 
+
     // Launch the matrix multiplication kernel
-    basic_mm<<<dimGrid, dimBlock>>>(dA, dB, dC);
+    basic_mm<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
