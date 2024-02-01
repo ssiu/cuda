@@ -102,7 +102,7 @@ int main() {
     dim3 dimBlock(32, 32);
 
     // Launch the matrix multiplication kernel
-    basic_mm<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
+    basic_mm<<<dimGrid, dimBlock>>>(dA, dB, dC);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
