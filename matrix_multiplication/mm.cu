@@ -11,13 +11,13 @@
 // using vectorized access each thread can load 4*4 = 16B numbers so need to do load twice
 // at each load we need 1024*4*4 = 16KB registers
 
-#define WIDTH 2048
+#define WIDTH 128
 #define OUTER_TILE_WIDTH 128
 #define INNER_TILE_WIDTH 32
 // This is needed for computing the addresses as float4 arrays
 #define SHRINK_FACTOR sizeof(float4) / sizeof(float) // 4
 
-__global__ void basic_mm(float* A, float* B, float* C, int N) {
+__global__ void basic_mm(float* A, float* B, float* C) {
 
 
     //global memory coalescing
@@ -49,6 +49,7 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
          for (int INNER_TILE = 0; INNER_TILE < INNER_TILE_WIDTH; INNER_TILE++) {
             float rA[4];
             float rB[4];
+
             //each threads loads 4 elements from A and B and computing a 4x4 outer product
             for (int FRAGMENT = 0; FRAGMENT < 4; FRAGMENT++) {
                 rA[FRAGMENT] = sA[(threadIdx.y * 4 + FRAGMENT) * INNER_TILE_WIDTH + INNER_TILE];
@@ -96,6 +97,12 @@ int main() {
 
     //call mma
     //mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
+
+    dim3 dimGrid(WIDTH/OUTER_TILE_WIDTH, WIDTH/OUTER_TILE_WIDTH); // You can adjust this based on your GPU's capability
+    dim3 dimBlock(32, 32);
+
+    // Launch the matrix multiplication kernel
+    basic_mm<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
