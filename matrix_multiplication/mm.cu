@@ -58,13 +58,13 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
             int row = blockIdx.y * blockDim.y * OUTER_TILE_WIDTH + threadIdx.y;
             int col = blockIdx.x * blockDim.x * OUTER_TILE_WIDTH + threadIdx.x;
 
-            float sum[16] = 0.0f;
+            float sum[16];
 
             for (int i = 0; i < 4; i++) {
                 #pragma unroll
                 for (int j = 0; j < 4; j++) {
                      sum[i*4+j] += rA[i] * rB[j];
-                     C[(row + i) * TILE_WIDTH + (col + j)] = sum[i*4+j];
+                     C[(row + i) * WIDTH + (col + j)] = sum[i*4+j];
                 }
             }
             __syncthreads();
@@ -73,7 +73,6 @@ __global__ void basic_mm(float* A, float* B, float* C, int N) {
     }
 
 }
-
 
 
 int main() {
