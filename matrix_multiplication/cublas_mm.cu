@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
 
-    int N = 2048; // Size of the square matrices
+    int N = 128; // Size of the square matrices
     int size = N * N * sizeof(float);
     cudaError_t cudaStat;  // cudaMalloc status
     cublasStatus_t stat;   // cuBLAS functions status
