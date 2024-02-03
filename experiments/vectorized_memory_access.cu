@@ -32,7 +32,7 @@ __global__ void device_copy_128_kernel(int* d_in, int* d_out) {
 
 //128 threads loading an array of size N
 int main() {
-    //int N = 1048576;
+    int N = 1048576;
     thrust::host_vector<float> h_in(N);
     thrust::host_vector<float> h_out(N);
 
