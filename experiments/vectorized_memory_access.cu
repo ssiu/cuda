@@ -44,7 +44,7 @@ void check_array(float* d_out, int N, int byte) {
 
 //128 threads loading an array of size N
 int main() {
-    int N = 1024;
+    constexpr int N = 1024;
     thrust::host_vector<float> h_in(N);
     thrust::host_vector<float> h_out(N);
 
