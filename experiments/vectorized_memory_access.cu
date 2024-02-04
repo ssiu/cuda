@@ -42,6 +42,7 @@ void check_array(thrust::device_vector<float> d_out, int N, int byte) {
     }
 }
 
+
 //128 threads loading an array of size N
 int main() {
     constexpr int N = 1048576;
