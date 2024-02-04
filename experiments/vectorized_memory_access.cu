@@ -9,6 +9,10 @@ __global__ void device_copy_32_kernel(float* d_in, float* d_out) {
     for (int i = idx; i < N; i += blockDim.x * gridDim.x) {
         d_out[i] = d_in[i];
     }
+
+    for (int i=0;i<N; i++){
+        printf("%f", d_out[i]);
+    }
 }
 
 
@@ -18,6 +22,7 @@ __global__ void device_copy_64_kernel(float* d_in, float* d_out) {
     for (int i = idx; i < N/2; i += blockDim.x * gridDim.x) {
         reinterpret_cast<float2*>(d_out)[i] = reinterpret_cast<float2*>(d_in)[i];
     }
+
 }
 
 template <int N>
@@ -52,7 +57,7 @@ int main() {
 
 
     device_copy_32_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-    thrust::host_vector<float> h_out_32 = d_out;
+//    thrust::host_vector<float> h_out_32 = d_out;
 //    check_array(h_out_32.data().get(), N, 32);
 
     device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
