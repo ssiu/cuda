@@ -29,11 +29,11 @@ __global__ void device_copy_128_kernel(float* d_in, float* d_out) {
 }
 
 check_array(float* d_out, int N, int byte) {
-    correct = 1;
     for (int i=0; i < N; i++){
-        if d_out[i] != 1.0f:
+        if (d_out[i] != 1.0f) {
             printf("Error copying %d byte access with array size %d \n", type, N);
             break;
+        }
     }
 }
 
@@ -52,13 +52,13 @@ int main() {
 
 
     device_copy_32_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-    check_array(d_out, N, 32);
+    check_array(d_out.data().get(), N, 32);
 
     device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-    check_array(d_out, N, 64);
+    check_array(d_out.data().get(), N, 64);
 
     device_copy_128_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-    check_array(d_out, N, 128);
+    check_array(d_out.data().get(), N, 128);
 
 
     return 0;
