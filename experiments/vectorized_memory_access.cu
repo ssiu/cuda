@@ -39,7 +39,7 @@ void check_array(float* d_out, int N, int byte) {
 
 //128 threads loading an array of size N
 int main() {
-    int N = 1048576;
+    int N = 1024;
     thrust::host_vector<float> h_in(N);
     thrust::host_vector<float> h_out(N);
 
@@ -52,6 +52,7 @@ int main() {
 
 
     device_copy_32_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
+    h_out = d_out;
 //    check_array(d_out.data().get(), N, 32);
 
     device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
