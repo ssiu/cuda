@@ -52,7 +52,7 @@ int main() {
     thrust::host_vector<float> h_out(N);
 
     for (int i=0; i< N; i++){
-        h_in[i] = 1.0f;
+        h_in[i] = 2.0f;
     }
 
     thrust::device_vector<float> d_in = h_in;
