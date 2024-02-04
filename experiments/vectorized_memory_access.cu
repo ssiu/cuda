@@ -56,7 +56,7 @@ int main() {
     thrust::device_vector<float> d_out = h_out;
 
 
-    device_copy_32_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
+    device_copy_32_kernel<N><<<128,8>>>(d_in.data().get(), d_out.data().get());
 //    thrust::host_vector<float> h_out_32 = d_out;
 //    check_array(h_out_32.data().get(), N, 32);
 
