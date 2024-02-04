@@ -34,12 +34,12 @@ __global__ void device_copy_128_kernel(float* d_in, float* d_out) {
 }
 
 void check_array(float* d_out, int N, int byte) {
-//    for (int i=0; i < N; i++){
-//        if (d_out[i] != 1.0f) {
-//            printf("Error copying %d byte access with array size %d \n", byte, N);
-//            break;
-//        }
-//    }
+    for (int i=0; i < N; i++){
+        if (d_out[i] != 1.0f) {
+            printf("Error copying %d byte access with array size %d \n", byte, N);
+            break;
+        }
+    }
 }
 
 //128 threads loading an array of size N
@@ -60,7 +60,7 @@ int main() {
     h_out = d_out;
 //    thrust::host_vector<float> h_out_32 = d_out;
     printf("%f", h_out[0]);
-    //check_array(h_out, N, 32);
+    check_array(h_out, N, 32);
 
 //    device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
 //    check_array(d_out.data().get(), N, 64);
