@@ -10,9 +10,9 @@ __global__ void device_copy_32_kernel(float* d_in, float* d_out) {
         d_out[i] = d_in[i];
     }
 
-    for (int i=0;i<N; i++){
-        printf("%f", d_out[i]);
-    }
+//    for (int i=0;i<N; i++){
+//        printf("%f", d_out[i]);
+//    }
 }
 
 
@@ -60,10 +60,10 @@ int main() {
 //    thrust::host_vector<float> h_out_32 = d_out;
 //    check_array(h_out_32.data().get(), N, 32);
 
-    device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
+//    device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
 //    check_array(d_out.data().get(), N, 64);
 
-    device_copy_128_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
+//   device_copy_128_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
 //    check_array(d_out.data().get(), N, 128);
 
 
