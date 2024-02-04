@@ -44,7 +44,10 @@ void check_array(thrust::device_vector<float> d_out, int N, int byte) {
 
 //128 threads loading an array of size N
 int main() {
-    constexpr int N = 1024;
+    constexpr int N = 2048;
+    constexpr int NUM_BLOCKS = 8;
+    constexpr int NUM_THREADS_IN_BLOCK = 128;
+
     thrust::host_vector<float> h_in(N);
     thrust::host_vector<float> h_out(N);
 
@@ -56,17 +59,17 @@ int main() {
     thrust::device_vector<float> d_out = h_out;
 
 
-    device_copy_32_kernel<N><<<128,8>>>(d_in.data().get(), d_out.data().get());
+    device_copy_32_kernel<N><<<NUM_BLOCKS,NUM_THREADS_IN_BLOCK>>>(d_in.data().get(), d_out.data().get());
     h_out = d_out;
-//    thrust::host_vector<float> h_out_32 = d_out;
-    printf("%f", h_out[0]);
     check_array(h_out, N, 32);
 
-//    device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-//    check_array(d_out.data().get(), N, 64);
+    device_copy_64_kernel<N><<<NUM_BLOCKS,NUM_THREADS_IN_BLOCK>>>(d_in.data().get(), d_out.data().get());
+    h_out = d_out;
+    check_array(h_out, N, 64);
 
-//   device_copy_128_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
-//    check_array(d_out.data().get(), N, 128);
+    device_copy_128_kernel<N><<<NUM_BLOCKS,NUM_THREADS_IN_BLOCK>>>(d_in.data().get(), d_out.data().get());
+    h_out = d_out;
+    check_array(h_out, N, 128);
 
 
     return 0;
