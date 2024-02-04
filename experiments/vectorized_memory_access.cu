@@ -59,7 +59,7 @@ int main() {
     device_copy_32_kernel<N><<<128,8>>>(d_in.data().get(), d_out.data().get());
     h_out = d_out;
 //    thrust::host_vector<float> h_out_32 = d_out;
-    check_array(h_out.data().get(), N, 32);
+    check_array(h_out, N, 32);
 
 //    device_copy_64_kernel<1048576><<<128,8>>>(d_in.data().get(), d_out.data().get());
 //    check_array(d_out.data().get(), N, 64);
