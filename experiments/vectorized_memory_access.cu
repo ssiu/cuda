@@ -33,7 +33,7 @@ __global__ void device_copy_128_kernel(float* d_in, float* d_out) {
     }
 }
 
-void check_array(float* d_out, int N, int byte) {
+void check_array(thrust::device_vector<float> , int N, int byte) {
     for (int i=0; i < N; i++){
         if (d_out[i] != 1.0f) {
             printf("Error copying %d byte access with array size %d \n", byte, N);
