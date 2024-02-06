@@ -25,7 +25,6 @@ __global__ void device_copy_64_kernel(float* d_in, float* d_out, int N) {
 
 }
 
-template <int N>
 __global__ void device_copy_128_kernel(float* d_in, float* d_out, int N) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     for (int i = idx; i < N/4; i += blockDim.x * gridDim.x) {
