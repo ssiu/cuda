@@ -53,7 +53,7 @@ int main() {
     constexpr int NUM_BLOCKS = 8;
     constexpr int NUM_THREADS_IN_BLOCK = 128;
 
-    for (int N = 1024; N <= 2048; N+=2){
+    for (int N = 1024; N <= 2048; N*=2){
         thrust::host_vector<float> h_in(N);
         thrust::host_vector<float> h_out(N);
 
