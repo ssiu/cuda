@@ -43,13 +43,13 @@ void check_array(thrust::device_vector<float> d_out, int N, int byte) {
 
 
 //128 threads loading an array of size N
-int main(int N) {
+int main(int argc, char *argv[]) {
 
 //for (int N = 1024; N <= maximum_value; N *= 2) {
 //    foo(N);
 //}
 
-
+    constexpr int N = argv[0];
     constexpr int NUM_BLOCKS = 8;
     constexpr int NUM_THREADS_IN_BLOCK = 128;
 
