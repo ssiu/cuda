@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+cd /mnt/shared/swsiu/cuda/experiments/
+
 # Start with 1024 (2^10)
 number=$((2**10))
 
