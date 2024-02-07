@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 //    foo(N);
 //}
 
-    constexpr int N = std::stoi(argv[0]);
+    int N = std::stoi(argv[0]);
     constexpr int NUM_BLOCKS = 8;
     constexpr int NUM_THREADS_IN_BLOCK = 128;
 
