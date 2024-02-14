@@ -194,12 +194,12 @@ int main(int argc, char *argv[]) {
     //call mma
     //mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
 
-    dim3 dimGrid(1, 1); // You can adjust this based on your GPU's capability
+    dim3 dimGrid(32, 32); // You can adjust this based on your GPU's capability
     dim3 dimBlock(32, 32);
 
 
     // Launch the matrix multiplication kernel
-    //naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
     //shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
 
     cudaError_t cudaStatus = cudaGetLastError();
