@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i=0; i < 100; i++){
-        printf("%d %d %d\n", h_in[i], h_out[i], h_in_t[i]);
+        printf("%f %f %f\n", h_in[i], h_out[i], h_in_t[i]);
     }
 
 
