@@ -208,6 +208,10 @@ int main(int argc, char *argv[]) {
 
     h_out = d_out;
 
+    for (int i=0; i<100; i++){
+        printf("%f %f\n", h_out[i*N+i], h_in_t[i*N+i])
+    }
+
     if (compareMatrix(h_out, h_in_t, N) == 0) {
         printf("Wrong answer\n");
     }
