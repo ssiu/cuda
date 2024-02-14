@@ -143,7 +143,7 @@ __global__ void naive_transpose(float* d_in, float* d_out, int N) {
 
 int compareMatrix(thrust::host_vector<float> A, thrust::host_vector<float> B, int N) {
     for (int i=0; i<N; i++) {
-        for (int j=0; j<N; i++) {
+        for (int j=0; j<N; j++) {
             if (A[i*N+j] != B[j*N+i]) {
                 return 0;
             }
