@@ -145,11 +145,11 @@ int compareMatrix(thrust::host_vector<float> A, thrust::host_vector<float> B, in
     for (int i=0; i<N; i++) {
         for (int j=0; j<N; i++) {
             if (A[i*N+j] != B[j*N+i]) {
-                return 0
+                return 0;
             }
         }
     }
-    return 1
+    return 1;
 }
 
 std::pair<thrust::host_vector<float>, thrust::host_vector<float>> generateMatrices(int N) {
