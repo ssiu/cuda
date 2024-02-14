@@ -141,7 +141,7 @@ __global__ void shared_transpose(float* d_in, float* d_out, int N) {
 //    d_out[row * N + col] = s[col_s * 32 + row_s];
 //}
 
-int compareMatrix(thrust::host_vector<float> A, thrust::host_vector<float> B, int N) {
+int isSameMatrix(thrust::host_vector<float> A, thrust::host_vector<float> B, int N) {
     for (int i=0; i<N; i++) {
         for (int j=0; j<N; j++) {
             if (A[i*N+j] != B[i*N+j]) {
@@ -210,11 +210,11 @@ int main(int argc, char *argv[]) {
 
     h_out = d_out;
 
-    if (compareMatrix(h_out, h_in_t, N) == 0) {
+    if (isSameMatrix(h_out, h_in_t, N) == 0) {
         printf("Wrong answer\n");
     }
 
-    for (i=0; i< 100; i++){
+    for (int i=0; i < 100; i++){
         printf("%d %d %d", h_in[i], h_out[i], h_in_t[i]);
     }
 
