@@ -213,10 +213,7 @@ int main(int argc, char *argv[]) {
 
     shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
     cudaError_t cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        //goto Error; // Use appropriate error handling here
-    }
+
     h_out = d_out;
     if (compareMatrix(h_out, h_in_t, N) == 0) {
         printf("Wrong answer for shared\n");
