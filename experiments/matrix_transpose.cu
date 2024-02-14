@@ -27,9 +27,12 @@ __global__ void shared_transpose(float* d_in, float* d_out, int N) {
     int row_s = threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
-
     s[row_s * 32 + col_s] = d_in[row * N + col];
     __syncthreads();
+
+    // transposed column and row
+    int col = blockIdx.y * blockDim.y + threadIdx.x;
+    int row = blockIdx.x * blockDim.x + threadIdx.y;
 
     d_out[row * N + col] = s[col_s * 32 + row_s];
 }
