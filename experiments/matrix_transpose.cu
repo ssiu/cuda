@@ -214,6 +214,10 @@ int main(int argc, char *argv[]) {
         printf("Wrong answer\n");
     }
 
+    for (i=0; i< 100; i++){
+        printf("%d %d %d", h_in[i], h_out[i], h_in_t[i]);
+    }
+
 
     return 0;
 }
