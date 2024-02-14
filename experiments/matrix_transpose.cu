@@ -189,37 +189,28 @@ int main(int argc, char *argv[]) {
     thrust::device_vector<float> d_in = h_in;
     thrust::device_vector<float> d_out = h_out;
 
-    //call mma
-    //mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
-
-    dim3 dimGrid(32, 32); // You can adjust this based on your GPU's capability
-    dim3 dimBlock(32, 32);
-
-
-    // Launch the matrix multiplication kernel
-    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
-
-    cudaError_t cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        //goto Error; // Use appropriate error handling here
-    }
-
-
-    h_out = d_out;
-
-    if (compareMatrix(h_out, h_in_t, N) == 0) {
-        printf("Wrong answer\n");
-    }
-
-
-
-
-
-
-
-
-
+//    //call mma
+//    //mma_atom<<<1,1>>>(dA.data().get(), dB.data().get(), dC.data().get());
+//
+//    dim3 dimGrid(32, 32); // You can adjust this based on your GPU's capability
+//    dim3 dimBlock(32, 32);
+//
+//
+//    // Launch the matrix multiplication kernel
+//    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+//
+//    cudaError_t cudaStatus = cudaGetLastError();
+//    if (cudaStatus != cudaSuccess) {
+//        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+//        //goto Error; // Use appropriate error handling here
+//    }
+//
+//
+//    h_out = d_out;
+//
+//    if (compareMatrix(h_out, h_in_t, N) == 0) {
+//        printf("Wrong answer\n");
+//    }
 
     return 0;
 }
