@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
 
     // Launch the matrix multiplication kernel
     //naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
-    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    //shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
