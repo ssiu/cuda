@@ -17,22 +17,22 @@ __global__ void naive_transpose(float* d_in, float* d_out, int N) {
 
 }
 
-//// Shared
-//// transpose a 1024x1024 row major matrix
-//// each block has 1024 thread, handling a 32x32 matrix, with 32x32 thread blocks
-//// each sm has 2048 thread, each thread loads 4B into shared memory, total shared memory = 2048*4B ~= 8KB
-//__global__ void shared_transpose(float* d_in, float* d_out, int N) {
-//    __shared__ float s[32*32];
-//    int col_s = threadIdx.x;
-//    int row_s = threadIdx.y;
-//    int col = blockIdx.x * blockDim.x + threadIdx.x;
-//    int row = blockIdx.y * blockDim.y + threadIdx.y;
-//
-//    s[row_s * 32 + col_s] = d_in[row * N + col];
-//    __syncthreads();
-//
-//    d_out[row * N + col] = s[col_s * 32 + row_s];
-//}
+// Shared
+// transpose a 1024x1024 row major matrix
+// each block has 1024 thread, handling a 32x32 matrix, with 32x32 thread blocks
+// each sm has 2048 thread, each thread loads 4B into shared memory, total shared memory = 2048*4B ~= 8KB
+__global__ void shared_transpose(float* d_in, float* d_out, int N) {
+    __shared__ float s[32*32];
+    int col_s = threadIdx.x;
+    int row_s = threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    s[row_s * 32 + col_s] = d_in[row * N + col];
+    __syncthreads();
+
+    d_out[row * N + col] = s[col_s * 32 + row_s];
+}
 //
 //// ILP
 //// transpose a 1024x1024 row major matrix
@@ -206,17 +206,20 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         //goto Error; // Use appropriate error handling here
     }
-
-
     h_out = d_out;
-
-    for (int i=0; i<100; i++){
-        printf("%f %f %f\n", h_in[i], h_out[i], h_in_t[i]);
-    }
-
     if (compareMatrix(h_out, h_in_t, N) == 0) {
-        printf("Wrong answer\n");
+        printf("Wrong answer for naive\n");
     }
 
+    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    cudaError_t cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        //goto Error; // Use appropriate error handling here
+    }
+    h_out = d_out;
+    if (compareMatrix(h_out, h_in_t, N) == 0) {
+        printf("Wrong answer for shared\n");
+    }
     return 0;
 }
