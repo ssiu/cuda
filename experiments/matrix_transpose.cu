@@ -199,24 +199,21 @@ int main(int argc, char *argv[]) {
 
 
     // Launch the matrix multiplication kernel
-    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    //naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
         //goto Error; // Use appropriate error handling here
     }
-    h_out = d_out;
-    if (compareMatrix(h_out, h_in_t, N) == 0) {
-        printf("Wrong answer for naive\n");
-    }
-
-    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
-    cudaError_t cudaStatus = cudaGetLastError();
 
     h_out = d_out;
+
     if (compareMatrix(h_out, h_in_t, N) == 0) {
-        printf("Wrong answer for shared\n");
+        printf("Wrong answer\n");
     }
+
+
     return 0;
 }
