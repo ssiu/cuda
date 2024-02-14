@@ -165,7 +165,7 @@ std::pair<thrust::host_vector<float>, thrust::host_vector<float>> generateMatric
 
     // Generate random matrix
     for (int i=0; i<N; i++) {
-        for (int j=0; j<N; i++) {
+        for (int j=0; j<N; j++) {
             float randomFloat = dis(gen);
             A[i * N + j] = randomFloat;
             A_t[j * N + i] = randomFloat;
