@@ -36,6 +36,54 @@ __global__ void shared_transpose(float* d_in, float* d_out, int N) {
 
     d_out[row * N + col] = s[col_s * 32 + row_s];
 }
+
+
+// Bank conflict
+__global__ void bank_conflict_transpose(float* d_in, float* d_out, int N) {
+
+    //  G -> S
+    //  a a a a
+    //  b b b b
+    //  c c c c
+    //  d d d d
+
+    //  S -> G (4-way bank conflict)
+    //  a b c d
+    //  a b c d
+    //  a b c d
+    //  a b c d
+
+    //  padding
+    //  G -> S
+    //  a a a a
+    //  o b b b
+    //  b o c c
+    //  c c o d
+    //  d d d o
+
+    //  permutation
+    //  a b c d
+    //  d a b c
+    //  c d a b
+    //  b c d a
+
+
+    __shared__ float s[32*32];
+    int col_s = threadIdx.x;
+    int row_s = threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+
+    s[cols_s * 32 + (row_s + col_s) % 32] = d_in[row * N + col];
+    __syncthreads();
+
+    int col = blockIdx.y * blockDim.y + threadIdx.x;
+    int row = blockIdx.x * blockDim.x + threadIdx.y;
+
+    d_out[row * N + col] = s[row_s * 32 + (row_s + cols) % 32];
+
+}
 //
 //// ILP
 //// transpose a 1024x1024 row major matrix
@@ -60,49 +108,7 @@ __global__ void shared_transpose(float* d_in, float* d_out, int N) {
 //    d_out[(row + 64) * N + col + 64] = s[(col_s + 64) * 64 + row_s + 64];
 //}
 //
-//// Bank conflict
-//__global__ void bank_conflict_free_transpose(float* d_in, float* d_out, int N) {
-//
-//    //  G -> S
-//    //  a a a a
-//    //  b b b b
-//    //  c c c c
-//    //  d d d d
-//
-//    //  S -> G (4-way bank conflict)
-//    //  a b c d
-//    //  a b c d
-//    //  a b c d
-//    //  a b c d
-//
-//    //  padding
-//    //  G -> S
-//    //  a a a a
-//    //  o b b b
-//    //  b o c c
-//    //  c c o d
-//    //  d d d o
-//
-//    //  permutation
-//    //  a b c d
-//    //  d a b c
-//    //  c d a b
-//    //  b c d a
-//
-//
-//    __shared__ float s[32*32];
-//    int col_s = threadIdx.x;
-//    int row_s = threadIdx.y;
-//    int col = blockIdx.x * blockDim.x + threadIdx.x;
-//    int row = blockIdx.y * blockDim.y + threadIdx.y;
-//
-//
-//    s[cols_s * 32 + (row_s + col_s) % 32] = d_in[row * N + col];
-//    __syncthreads();
-//
-//    d_out[row * N + col] = s[row_s * 32 + (row_s + cols) % 32];
-//
-//}
+
 //
 ////Bank conflict + ILP
 //__global__ void ILP_shared_transpose(float* d_in, float* d_out, int N) {
@@ -202,9 +208,9 @@ int main(int argc, char *argv[]) {
 
 
     // Launch the matrix multiplication kernel
-    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
-    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
-
+//    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+//    shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    bank_conflict_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
