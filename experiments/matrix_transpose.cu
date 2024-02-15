@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
 
 
     // Launch the matrix multiplication kernel
-    //naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
     shared_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
 
     cudaError_t cudaStatus = cudaGetLastError();
@@ -216,10 +216,10 @@ int main(int argc, char *argv[]) {
     if (isSameMatrix(h_out, h_in_t, N) == 0) {
         printf("Wrong answer\n");
     }
-
-    for (int i=0; i < 100; i++){
-        printf("%f %f %f\n", h_in[i], h_out[i], h_in_t[i]);
-    }
+//
+//    for (int i=0; i < 100; i++){
+//        printf("%f %f %f\n", h_in[i], h_out[i], h_in_t[i]);
+//    }
 
 
     return 0;
