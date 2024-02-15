@@ -75,13 +75,13 @@ __global__ void bank_conflict_transpose(float* d_in, float* d_out, int N) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
 
-    s[cols_s * 32 + (row_s + col_s) % 32] = d_in[row * N + col];
+    s[col_s * 32 + (row_s + col_s) % 32] = d_in[row * N + col];
     __syncthreads();
 
     col = blockIdx.y * blockDim.y + threadIdx.x;
     row = blockIdx.x * blockDim.x + threadIdx.y;
 
-    d_out[row * N + col] = s[row_s * 32 + (row_s + cols) % 32];
+    d_out[row * N + col] = s[row_s * 32 + (row_s + col_s) % 32];
 
 }
 //
