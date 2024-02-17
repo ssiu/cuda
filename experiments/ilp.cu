@@ -35,7 +35,7 @@ __global__ void arithmetic_kernel_3(int N) {
     }
 }
 
-__global__ void arithmetic_kernel_4(N) {
+__global__ void arithmetic_kernel_4(int N) {
     int a = 1;
 
     #pragma unroll 4
@@ -44,7 +44,7 @@ __global__ void arithmetic_kernel_4(N) {
     }
 }
 
-__global__ void arithmetic_kernel_5(N) {
+__global__ void arithmetic_kernel_5(int N) {
     int a = 1;
 
     #pragma unroll 5
