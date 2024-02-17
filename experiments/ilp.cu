@@ -3,7 +3,9 @@
 // variables: number of threads
 //            number of ILP
 
-__global__ void arithmetic_kernel(int num_instructions, int N) {
+#define N 1024
+
+__global__ void arithmetic_kernel(int num_instructions) {
     int a = 1;
 
     #pragma unroll 1
@@ -13,10 +15,15 @@ __global__ void arithmetic_kernel(int num_instructions, int N) {
 }
 
 
-
 int main(){
 
     arithmetic_kernel<<<1024, 128>>>(1, 1024);
+
+    cudaError_t cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        //goto Error; // Use appropriate error handling here
+    }
     return 0;
 
 }
