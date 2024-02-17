@@ -10,7 +10,7 @@
 __global__ void arithmetic_kernel(int num_instructions) {
     int a = 1;
 
-    #pragma unroll 1
+    #pragma unroll num_instructions
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
     }
