@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
     int N = std::stoi(argv[1]);
 
     int numBlocks = 1024;
-    int numThreads = 1024;
+    int numThreads = 2048;
     arithmetic_kernel_1<<<numBlocks, numThreads>>>(N);
     arithmetic_kernel_2<<<numBlocks, numThreads>>>(N);
     arithmetic_kernel_3<<<numBlocks, numThreads>>>(N);
