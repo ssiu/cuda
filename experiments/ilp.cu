@@ -10,7 +10,7 @@
 __global__ void arithmetic_kernel_1(int N) {
     int a = 1;
 
-    #pragma unroll 1
+    #pragma unroll UNROLL
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
     }
@@ -19,37 +19,57 @@ __global__ void arithmetic_kernel_1(int N) {
 
 __global__ void arithmetic_kernel_2(int N) {
     int a = 1;
+    int b = 1;
 
-    #pragma unroll 2
+    #pragma unroll UNROLL
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
+        b = b * 1 + 1;
     }
 }
 
 __global__ void arithmetic_kernel_3(int N) {
     int a = 1;
+    int b = 1;
+    int c = 1;
 
-    #pragma unroll 3
+    #pragma unroll UNROLL
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
+        b = b * 1 + 1;
+        c = c * 1 + 1;
     }
 }
 
 __global__ void arithmetic_kernel_4(int N) {
     int a = 1;
+    int b = 1;
+    int c = 1;
+    int d = 1;
 
-    #pragma unroll 4
+    #pragma unroll UNROLL
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
+        b = b * 1 + 1;
+        c = c * 1 + 1;
+        d = d * 1 + 1;
     }
 }
 
 __global__ void arithmetic_kernel_5(int N) {
     int a = 1;
+    int b = 1;
+    int c = 1;
+    int d = 1;
+    int e = 1;
 
-    #pragma unroll 5
+    #pragma unroll UNROLL
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
+        b = b * 1 + 1;
+        c = c * 1 + 1;
+        d = d * 1 + 1;
+        e = e * 1 + 1;
     }
 }
 
