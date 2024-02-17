@@ -5,9 +5,9 @@
 // variables: number of threads
 //            number of ILP
 
-// #define N 10000000
+#define N 1000000000
 
-__global__ void arithmetic_kernel_1(int N) {
+__global__ void arithmetic_kernel_1() {
     int a = 1;
 
     //#pragma unroll 1
@@ -17,7 +17,7 @@ __global__ void arithmetic_kernel_1(int N) {
 }
 
 
-__global__ void arithmetic_kernel_2(int N) {
+__global__ void arithmetic_kernel_2() {
     int a = 1;
     int b = 1;
 
@@ -28,7 +28,7 @@ __global__ void arithmetic_kernel_2(int N) {
     }
 }
 
-__global__ void arithmetic_kernel_3(int N) {
+__global__ void arithmetic_kernel_3() {
     int a = 1;
     int b = 1;
     int c = 1;
@@ -41,7 +41,7 @@ __global__ void arithmetic_kernel_3(int N) {
     }
 }
 
-__global__ void arithmetic_kernel_4(int N) {
+__global__ void arithmetic_kernel_4() {
     int a = 1;
     int b = 1;
     int c = 1;
@@ -56,7 +56,7 @@ __global__ void arithmetic_kernel_4(int N) {
     }
 }
 
-__global__ void arithmetic_kernel_5(int N) {
+__global__ void arithmetic_kernel_5() {
     int a = 1;
     int b = 1;
     int c = 1;
