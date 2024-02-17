@@ -10,7 +10,7 @@
 __global__ void arithmetic_kernel_1(int N) {
     int a = 1;
 
-    #pragma unroll 1
+    //#pragma unroll 1
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
     }
@@ -21,7 +21,7 @@ __global__ void arithmetic_kernel_2(int N) {
     int a = 1;
     int b = 1;
 
-    #pragma unroll 1
+    //#pragma unroll 1
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
         b = b * 1 + 1;
@@ -33,7 +33,7 @@ __global__ void arithmetic_kernel_3(int N) {
     int b = 1;
     int c = 1;
 
-    #pragma unroll 1
+    //#pragma unroll 1
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
         b = b * 1 + 1;
@@ -47,7 +47,7 @@ __global__ void arithmetic_kernel_4(int N) {
     int c = 1;
     int d = 1;
 
-    #pragma unroll 1
+    //#pragma unroll 1
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
         b = b * 1 + 1;
@@ -63,7 +63,7 @@ __global__ void arithmetic_kernel_5(int N) {
     int d = 1;
     int e = 1;
 
-    #pragma unroll 1
+    //#pragma unroll 1
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
         b = b * 1 + 1;
@@ -74,7 +74,9 @@ __global__ void arithmetic_kernel_5(int N) {
 }
 
 int main(int argc, char *argv[]){
+
     int N = std::stoi(argv[1]);
+
     int numBlocks = 1024;
     int numThreads = 1024;
     arithmetic_kernel_1<<<numBlocks, numThreads>>>(N);
