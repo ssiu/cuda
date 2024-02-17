@@ -5,9 +5,9 @@
 // variables: number of threads
 //            number of ILP
 
-#define N 1048576
+// #define N 10000000
 
-__global__ void arithmetic_kernel_1() {
+__global__ void arithmetic_kernel_1(int N) {
     int a = 1;
 
     #pragma unroll 1
@@ -17,7 +17,7 @@ __global__ void arithmetic_kernel_1() {
 }
 
 
-__global__ void arithmetic_kernel_2() {
+__global__ void arithmetic_kernel_2(int N) {
     int a = 1;
 
     #pragma unroll 2
@@ -26,7 +26,7 @@ __global__ void arithmetic_kernel_2() {
     }
 }
 
-__global__ void arithmetic_kernel_3() {
+__global__ void arithmetic_kernel_3(int N) {
     int a = 1;
 
     #pragma unroll 3
@@ -35,7 +35,7 @@ __global__ void arithmetic_kernel_3() {
     }
 }
 
-__global__ void arithmetic_kernel_4() {
+__global__ void arithmetic_kernel_4(N) {
     int a = 1;
 
     #pragma unroll 4
@@ -44,7 +44,7 @@ __global__ void arithmetic_kernel_4() {
     }
 }
 
-__global__ void arithmetic_kernel_5() {
+__global__ void arithmetic_kernel_5(N) {
     int a = 1;
 
     #pragma unroll 5
@@ -53,13 +53,14 @@ __global__ void arithmetic_kernel_5() {
     }
 }
 
-int main(){
+int main(int argc, char *argv[]){
+    int N = std::stoi(argv[1]);
 
-    arithmetic_kernel_1<<<1024, 128>>>();
-    arithmetic_kernel_2<<<1024, 128>>>();
-    arithmetic_kernel_3<<<1024, 128>>>();
-    arithmetic_kernel_4<<<1024, 128>>>();
-    arithmetic_kernel_5<<<1024, 128>>>();
+    arithmetic_kernel_1<<<1024, 128>>>(N);
+    arithmetic_kernel_2<<<1024, 128>>>(N);
+    arithmetic_kernel_3<<<1024, 128>>>(N);
+    arithmetic_kernel_4<<<1024, 128>>>(N);
+    arithmetic_kernel_5<<<1024, 128>>>(N);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
