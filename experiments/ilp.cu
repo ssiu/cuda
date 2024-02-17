@@ -3,10 +3,10 @@
 // variables: number of threads
 //            number of ILP
 
-__global__ void arithmetic_kernel(float num_instructions, int N) {
-    #pragma unroll num_instructions
+__global__ void arithmetic_kernel(int num_instructions, int N) {
+    #pragma unroll 1
     int a = 1;
-    for (int i = idx; i < N; i ++) {
+    for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
     }
 }
