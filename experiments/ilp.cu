@@ -75,12 +75,13 @@ __global__ void arithmetic_kernel_5(int N) {
 
 int main(int argc, char *argv[]){
     int N = std::stoi(argv[1]);
-
-    arithmetic_kernel_1<<<1024, 128>>>(N);
-    arithmetic_kernel_2<<<1024, 128>>>(N);
-    arithmetic_kernel_3<<<1024, 128>>>(N);
-    arithmetic_kernel_4<<<1024, 128>>>(N);
-    arithmetic_kernel_5<<<1024, 128>>>(N);
+    int numBlocks = 1024;
+    int numThreads = 1024;
+    arithmetic_kernel_1<<<numBlocks, numThreads>>>(N);
+    arithmetic_kernel_2<<<numBlocks, numThreads>>>(N);
+    arithmetic_kernel_3<<<numBlocks, numThreads>>>(N);
+    arithmetic_kernel_4<<<numBlocks, numThreads>>>(N);
+    arithmetic_kernel_5<<<numBlocks, numThreads>>>(N);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
