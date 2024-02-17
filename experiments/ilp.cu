@@ -79,11 +79,11 @@ int main(int argc, char *argv[]){
 
     int numBlocks = 1024;
     int numThreads = 256;
-    arithmetic_kernel_1<<<numBlocks, numThreads>>>(N);
-    arithmetic_kernel_2<<<numBlocks, numThreads>>>(N);
-    arithmetic_kernel_3<<<numBlocks, numThreads>>>(N);
-    arithmetic_kernel_4<<<numBlocks, numThreads>>>(N);
-    arithmetic_kernel_5<<<numBlocks, numThreads>>>(N);
+    arithmetic_kernel_1<<<numBlocks, numThreads>>>();
+    arithmetic_kernel_2<<<numBlocks, numThreads>>>();
+    arithmetic_kernel_3<<<numBlocks, numThreads>>>();
+    arithmetic_kernel_4<<<numBlocks, numThreads>>>();
+    arithmetic_kernel_5<<<numBlocks, numThreads>>>();
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
