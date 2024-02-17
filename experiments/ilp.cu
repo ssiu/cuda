@@ -1,3 +1,5 @@
+#include <iostream>
+#include <string>
 
 // This kernel
 // variables: number of threads
