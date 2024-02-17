@@ -73,9 +73,7 @@ __global__ void arithmetic_kernel_5() {
     }
 }
 
-int main(int argc, char *argv[]){
-
-    int N = std::stoi(argv[1]);
+int main(){
 
     int numBlocks = 1024;
     int numThreads = 256;
