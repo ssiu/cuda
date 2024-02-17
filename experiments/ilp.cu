@@ -17,7 +17,7 @@ __global__ void arithmetic_kernel(int num_instructions) {
 
 int main(){
 
-    arithmetic_kernel<<<1024, 128>>>(1, 1024);
+    arithmetic_kernel<<<1024, 128>>>(1);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
