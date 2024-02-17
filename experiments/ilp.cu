@@ -63,7 +63,7 @@ __global__ void arithmetic_kernel_5(int N) {
     int d = 1;
     int e = 1;
 
-    //#pragma unroll 1
+    #pragma unroll
     for (int i = 0; i < N; i ++) {
         a = a * 1 + 1;
         b = b * 1 + 1;
