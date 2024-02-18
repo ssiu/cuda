@@ -8,13 +8,15 @@
 #define N 1000000000
 
 __global__ void arithmetic_kernel_1() {
-    int a = 1;
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+    int a = idx * 1 + 1;
 
     //#pragma unroll 1
 //    for (int i = 0; i < N; i ++) {
 //        a = a * 1 + 1;
 //    }
-    a = a * 1 + 1;
+
 }
 
 
