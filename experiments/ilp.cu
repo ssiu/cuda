@@ -15,8 +15,29 @@ __global__ void naive_transpose(float* d_in, float* d_out, int N) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
     d_out[col * N + row] = d_in[row * N + col];
+    int a = 0;
+
+    for (int i = 0, i<10, i++){
+        a = a*i + i;
+    }
 
 }
+
+
+__global__ void naive_transpose_1(float* d_in, float* d_out, int N) {
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    d_out[col * N + row] = d_in[row * N + col];
+    int array[10];
+
+    #pragma unroll
+    for (int i = 0, i<10, i++){
+        array[i] = i;
+    }
+
+}
+
 
 //__global__ void arithmetic_kernel_1(float x) {
 //    int idx = blockDim.x * blockIdx.x + threadIdx.x;
@@ -135,6 +156,7 @@ int main(){
     dim3 dimBlock(32, 32);
 
     naive_transpose<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
+    naive_transpose_1<<<dimGrid, dimBlock>>>(d_in.data().get(), d_out.data().get(), N);
 
     cudaError_t cudaStatus = cudaGetLastError();
     if (cudaStatus != cudaSuccess) {
