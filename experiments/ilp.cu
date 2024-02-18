@@ -17,8 +17,8 @@ __global__ void naive_transpose(float* d_in, float* d_out, int N) {
     d_out[col * N + row] = d_in[row * N + col];
     int a = 0;
 
-    for (int i = 0, i<10, i++){
-        a = a*i + i;
+    for (int i = 0; i<10; i++){
+        a = a * i + i;
     }
 
 }
@@ -32,7 +32,7 @@ __global__ void naive_transpose_1(float* d_in, float* d_out, int N) {
     int array[10];
 
     #pragma unroll
-    for (int i = 0, i<10, i++){
+    for (int i = 0; i<10; i++){
         array[i] = i;
     }
 
