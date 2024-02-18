@@ -119,7 +119,7 @@ int main(){
 //    arithmetic_kernel_5<<<numBlocks, numThreads>>>();
 
 
-    auto h_in = generateMatrices(N);
+    auto h_in = generateMatrix(N);
     //thrust::host_vector<float> h_in(N * N);
     thrust::host_vector<float> h_out(N * N);
     //thrust::host_vector<float> h_tranpose(N * N);
