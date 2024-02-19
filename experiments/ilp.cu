@@ -8,13 +8,13 @@
 // variables: number of threads
 //            number of ILP
 
-// #define N 1000000000
+#define N 1000000
 
 __global__ void test_1(float a, float c) {
         float a1 = a;
         float c1 = c;
 
-        for (int i = 0; i < 1000000000; i++)
+        for (int i = 0; i < N; i++)
         {
                 c1 += a1;
         }
@@ -36,7 +36,7 @@ __global__ void test_5(float a, float c) {
         float c5 = c+4;
 
         #pragma unroll
-        for (int i = 0; i < 1000000000; i++)
+        for (int i = 0; i < N; i++)
         {
                 c1 += a1;
                 c2 += a2;
