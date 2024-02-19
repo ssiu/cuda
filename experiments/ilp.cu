@@ -36,7 +36,7 @@ __global__ void test_5(float a, float c) {
         float a5 = a+4;
         float c5 = c+4;
 
-        #pragma unroll 1
+        #pragma unroll
         for (int i = 0; i < N; i++)
         {
                 c1 += a1;
@@ -52,6 +52,34 @@ __global__ void test_5(float a, float c) {
         if (c5 == 0) printf("/");
 }
 
+
+//__global__ void test_5(float a, float c) {
+//        float a1 = a;
+//        float c1 = c;
+//        float a2 = a+1;
+//        float c2 = c+1;
+//        float a3 = a+2;
+//        float c3 = c+2;
+//        float a4 = a+3;
+//        float c4 = c+3;
+//        float a5 = a+4;
+//        float c5 = c+4;
+//
+//        #pragma unroll 1
+//        for (int i = 0; i < N; i++)
+//        {
+//                c1 += a1;
+//                c2 += a2;
+//                c3 += a3;
+//                c4 += a4;
+//                c5 += a5;
+//        }
+//        if (c1 == 0) printf("?");
+//        if (c2 == 0) printf("!");
+//        if (c3 == 0) printf(".");
+//        if (c4 == 0) printf("*");
+//        if (c5 == 0) printf("/");
+//}
 
 
 int main(){
