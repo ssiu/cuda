@@ -14,6 +14,7 @@ __global__ void test_1(float a, float c) {
         float a1 = a;
         float c1 = c;
 
+        #pragma unroll 1
         for (int i = 0; i < N; i++)
         {
                 c1 += a1;
@@ -35,7 +36,7 @@ __global__ void test_5(float a, float c) {
         float a5 = a+4;
         float c5 = c+4;
 
-        #pragma unroll
+        #pragma unroll 1
         for (int i = 0; i < N; i++)
         {
                 c1 += a1;
