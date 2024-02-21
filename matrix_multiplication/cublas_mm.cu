@@ -7,6 +7,7 @@
 /*
  * A stand-alone script to invoke & benchmark standard cuBLAS SGEMM performance
  */
+// nvcc -o my_cublas_program my_cublas_program.cu -lcublas
 
 int main(int argc, char *argv[]) {
 
