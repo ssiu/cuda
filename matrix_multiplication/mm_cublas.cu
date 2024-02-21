@@ -16,7 +16,7 @@ void mm_cublas(thrust::device_vector<float> dA, thrust::device_vector<float> dB,
     float alpha = 1.0f;
     float beta = 1.0f;
 
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA, N,
-                     dB, N, &beta, dC, N);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
+                     dB.data().get(), N, &beta, dC.data().get(), N);
 
 }
