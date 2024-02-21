@@ -8,7 +8,7 @@
 
 
 
-void mm_cublas(thrust::device_vector<float> A, thrust::device_vector<float> B, thrust::device_vector<float> C, int N) {
+void mm_cublas(thrust::device_vector<float> dA, thrust::device_vector<float> dB, thrust::device_vector<float> dC, int N) {
     cudaError_t cudaStat;  // cudaMalloc status
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
@@ -16,7 +16,7 @@ void mm_cublas(thrust::device_vector<float> A, thrust::device_vector<float> B, t
     float alpha = 1.0f;
     float beta = 1.0f;
 
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, d_A, N,
-                     d_B, N, &beta, d_C, N);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA, N,
+                     dB, N, &beta, dC, N);
 
 }
