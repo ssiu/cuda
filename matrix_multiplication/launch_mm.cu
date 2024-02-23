@@ -45,7 +45,7 @@ int main(){
 
     dim3 dimGrid(16, 16);
     dim3 dimBlock(16, 16);
-    //mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
+    mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
 
     //
     // cublas
