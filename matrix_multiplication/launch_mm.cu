@@ -43,21 +43,21 @@ int main(){
     thrust::device_vector<float> dC = hC;
 
 
-    dim3 dimGrid(32, 32);
-    dim3 dimBlock(32, 32);
-    mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
+//    dim3 dimGrid(32, 32);
+//    dim3 dimBlock(32, 32);
+//    mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
 
     //
     // cublas
     //
-//    float alpha = 1.0f;
-//    float beta = 1.0f;
-//
-//    cudaError_t cudaStat;  // cudaMalloc status
-//    cublasStatus_t stat;   // cuBLAS functions status
-//    cublasHandle_t handle; // cuBLAS context
-//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
-//                     dB.data().get(), N, &beta, dC.data().get(), N);
+    float alpha = 1.0f;
+    float beta = 1.0f;
+
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
+                     dB.data().get(), N, &beta, dC.data().get(), N);
 
     return 0;
 }
