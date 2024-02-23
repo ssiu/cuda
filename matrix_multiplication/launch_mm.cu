@@ -5,7 +5,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <random>
-#include "mm.h"
+#include "mm.cuh"
 
 
 thrust::host_vector<float> generateMatrices(int N) {
@@ -32,7 +32,7 @@ thrust::host_vector<float> generateMatrices(int N) {
 
 
 int main(){
-    int N = 2048;
+    int N = 1024;
 
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
@@ -43,7 +43,7 @@ int main(){
     thrust::device_vector<float> dC = hC;
 
 
-    dim3 dimGrid(64, 64 );
+    dim3 dimGrid(32, 32);
     dim3 dimBlock(32, 32);
     mm_0<<<dimGrid, dimBlock>>>(dA.data(), dB.data(), dC.data(), N);
 
