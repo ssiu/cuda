@@ -36,7 +36,7 @@ int main(){
 
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
-    thrust::host_vector<float> hC;
+    thrust::host_vector<float> hC(N*N);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
