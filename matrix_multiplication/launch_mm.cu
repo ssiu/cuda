@@ -43,8 +43,8 @@ int main(){
     thrust::device_vector<float> dC = hC;
 
 
-    dim3 dimGrid(32, 32);
-    dim3 dimBlock(32, 32);
+    dim3 dimGrid(16, 16);
+    dim3 dimBlock(16, 16);
     //mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
 
     //
