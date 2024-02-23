@@ -43,9 +43,9 @@ int main(){
     thrust::device_vector<float> dC = hC;
 
 
-    dim3 dimGrid(16, 16);
-    dim3 dimBlock(16, 16);
-    mm_0<<<dimGrid, dimBlock>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
+    dim3 dimGrid(1, 1);
+    dim3 dimBlock(1, 1);
+    mm_0<<<1, 1>>>(dA.data().get(), dB.data().get(), dC.data().get(), N);
 
 //    //
 //    // cublas
