@@ -6,29 +6,7 @@
 #include <thrust/device_vector.h>
 #include <random>
 #include "mm.cuh"
-
-
-thrust::host_vector<float> generateMatrices(int N) {
-    thrust::host_vector<float> A(N * N);
-
-    // Create random engine
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    // Define distribution range
-    std::uniform_real_distribution<float> dis(0.0, 1.0);
-
-    // Generate random matrix
-    for (int i=0; i<N; i++) {
-        for (int j=0; j<N; j++) {
-            float randomFloat = dis(gen);
-            A[i * N + j] = randomFloat;
-        }
-    }
-
-    // Return both matrices
-    return A;
-}
+#include "utils.cuh"
 
 
 int main(){
@@ -37,10 +15,11 @@ int main(){
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
+    thrust::host_vector<float> hC_cublas(N*N);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
-    thrust::device_vector<float> dC = hC;
+    thrust::device_vector<float> dC_cublas(N*N);
 
 
     dim3 dimGrid(32, 32);
@@ -50,14 +29,16 @@ int main(){
     //
     // cublas
     //
-//    float alpha = 1.0f;
-//    float beta = 1.0f;
-//
-//    cudaError_t cudaStat;  // cudaMalloc status
-//    cublasStatus_t stat;   // cuBLAS functions status
-//    cublasHandle_t handle; // cuBLAS context
-//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
-//                     dB.data().get(), N, &beta, dC.data().get(), N);
+    float alpha = 1.0f;
+    float beta = 1.0f;
+
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
+                     dB.data().get(), N, &beta, dC_cublas.data().get(), N);
+
+    hC_cublas = dC_cublas;
 
     return 0;
 }
