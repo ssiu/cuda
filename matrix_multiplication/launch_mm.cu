@@ -25,7 +25,8 @@ int main(){
 
     dim3 dimGrid(32, 32);
     dim3 dimBlock(32, 32);
-    mm_0<<<dimGrid, dimBlock>>>(dA.data(), dB.data(), dC.data(), N);
+    mm_0<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                                    thrust::raw_pointer_cast(dC.data()), N);
     hC = dC;
 
     //
