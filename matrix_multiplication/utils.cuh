@@ -6,13 +6,13 @@
 #include <thrust/device_vector.h>
 #include <random>
 
-int isSameMatrices(float* A_1, float* A2, int N){
+int isSameMatrices(float* A_1, float* A_2, int N){
     for (int i = 0; i < N*N; i++){
         if (A_1[i] != A_2[i]) {
-            return 0
+            return 0;
         }
     }
-    return 1
+    return 1;
 }
 
 thrust::host_vector<float> generateMatrices(int N) {
