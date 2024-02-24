@@ -30,16 +30,16 @@ int main(){
     //
     // cublas
     //
-    float alpha = 1.0f;
-    float beta = 1.0f;
-
-    cudaError_t cudaStat;  // cudaMalloc status
-    cublasStatus_t stat;   // cuBLAS functions status
-    cublasHandle_t handle; // cuBLAS context
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
-                     dB.data().get(), N, &beta, dC_cublas.data().get(), N);
-
-    hC_cublas = dC_cublas;
+//    float alpha = 1.0f;
+//    float beta = 1.0f;
+//
+//    cudaError_t cudaStat;  // cudaMalloc status
+//    cublasStatus_t stat;   // cuBLAS functions status
+//    cublasHandle_t handle; // cuBLAS context
+//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
+//                     dB.data().get(), N, &beta, dC_cublas.data().get(), N);
+//
+//    hC_cublas = dC_cublas;
 
     return 0;
 }
