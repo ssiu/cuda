@@ -82,8 +82,8 @@ int main(){
 //    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
 //                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
 
-    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dB.data()), 2,
-                     thrust::raw_pointer_cast(dA.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
+                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
 
 
     hC_cublas = dC_cublas;
