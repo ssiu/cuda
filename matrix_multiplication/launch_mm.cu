@@ -107,6 +107,6 @@ int main(){
     for (int i=0;i<4;i++){
         std::cout << "cublas: " << hC_cublas[i] << std::endl;
     }
-
+    std::cout << "hi" << hC_cublas[i] << std::endl;
     return 0;
 }
