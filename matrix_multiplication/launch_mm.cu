@@ -60,10 +60,12 @@ int main(){
 
 // cublas experiment
     thrust::host_vector<float> hA;
-    hA = {static_cast<float>(1.0), static_cast<float>(2.0), static_cast<float>(3.0), static_cast<float>(4.0)};
     thrust::host_vector<float> hB;
-    hB = {static_cast<float>(5.0), static_cast<float>(6.0), static_cast<float>(7.0), static_cast<float>(8.0)};
     thrust::host_vector<float> hC_cublas(4);
+    for (int i=0;i<4;i++){
+        hA[i] = static_cast<float>(i);
+        hB[i] = static_cast<float>(i+4);
+    }
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
