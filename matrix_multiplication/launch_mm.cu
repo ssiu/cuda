@@ -59,13 +59,13 @@ int main(){
 //    }
 
 // cublas experiment
-    thrust::host_vector<float> hA = {1.0, 2.0, 3.0, 4.0};
-    thrust::host_vector<float> hB = {5.0, 6.0, 7.0, 8.0};
-    thrust::host_vector<float> hC_cublas(N*N);
+    thrust::host_vector<float> hA = {static_cast<float>(1.0), static_cast<float>(2.0), static_cast<float>(3.0), static_cast<float>(4.0)};
+    thrust::host_vector<float> hB = {static_cast<float>(5.0), static_cast<float>(6.0), static_cast<float>(7.0), static_cast<float>(8.0)};
+    thrust::host_vector<float> hC_cublas(4);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
-    thrust::device_vector<float> dC_cublas(N*N);
+    thrust::device_vector<float> dC_cublas(4);
 
 
     float alpha = 1.0f;
