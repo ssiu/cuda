@@ -79,12 +79,22 @@ int main(){
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dB.data()), 2,
-                     thrust::raw_pointer_cast(dA.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
+                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+
+    //cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dB.data()), 2,
+    //                 thrust::raw_pointer_cast(dA.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+
 
     hC_cublas = dC_cublas;
 
     cublasDestroy(handle);
+    for (int i=0;i<4;i++){
+        std::cout << "A: " << hA[i] << std::endl;
+    }
+    for (int i=0;i<4;i++){
+        std::cout << "B: " << hB[i] << std::endl;
+    }
     for (int i=0;i<4;i++){
         std::cout << "cublas: " << hC_cublas[i] << std::endl;
     }
