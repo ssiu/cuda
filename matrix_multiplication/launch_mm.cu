@@ -39,8 +39,8 @@ int main(){
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
-                     thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
+                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
     hC_cublas = dC_cublas;
 
@@ -48,7 +48,7 @@ int main(){
 
 
     for (int i=0;i<100;i++){
-        std::cout << hC[i] << hC_cublas[i] << std::endl;
+        std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
     }
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
