@@ -19,6 +19,7 @@ int main(){
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
+    thrust::device_vector<float> dC(N*N);
     thrust::device_vector<float> dC_cublas(N*N);
 
 
