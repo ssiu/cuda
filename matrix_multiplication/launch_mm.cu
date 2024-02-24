@@ -58,5 +58,32 @@ int main(){
         std::cout << "Wrong answer" << std::endl;
     }
 
+// cublas experiment
+    thrust::host_vector<float> hA = {1.0, 2.0, 3.0, 4.0};
+    thrust::host_vector<float> hB = {5.0, 6.0, 7.0, 8.0};
+    thrust::host_vector<float> hC_cublas(N*N);
+
+    thrust::device_vector<float> dA = hA;
+    thrust::device_vector<float> dB = hB;
+    thrust::device_vector<float> dC_cublas(N*N);
+
+
+    float alpha = 1.0f;
+    float beta = 1.0f;
+
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
+    cublasCreate(&handle);
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dB.data()), 2,
+                     thrust::raw_pointer_cast(dA.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+
+    hC_cublas = dC_cublas;
+
+    cublasDestroy(handle);
+    for (int i=0;i<4;i++){
+        std::cout << "cublas: " << hC_cublas[i] << std::endl;
+    }
+
     return 0;
 }
