@@ -15,12 +15,12 @@ int main(){
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
-    thrust::host_vector<float> hC_cublas;
+    thrust::host_vector<float> hC_cublas(N*N);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
     thrust::device_vector<float> dC = hC;
-    thrust::device_vector<float> dC_cublas = hC_cublas;
+    thrust::device_vector<float> dC_cublas(N*N);
 
 
     dim3 dimGrid(32, 32);
@@ -36,8 +36,9 @@ int main(){
     cudaError_t cudaStat;  // cudaMalloc status
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, dA.data().get(), N,
-                     dB.data().get(), N, &beta, dC_cublas.data().get(), N);
+    cublasCreate(&handle);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
+                     thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
     hC_cublas = dC_cublas;
 
