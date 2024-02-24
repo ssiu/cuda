@@ -45,7 +45,9 @@ int main(){
 
     cublasDestroy(handle);
 
-    if (isSameMatrices(hC.data().get(), hC_cublas.data().get(), N)==0):
+    if (isSameMatrices(hC.data().get(), hC_cublas.data().get(), N)==0){
         std::cout << "Wrong answer" << std::endl;
+    }
+
     return 0;
 }
