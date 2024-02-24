@@ -46,9 +46,12 @@ int main(){
 
     cublasDestroy(handle);
 
+    for (int i=0;i<100;i++){
+        std::cout << "check A and B matrices" << hA[i] << " " << hB[i] << std::endl;
+    }
 
     for (int i=0;i<100;i++){
-        std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+        std::cout << "compare results against cublas" << hC[i] << " " << hC_cublas[i] << std::endl;
     }
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
