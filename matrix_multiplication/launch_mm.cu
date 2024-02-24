@@ -73,7 +73,7 @@ int main(){
 
 
     float alpha = 1.0f;
-    float beta = 1.0f;
+    float beta = 0.0f;
 
     cudaError_t cudaStat;  // cudaMalloc status
     cublasStatus_t stat;   // cuBLAS functions status
