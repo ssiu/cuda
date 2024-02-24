@@ -63,18 +63,18 @@ int main(){
     thrust::host_vector<float> hB(4);
     thrust::host_vector<float> hC_cublas(4);
 
-    hA[0] = static_cast<float>(0.0);
-    hA[1] = static_cast<float>(2.0);
-    hA[2] = static_cast<float>(1.0);
-    hA[3] = static_cast<float>(3.0);
-    hB[0] = static_cast<float>(4.0);
-    hB[1] = static_cast<float>(6.0);
-    hB[2] = static_cast<float>(5.0);
-    hB[3] = static_cast<float>(7.0);
-//    for (int i=0;i<4;i++){
-//        hA[i] = static_cast<float>(i);
-//        hB[i] = static_cast<float>(i+4);
-//    }
+//    hA[0] = static_cast<float>(0.0);
+//    hA[1] = static_cast<float>(2.0);
+//    hA[2] = static_cast<float>(1.0);
+//    hA[3] = static_cast<float>(3.0);
+//    hB[0] = static_cast<float>(4.0);
+//    hB[1] = static_cast<float>(6.0);
+//    hB[2] = static_cast<float>(5.0);
+//    hB[3] = static_cast<float>(7.0);
+    for (int i=0;i<4;i++){
+        hA[i] = static_cast<float>(i);
+        hB[i] = static_cast<float>(i+4);
+    }
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
@@ -88,11 +88,11 @@ int main(){
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
-                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
-
-//    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
+//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
 //                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
+
+    cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, 2, 2, 2, &alpha, thrust::raw_pointer_cast(dA.data()), 2,
+                     thrust::raw_pointer_cast(dB.data()), 2, &beta, thrust::raw_pointer_cast(dC_cublas.data()), 2);
 
 
     hC_cublas = dC_cublas;
