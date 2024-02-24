@@ -67,8 +67,8 @@ int main(){
         hB[i] = static_cast<float>(i+4);
     }
 
-    thrust::device_vector<float> dA = hA(4);
-    thrust::device_vector<float> dB = hB(4);
+    thrust::device_vector<float> dA = hA;
+    thrust::device_vector<float> dB = hB;
     thrust::device_vector<float> dC_cublas(4);
 
 
