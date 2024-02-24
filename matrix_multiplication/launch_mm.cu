@@ -15,7 +15,7 @@ int main(){
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
-    thrust::host_vector<float> hC_cublas(N*N);
+    thrust::host_vector<float> hC_cublas;
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
@@ -41,5 +41,6 @@ int main(){
 
     hC_cublas = dC_cublas;
 
+    cublasDestroy(handle);
     return 0;
 }
