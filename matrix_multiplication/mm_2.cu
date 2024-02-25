@@ -17,8 +17,8 @@ __global__ void mm_1(float* A, float* B, float* C, int N){
     int gRow_B;
     int gCol_B = cCol;
 
-    __shared__ sA[TILE_WIDTH*TILE_WIDTH];
-    __shared__ sB[TILE_WIDTH*TILE_WIDTH];
+    __shared__ float sA[TILE_WIDTH*TILE_WIDTH];
+    __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
 
     // load into shared memory
     int sum = 0;
@@ -36,5 +36,5 @@ __global__ void mm_1(float* A, float* B, float* C, int N){
         __syncthreads();
     }
 
-    C[row*N + col] = sum;
+    C[cRow*N + cCol] = sum;
 }

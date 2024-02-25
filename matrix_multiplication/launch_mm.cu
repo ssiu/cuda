@@ -30,6 +30,8 @@ int main(){
 
     mm_1<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                     thrust::raw_pointer_cast(dC.data()), N);
+    mm_2<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                                    thrust::raw_pointer_cast(dC.data()), N);
     hC = dC;
 
     //
