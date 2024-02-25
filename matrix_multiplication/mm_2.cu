@@ -31,9 +31,9 @@ __global__ void mm_2(float* A, float* B, float* C, int N){
         __syncthreads();
 
         for (int i=0; i<TILE_WIDTH; i++){
-            if (blockIdx.x == 0 and blockIdx.x==0 and threadIdx.x==0 and threadIdx.y==0){
-                printf("SUM is %f\n", sum);
-            }
+//            if (blockIdx.x == 0 and blockIdx.x==0 and threadIdx.x==0 and threadIdx.y==0){
+//                printf("SUM is %f\n", sum);
+//            }
             sum += sA[sRow*TILE_WIDTH + i] * sB[i*TILE_WIDTH + sCol];
         }
         __syncthreads();
