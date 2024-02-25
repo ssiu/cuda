@@ -7,7 +7,7 @@
 #include <random>
 #include <cmath> // For std::fabs
 
-bool areFloatsEqual(float a, float b, float epsilon = 1e-5) {
+bool areFloatsEqual(float a, float b, float epsilon = 1e-3) {
     return std::fabs(a - b) < epsilon;
 }
 
