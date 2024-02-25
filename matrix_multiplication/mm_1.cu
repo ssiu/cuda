@@ -2,7 +2,7 @@
 // global memory coalescing
 #include <iostream>
 
-__global__ void mm_0(float* A, float* B, float* C, int N){
+__global__ void mm_1(float* A, float* B, float* C, int N){
     //int threadId = threadIdx.x + blockDim.x * threadIdx.y
     int row = threadIdx.y + blockDim.y * blockIdx.y;
     int col = threadIdx.x + blockDim.x * blockIdx.x;
