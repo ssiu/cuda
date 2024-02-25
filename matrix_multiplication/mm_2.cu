@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define TILE_WIDTH 32
-__global__ void mm_1(float* A, float* B, float* C, int N){
+__global__ void mm_2(float* A, float* B, float* C, int N){
     //int threadId = threadIdx.x + blockDim.x * threadIdx.y
     // rows and columns that the thread compute the in output C matrix
     int cRow = threadIdx.y + blockDim.y * blockIdx.y;
