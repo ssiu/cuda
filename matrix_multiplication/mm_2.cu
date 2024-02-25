@@ -21,7 +21,7 @@ __global__ void mm_2(float* A, float* B, float* C, int N){
     __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
 
     // load into shared memory
-    int sum = 0;
+    float sum = 0;
     for (int kTile=0; kTile < N/TILE_WIDTH; kTile++){
         //offset is row, kTile*TILE_WIDTH
         gCol_A = kTile*TILE_WIDTH + threadIdx.x;
