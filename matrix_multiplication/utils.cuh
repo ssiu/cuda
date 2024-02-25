@@ -7,14 +7,14 @@
 #include <random>
 #include <cmath> // For std::fabs
 
-bool areFloatsEqual(float a, float b, float epsilon = 1e-3) {
+bool areFloatsEqual(float a, float b, float epsilon = 1e-5) {
     return std::fabs(a - b) < epsilon;
 }
 
 
 int isSameMatrices(float* A_1, float* A_2, int N){
     for (int i = 0; i < N*N; i++){
-        if (areFloatsEqual(A_1[i], A_2[i])) {
+        if (!(areFloatsEqual(A_1[i], A_2[i]))) {
             std::cout << "Wrong answer:" << A_1[i] << " " << A_2[i] << std::endl;
             return 0;
         }
