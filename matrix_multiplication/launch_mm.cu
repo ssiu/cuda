@@ -53,6 +53,9 @@ int main(){
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
         std::cout << "Wrong answer" << std::endl;
+        for (int i=0;i<100;i++){
+            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+        }
     }
 
     return 0;
