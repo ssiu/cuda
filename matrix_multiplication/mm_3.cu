@@ -44,7 +44,7 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
 
         for (int i=0; i<TILE_WIDTH; i++){
             #pragma unroll
-            for (int j=0; j<TILE_WIDTH; j++) {
+            for (int j=0; j<4; j++) {
                 sum[j] += sA[sRow*TILE_WIDTH + (i + j)] * sB[(i+j) * TILE_WIDTH + sCol];
             }
         }
@@ -53,7 +53,7 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
 
     //reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C] = reinterpret_cast<float4*>(sum)[0];
     reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C].x = sum[0];
-//    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C].y = sum[1];
+    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C].y = sum[1];
 //    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C].z = sum[2];
 //    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C].w = sum[3];
 }
