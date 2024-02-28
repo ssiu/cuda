@@ -29,8 +29,8 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
     __shared__ float sA[TILE_WIDTH*TILE_WIDTH];
     __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
 
-    // float sum[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    float sum[4] = {};
+    float sum[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    //float sum[4] = {};
     for (int kTile=0; kTile < N/TILE_WIDTH; kTile++){
         //offset is row, kTile*TILE_WIDTH
         // reinterpret_cast<float2*>(d_out)[i]
