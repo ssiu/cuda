@@ -51,5 +51,6 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
         __syncthreads();
     }
 
-    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C] = reinterpret_cast<float4*>(sum)[0];
+    //reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C] = reinterpret_cast<float4*>(sum)[0];
+    reinterpret_cast<float4*>(C)[0] = reinterpret_cast<float4*>(sum)[0];
 }
