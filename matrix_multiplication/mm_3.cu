@@ -48,6 +48,9 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
         for (int i=0; i<TILE_WIDTH; i++){
             #pragma unroll
             for (int j=0; j<4; j++) {
+                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==0 and threadIdx.y==0){
+                    printf("SUM[1] is %f\n", sum[1]);
+                }
                 sum[j] += sA[sRow*TILE_WIDTH + (i + j)] * sB[(i+j) * TILE_WIDTH + sCol];
             }
         }
