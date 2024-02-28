@@ -32,7 +32,7 @@ __global__ void mm_2(float* A, float* B, float* C, int N){
 
         if (kTile==5 and blockIdx.x == 10 and blockIdx.y==11 and threadIdx.x==0 and threadIdx.y==0){
             for (int k=0;k<32;k++){
-                printf("shared memory in mm2 %f\n", sA[k]);
+                printf("shared memory in mm2 %f\n", sB[k]);
             }
         }
         for (int i=0; i<TILE_WIDTH; i++){
