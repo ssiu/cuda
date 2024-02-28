@@ -30,6 +30,11 @@ __global__ void mm_2(float* A, float* B, float* C, int N){
         sB[sRow * TILE_WIDTH + sCol] = B[gRow_B * N + gCol_B];
         __syncthreads();
 
+        if (blockIdx.x == 0 and blockIdx.x==0 and threadIdx.x==0 and threadIdx.y==0){
+            for (int k=0;k<100;k++){
+                printf("shared memory in mm2 %f\n", sA[k]);
+            }
+        }
         for (int i=0; i<TILE_WIDTH; i++){
 //            if (blockIdx.x == 0 and blockIdx.x==0 and threadIdx.x==0 and threadIdx.y==0){
 //                printf("SUM is %f\n", sum);

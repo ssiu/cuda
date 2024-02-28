@@ -29,10 +29,8 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
     __shared__ float sA[TILE_WIDTH*TILE_WIDTH];
     __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
 
-    float sum[4] = {};
-    if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==0 and threadIdx.y==0){
-        printf("SUM[1] is %f\n", sum[1]);
-    }
+    float sum[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+
     //float sum[4] = {};
     for (int kTile=0; kTile < N/TILE_WIDTH; kTile++){
         //offset is row, kTile*TILE_WIDTH
@@ -45,12 +43,18 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
 
         __syncthreads();
 
+        if (blockIdx.x == 0 and blockIdx.x==0 and threadIdx.x==0 and threadIdx.y==0){
+            for (int k=0;k<100;k++){
+                printf("shared memory in mm3 %f\n", sA[k]);
+            }
+        }
+
         for (int i=0; i<TILE_WIDTH; i++){
             #pragma unroll
             for (int j=0; j<4; j++) {
-                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==0 and threadIdx.y==0){
-                    printf("SUM[0] is %f\n", sum[j]);
-                }
+//                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==0 and threadIdx.y==0){
+//                    printf("SUM[0] is %f\n", sum[j]);
+//                }
                 sum[j] += sA[sRow*TILE_WIDTH + i] * sB[i * TILE_WIDTH + sCol * 4 + j];
             }
         }
