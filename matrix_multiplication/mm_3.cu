@@ -2,6 +2,7 @@
 // global memory coalescing
 // shared memory blocking
 // thread coarsening + vectorized memory access
+//each thread loads a row of 4 float and compute a row of 4 floats in C
 // we will use 256 threads dimBlock(8, 32);
 
 //    float4 tmp = reinterpret_cast<float4 *>(&A[innerRowA * K + innerColA * 4])[0];
