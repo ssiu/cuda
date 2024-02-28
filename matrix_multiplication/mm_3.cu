@@ -43,7 +43,7 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
 
         __syncthreads();
 
-        if (kTile==0 and blockIdx.x == 0 and blockIdx.y==0 and threadIdx.x==0 and threadIdx.y==0){
+        if (kTile==5 and blockIdx.x == 10 and blockIdx.y==11 and threadIdx.x==0 and threadIdx.y==0){
             for (int k=0;k<32;k++){
                 printf("shared memory in mm3 %f\n", sA[k]);
             }
