@@ -51,7 +51,7 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
                 if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==0 and threadIdx.y==0){
                     printf("SUM[0] is %f\n", sum[j]);
                 }
-                //sum[j] += sA[sRow*TILE_WIDTH + i] * sB[i * TILE_WIDTH + sCol * 4 + j];
+                sum[j] += sA[sRow*TILE_WIDTH + i] * sB[i * TILE_WIDTH + sCol * 4 + j];
             }
         }
         __syncthreads();
