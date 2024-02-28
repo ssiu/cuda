@@ -43,13 +43,6 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
 
         __syncthreads();
 
-        if (kTile==5 and blockIdx.x == 10 and blockIdx.y==10 and threadIdx.x==0 and threadIdx.y==0){
-            for (int k=0;k<32;k++){
-                printf("shared memory sA in mm3 %f\n", sA[k]);
-                printf("shared memory sB in mm3 %f\n", sB[k]);
-            }
-        }
-
         for (int i=0; i<TILE_WIDTH; i++){
             #pragma unroll
             for (int j=0; j<4; j++) {

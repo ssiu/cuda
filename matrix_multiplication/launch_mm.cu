@@ -27,11 +27,11 @@ int main(){
     dim3 dimBlock(32, 32);
 //    mm_0<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
-
-    mm_1<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                                    thrust::raw_pointer_cast(dC.data()), N);
-    mm_2<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                                    thrust::raw_pointer_cast(dC.data()), N);
+//
+//    mm_1<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                                    thrust::raw_pointer_cast(dC.data()), N);
+//    mm_2<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                                    thrust::raw_pointer_cast(dC.data()), N);
 
 
     dim3 dimGrid3(32, 32);
