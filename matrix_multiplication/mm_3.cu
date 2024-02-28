@@ -39,16 +39,16 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
         // bank conflict free G->S
         reinterpret_cast<float4*>(sA)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(A)[gRow_A * N / 4 + gCol_A];
         reinterpret_cast<float4*>(sB)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(B)[gRow_B * N / 4 + gCol_B];
-//
-//        __syncthreads();
-//
-//        for (int i=0; i<TILE_WIDTH; i++){
-//            #pragma unroll
-//            for (int j=0; j<TILE_WIDTH; j++) {
-//                sum[j] += sA[sRow*TILE_WIDTH + (i + j)] * sB[(i+j) * TILE_WIDTH + sCol];
-//            }
-//        }
-//        __syncthreads();
+
+        __syncthreads();
+
+        for (int i=0; i<TILE_WIDTH; i++){
+            #pragma unroll
+            for (int j=0; j<TILE_WIDTH; j++) {
+                sum[j] += sA[sRow*TILE_WIDTH + (i + j)] * sB[(i+j) * TILE_WIDTH + sCol];
+            }
+        }
+        __syncthreads();
     }
 
 //    reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C] = reinterpret_cast<float4*>(sum)[0];
