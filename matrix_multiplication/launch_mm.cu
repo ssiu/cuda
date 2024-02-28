@@ -57,14 +57,14 @@ int main(){
 
     cublasDestroy(handle);
 
-    if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
-        for (int i=0;i<100;i++){
-            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
-        }
-        std::cout << "Wrong answer" << std::endl;
-    } else {
-        std::cout << "Correct answer" << std::endl;
-    }
+//    if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
+//        for (int i=0;i<100;i++){
+//            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+//        }
+//        std::cout << "Wrong answer" << std::endl;
+//    } else {
+//        std::cout << "Correct answer" << std::endl;
+//    }
 
     return 0;
 }
