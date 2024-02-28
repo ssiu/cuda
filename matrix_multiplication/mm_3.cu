@@ -36,7 +36,7 @@ __global__ void mm_3(float* A, float* B, float* C, int N){
         //offset is row, kTile*TILE_WIDTH
         // reinterpret_cast<float2*>(d_out)[i]
         gCol_A = kTile*TILE_WIDTH / 4 + threadIdx.x;
-        gRow_B = kTile*TILE_WIDTH / 4 + threadIdx.y;
+        gRow_B = kTile*TILE_WIDTH + threadIdx.y;
         // bank conflict free G->S
         reinterpret_cast<float4*>(sA)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(A)[gRow_A * N / 4 + gCol_A];
         reinterpret_cast<float4*>(sB)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(B)[gRow_B * N / 4 + gCol_B];
