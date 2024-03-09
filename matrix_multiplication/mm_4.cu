@@ -26,6 +26,7 @@
 // df/dx = (f(t+dt) - f(t)) / dt
 
 __global__ void mm_4(float* A, float* B, float* C, int N){
+
     int warp_id = threadIdx.x / 32;
     int lane_id = threadIdx.x % 32;
 
@@ -112,14 +113,14 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             int warp_offset_col = (warp_id % 2) * 64;
 
 
-            int thread_offset_row = thread_id / 8;
-            int thread_offset_col = (thread_id % 8) * 4;
+            int thread_offset_row = threadIdx.x / 8;
+            int thread_offset_col = (threadIdx.x % 8) * 4;
 
             // offsets for A and B
-            // sA row is (warp_id / 4) * 64 + (thread_id / 4) * 4 + {0,32}
+            // sA row is (warp_id / 4) * 64 + (threadIdx.x / 4) * 4 + {0,32}
             // sA column is kFragment
             // sB row is kFragment
-            // sB column is (warp_id % 4) * 32 + (thread_id % 4) * 4 + {0, 16}
+            // sB column is (warp_id % 4) * 32 + (threadIdx.x % 4) * 4 + {0, 16}
 
             #pragma unroll
             // todo: make vectorized access
