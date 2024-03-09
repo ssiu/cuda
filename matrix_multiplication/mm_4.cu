@@ -146,10 +146,10 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
         __syncthreads();
     }
     // non-vectorized
-    for (kTx=0; kTx<8; kTx+=1){
-        for (kTy=0; kTy<4; kTy+=1){
-            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy] = accum[kThreadx*8 + kThready];
-            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy + 32] = accum[kThreadx * 8 + kThready + 4];
+    for (int kTx=0; kTx<8; kTx+=1){
+        for (int kTy=0; kTy<4; kTy+=1){
+            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy] = accum[kTx*8 + kTy];
+            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy + 32] = accum[kTx * 8 + kTy + 4];
         }
     }
 
