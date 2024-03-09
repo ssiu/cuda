@@ -30,11 +30,14 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
     int warp_id = threadIdx.x / 32;
     int lane_id = threadIdx.x % 32;
 
+    int warp_offset_row = (warp_id / 2) * 32;
+    int warp_offset_col = (warp_id % 2) * 64;
+    int thread_offset_row = threadIdx.x / 8;
+    int thread_offset_col = (threadIdx.x % 8) * 4;
 
     // offset for output matrix C
     int gRow_C =  TILE_LENGTH * blockIdx.y;
     int gCol_C =  TILE_LENGTH * blockIdx.x;
-
 
     int gRow_A;
     int gCol_A;
@@ -109,12 +112,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             // warp 1, 3, 5, 7 need cols 64 - 127 of sB
 
 
-            int warp_offset_row = (warp_id / 2) * 32;
-            int warp_offset_col = (warp_id % 2) * 64;
 
-
-            int thread_offset_row = threadIdx.x / 8;
-            int thread_offset_col = (threadIdx.x % 8) * 4;
 
             // offsets for A and B
             // sA row is (warp_id / 4) * 64 + (threadIdx.x / 4) * 4 + {0,32}
