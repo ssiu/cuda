@@ -16,7 +16,7 @@ bool areFloatsEqual(float a, float b, float epsilon = 1e-3) {
 int isSameMatrices(float* A_1, float* A_2, int N){
     for (int i = 0; i < N*N; i++){
         if (!(areFloatsEqual(A_1[i], A_2[i]))) {
-            std::cout << "Wrong answer:" << A_1[i] << " " << A_2[i] << std::endl;
+            //std::cout << "Wrong answer:" << A_1[i] << " " << A_2[i] << std::endl;
             return 0;
         }
     }
