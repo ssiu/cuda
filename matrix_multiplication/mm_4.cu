@@ -26,6 +26,9 @@
 // df/dx = (f(t+dt) - f(t)) / dt
 
 __global__ void mm_4(float* A, float* B, float* C, int N){
+    int warp_id = threadIdx.x / 32;
+    int lane_id = threadIdx.x % 32;
+
 
     // offset for output matrix C
     int gRow_C =  TILE_LENGTH * blockIdx.y;
@@ -76,7 +79,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
         }
         #pragma unroll
-        for (i=0; i<32; i+=2) {
+        for (int i=0; i<32; i+=2) {
             // ________________________________
             // | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
             // | 8 | 9 | 10| 11| 12| 13| 14| 15|
@@ -91,8 +94,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < TILE_WIDTH; kFragment++){
             // 256 thread = 8 warps,
-            int warp_id = threadIdx.x / 32;
-            int lane_id = threadIdx.x % 32;
+
             // each warp computes 32 x 64 matrix
             // the 32 x 64 is further split into 4 16 x 32 matrix
             // in the 16 x 32 matrix, each thread computes 4x4 matrix
@@ -137,7 +139,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
             for (int kTx=0; kTx<8; kTx++){
                 for (int kTy=0; kTy<8; kTy++){
-                    accum[kThreadx * 8 + kThready] += fragment_A[kTx] * fragment_B[kTy];
+                    accum[kTx * 8 + kTy] += fragment_A[kTx] * fragment_B[kTy];
                 }
             }
 
