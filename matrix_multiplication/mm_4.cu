@@ -146,18 +146,18 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
         __syncthreads();
     }
     // non-vectorized
-//    for (kTx=0; kTx<8; kTx+=1){
-//        for (kTy=0; kTy<4; kTy+=1){
-//            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy] = accum[kThreadx*8 + kThready];
-//            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy + 32] = accum[kThreadx * 8 + kThready + 4];
-//        }
-//    }
+    for (kTx=0; kTx<8; kTx+=1){
+        for (kTy=0; kTy<4; kTy+=1){
+            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy] = accum[kThreadx*8 + kThready];
+            C[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + gCol_C + warp_offset_col + thread_offset_col + kTy + 32] = accum[kThreadx * 8 + kThready + 4];
+        }
+    }
 
     //vectorized
     // reinterpret_cast<float2*>(d_out)[i]
-    for (int kTx=0; kTx<8; kTx+=1){
-        reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col) / 4] = reinterpret_cast<float4*>(accum)[kTx*8];
-        reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col + 32) / 4] = reinterpret_cast<float4*>(accum)[kTx * 8 + 1];
-    }
+//    for (int kTx=0; kTx<8; kTx+=1){
+//        reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col) / 4] = reinterpret_cast<float4*>(accum)[kTx*8];
+//        reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col + 32) / 4] = reinterpret_cast<float4*>(accum)[kTx * 8 + 1];
+//    }
 
 }
