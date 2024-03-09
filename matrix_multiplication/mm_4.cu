@@ -32,8 +32,8 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
     int warp_offset_row = (warp_id / 2) * 32;
     int warp_offset_col = (warp_id % 2) * 64;
-    int thread_offset_row = threadIdx.x / 8;
-    int thread_offset_col = (threadIdx.x % 8) * 4;
+    int thread_offset_row = lane_id / 8;
+    int thread_offset_col = (lane_id % 8) * 4;
 
     // offset for output matrix C
     int gRow_C =  TILE_LENGTH * blockIdx.y;
@@ -58,7 +58,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
     float accum[64] = {};
 
     // offset for A loading into shared memory
-    for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
+    for (int kBlock = 0; kBlock < N / TILE_WIDTH; kBlock++){
         sRow_A = threadIdx.x / 32;
         sCol_A = threadIdx.x % 32;
         sRow_B = threadIdx.x / 128;
