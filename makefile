@@ -4,11 +4,14 @@ say_hello:
 %.o: %.cu
 	nvcc -o $@ -std=c++17 -arch=sm_70 -I/mnt/shared/swsiu/cutlass/sm70/cutlass/include $<
 
+
+mm: clean_mm matrix_multiplication/launch_mm.o
+
 matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
 	nvcc -o $@ -std=c++17 -arch=sm_70 -I/mnt/shared/swsiu/cutlass/sm70/cutlass/include $< \
 	matrix_multiplication/mm_*.cu -lcublas
 
-clean:
+clean_mm:
 	rm -f matrix_multiplication/*.o
 
 

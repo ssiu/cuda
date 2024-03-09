@@ -28,14 +28,19 @@
 __global__ void mm_4(float* A, float* B, float* C, int N){
 
     // offset for output matrix C
-    gRow_C =  TILE_LENGTH * blockIdx.y;
-    gCol_C =  TILE_LENGTH * blockIdx.x;
+    int gRow_C =  TILE_LENGTH * blockIdx.y;
+    int gCol_C =  TILE_LENGTH * blockIdx.x;
 
 
     int gRow_A;
     int gCol_A;
     int gRow_B;
     int gCol_B;
+
+    int sRow_A;
+    int sCol_A;
+    int sRow_B;
+    int sCol_B;
 
     __shared__ float sA[TILE_LENGTH * TILE_WIDTH];
     __shared__ float sB[TILE_LENGTH * TILE_WIDTH];
@@ -60,7 +65,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
         // load A, B tile into shared memory
         // each thread load every 8th row
         #pragma unroll
-        for (i=0; i<128; i+=8) {
+        for (int i=0; i<128; i+=8) {
             //    32
             //  ________
       //128 // | 0 | 1 |
@@ -116,21 +121,22 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
             #pragma unroll
             // todo: make vectorized access
-            for (i=0; i<32; i+=8){
+            for (int i=0; i<32; i+=8){
                 fragment_A[i] = sA[(warp_offset_row + thread_offset_row + i) * TILE_WIDTH + kFragment];
             }
 
             #pragma unroll
-            for (i=0; i<4; i++){
+            for (int i=0; i<4; i++){
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_offset_col + thread_offset_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_offset_col + thread_offset_col + 32 + i];
             }
 
 
+
             #pragma unroll
 
-            for (kTx=0; kTx<8; kTx++){
-                for (kTy=0; kTy<8; kTy++){
+            for (int kTx=0; kTx<8; kTx++){
+                for (int kTy=0; kTy<8; kTy++){
                     accum[kThreadx * 8 + kThready] += fragment_A[kTx] * fragment_B[kTy];
                 }
             }
@@ -148,7 +154,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
     //vectorized
     // reinterpret_cast<float2*>(d_out)[i]
-    for (kTx=0; kTx<8; kTx+=1){
+    for (int kTx=0; kTx<8; kTx+=1){
         reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col) / 4] = reinterpret_cast<float4*>(accum)[kThreadx*8];
         reinterpret_cast<float4*>(C)[(gRow_C + warp_offset_row + thread_offset_row + kTx * 4) * N + (gCol_C + warp_offset_col + thread_offset_col + 32) / 4] = reinterpret_cast<float4*>(accum)[kThreadx * 8 + 1];
     }
