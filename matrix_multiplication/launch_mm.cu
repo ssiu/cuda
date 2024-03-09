@@ -40,12 +40,7 @@ int main(){
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 
 
-//    dim3 dimGrid4(16, 16);
-//    dim3 dimBlock4(256, 1);
-//    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-//                                   thrust::raw_pointer_cast(dC.data()), N);
 
-    hC = dC;
 
     //
     // cublas
@@ -63,6 +58,17 @@ int main(){
     hC_cublas = dC_cublas;
 
     cublasDestroy(handle);
+    //
+    //
+    //
+
+    dim3 dimGrid4(16, 16);
+    dim3 dimBlock4(256, 1);
+    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                                   thrust::raw_pointer_cast(dC.data()), N);
+
+    hC = dC;
+
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
         for (int i=0;i<100;i++){
