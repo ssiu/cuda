@@ -75,9 +75,9 @@ int main(){
             std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
         }
 
-        for (int i=0;i<100;i++){
-            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
-        }
+//        for (int i=0;i<100;i++){
+//            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+//        }
 
         std::cout << "Wrong answer" << std::endl;
     } else {
