@@ -9,6 +9,6 @@ matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
 	matrix_multiplication/mm_*.cu -lcublas
 
 clean:
-	rm -f *.o
+	rm -f matrix_multiplication/*.o
 
 
