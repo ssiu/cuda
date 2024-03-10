@@ -39,7 +39,12 @@ int main(){
 //    mm_3<<<dimGrid3, dimBlock3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 
+    dim3 dimGrid4(16, 16);
+    dim3 dimBlock4(256, 1);
+    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                                   thrust::raw_pointer_cast(dC.data()), N);
 
+    hC = dC;
 
 
     //
@@ -62,12 +67,7 @@ int main(){
     //
     //
 
-    dim3 dimGrid4(16, 16);
-    dim3 dimBlock4(256, 1);
-    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                                   thrust::raw_pointer_cast(dC.data()), N);
 
-    hC = dC;
 
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
@@ -77,12 +77,12 @@ int main(){
 //            }
 //        }
 
-//        for (int i=0;i<100;i++){
-//            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
-//        }
-        int num = countZeros(hC.data(), N);
-        std::cout << "number of zeros in hC is " << num << std::endl;
-        std::cout << "Wrong answer" << std::endl;
+        for (int i=0;i<100;i++){
+            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+        }
+//        int num = countZeros(hC.data(), N);
+//        std::cout << "number of zeros in hC is " << num << std::endl;
+//        std::cout << "Wrong answer" << std::endl;
     } else {
         std::cout << "Correct answer" << std::endl;
     }
