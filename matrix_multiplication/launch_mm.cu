@@ -23,13 +23,13 @@ int main(){
     thrust::device_vector<float> dC_cublas(N*N);
 
 
-//    dim3 dimGrid(32, 32);
-//    dim3 dimBlock(32, 32);
+    dim3 dimGrid(64, 64);
+    dim3 dimBlock(32, 32);
 //    mm_0<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 //
-//    mm_1<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-//                                    thrust::raw_pointer_cast(dC.data()), N);
+    mm_1<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                                    thrust::raw_pointer_cast(dC.data()), N);
 //    mm_2<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 //
@@ -39,10 +39,10 @@ int main(){
 //    mm_3<<<dimGrid3, dimBlock3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 
-    dim3 dimGrid4(16, 16);
-    dim3 dimBlock4(256, 1);
-    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                                   thrust::raw_pointer_cast(dC.data()), N);
+//    dim3 dimGrid4(16, 16);
+//    dim3 dimBlock4(256, 1);
+//    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                                   thrust::raw_pointer_cast(dC.data()), N);
 
     hC = dC;
 

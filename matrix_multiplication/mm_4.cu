@@ -134,12 +134,12 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             // todo: make vectorized access
             for (int i=0; i<8; i++){
                 fragment_A[i] = sA[(warp_offset_row + thread_offset_row + 4*i) * TILE_WIDTH + kFragment];
-                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
-                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 224, kBlock, kFragment, fragment_A[i]);
-                }
-                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 1){
-                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
-                }
+//                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+//                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 224, kBlock, kFragment, fragment_A[i]);
+//                }
+//                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 1){
+//                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
+//                }
             }
 
             #pragma unroll
