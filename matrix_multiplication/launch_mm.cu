@@ -75,13 +75,13 @@ int main(){
             for (int j=0;j<2048; j+=128){
                 std::cout << 2048 * i + j << " " << hC[2048 * i + j] << " " << hC_cublas[2048 * i + j] << std::endl;
             }
-
         }
 
 //        for (int i=0;i<100;i++){
 //            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
 //        }
-
+        num = countZeros(hC);
+        std::cout << "number of zeros in hC is "<< num << std::endl;
         std::cout << "Wrong answer" << std::endl;
     } else {
         std::cout << "Correct answer" << std::endl;
