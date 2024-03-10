@@ -34,7 +34,7 @@ int countZeros(float* A, int N) {
             num += 1;
         }
     }
-    return num
+    return num;
 
 }
 

@@ -80,7 +80,7 @@ int main(){
 //        for (int i=0;i<100;i++){
 //            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
 //        }
-        num = countZeros(hC);
+        int num = countZeros(hC);
         std::cout << "number of zeros in hC is "<< num << std::endl;
         std::cout << "Wrong answer" << std::endl;
     } else {
