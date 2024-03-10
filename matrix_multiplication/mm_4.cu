@@ -147,7 +147,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
                 for (int kTy=0; kTy<8; kTy++){
                     accum[kTx * 8 + kTy] += fragment_A[kTx] * fragment_B[kTy];
                     if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
-                        printf("kBlock is %d, kFragment is %d, accum is %f\n", kBlock, kFragment, accum[i]);
+                        printf("kBlock is %d, kFragment is %d, accum is %f\n", kBlock, kFragment, accum[kTx * 8 + kTy]);
                     }
                 }
             }
