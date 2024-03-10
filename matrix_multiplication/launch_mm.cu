@@ -71,16 +71,16 @@ int main(){
 
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
-        for (int i=0;i<2048;i += 128){
-            for (int j=0;j<2048; j+=128){
-                std::cout << 2048 * i + j << " " << hC[2048 * i + j] << " " << hC_cublas[2048 * i + j] << std::endl;
+        for (int i=0;i<N;i += 128){
+            for (int j=0;j<N; j+=128){
+                std::cout << N * i + j << " " << hC[N * i + j] << " " << hC_cublas[N * i + j] << std::endl;
             }
         }
 
 //        for (int i=0;i<100;i++){
 //            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
 //        }
-        int num = countZeros(hC);
+        int num = countZeros(hC, N);
         std::cout << "number of zeros in hC is "<< num << std::endl;
         std::cout << "Wrong answer" << std::endl;
     } else {
