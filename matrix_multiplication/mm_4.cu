@@ -75,8 +75,8 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
         for (int i=0; i<128; i+=8) {
             //    32
             //  ________
-      //128 // | 0 | 1 |
-            // | 2 | 3 |
+      //128 // | 0 | 1 | ... | 6 | 7 |
+            // | 8 | 9 | ... |
             // | ..... |
             // 128 rows
             sA[(sRow_A + i) * TILE_WIDTH + sCol_A] = A[(gRow_A + i) * N + gCol_A];
@@ -89,7 +89,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             // | 8 | 9 | 10| 11| 12| 13| 14| 15|
             // | ............................. |
             // 32 rows
-            sB[(sRow_B + i) * TILE_WIDTH + sCol_B] = B[(gRow_B + i) * N + gCol_B];
+            sB[(sRow_B + i) * TILE_LENGTH + sCol_B] = B[(gRow_B + i) * N + gCol_B];
         }
 
         __syncthreads();
@@ -128,8 +128,8 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
             #pragma unroll
             for (int i=0; i<4; i++){
-                fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_offset_col + thread_offset_col + i];
-                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_offset_col + thread_offset_col + 32 + i];
+                fragment_B[i] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + i];
+                fragment_B[i+4] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + 32 + i];
             }
 
 
