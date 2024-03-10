@@ -97,10 +97,11 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
         if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 0){
             for (int i =0; i<TILE_LENGTH; i++){
-                for (int j =0; j< TILE_WIDTH; j++){}
+                for (int j =0; j< TILE_WIDTH; j++){
                     printf("%f ", sA[i*TILE_WIDTH + j]);
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
         #pragma unroll
