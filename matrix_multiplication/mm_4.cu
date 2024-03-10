@@ -95,6 +95,14 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
         __syncthreads();
 
+        if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 0){
+            for (int i =0; i<TILE_LENGTH; i++){
+                for (int j =0; j< TILE_WIDTH; j++){}
+                    printf("%f ", sA[i*TILE_WIDTH + j]);
+            }
+            printf("\n");
+        }
+
         #pragma unroll
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < TILE_WIDTH; kFragment++){
@@ -146,9 +154,9 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             for (int kTx=0; kTx<8; kTx++){
                 for (int kTy=0; kTy<8; kTy++){
                     accum[kTx * 8 + kTy] += fragment_A[kTx] * fragment_B[kTy];
-                    if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
-                        printf("kBlock is %d, kFragment is %d, kTx is %d, frag A is %f, kTy is %d, frag B is %f, accum is %f\n", kBlock, kFragment, kTx, fragment_A[kTx], kTy, fragment_B[kTy], accum[kTx * 8 + kTy]);
-                    }
+//                    if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+//                        printf("kBlock is %d, kFragment is %d, kTx is %d, frag A is %f, kTy is %d, frag B is %f, accum is %f\n", kBlock, kFragment, kTx, fragment_A[kTx], kTy, fragment_B[kTy], accum[kTx * 8 + kTy]);
+//                    }
                 }
             }
 
