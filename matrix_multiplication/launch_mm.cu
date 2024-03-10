@@ -71,8 +71,11 @@ int main(){
 
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
-        for (int i=500000;i<500100;i++){
-            std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
+        for (int i=0;i<2048;i += 128){
+            for (int j=0;j<2048; j+=128){
+                std::cout << 2048 * i + j << " " << hC[2048 * i + j] << " " << hC_cublas[2048 * i + j] << std::endl;
+            }
+
         }
 
 //        for (int i=0;i<100;i++){
