@@ -62,7 +62,7 @@ int main(){
     //
     //
 
-    dim3 dimGrid4(1, 1);
+    dim3 dimGrid4(16, 16);
     dim3 dimBlock4(256, 1);
     mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                    thrust::raw_pointer_cast(dC.data()), N);
@@ -71,7 +71,7 @@ int main(){
 
 
     if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
-        for (int i=0;i<100;i++){
+        for (int i=500000;i<500100;i++){
             std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
         }
 
