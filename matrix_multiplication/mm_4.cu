@@ -125,12 +125,18 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             // todo: make vectorized access
             for (int i=0; i<32; i+=8){
                 fragment_A[i] = sA[(warp_offset_row + thread_offset_row + i) * TILE_WIDTH + kFragment];
+                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+                    printf("kBlock is %d, kFragment is %d, frag_A is %f\n", kBlock, kFragment, fragment_A[i]);
+                }
             }
 
             #pragma unroll
             for (int i=0; i<4; i++){
                 fragment_B[i] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + 32 + i];
+                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+                    printf("kBlock is %d, kFragment is %d, frag_B is %f\n", kBlock, kFragment, fragment_B[i]);
+                }
             }
 
 
@@ -139,11 +145,7 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
             for (int kTx=0; kTx<8; kTx++){
                 for (int kTy=0; kTy<8; kTy++){
-
                     accum[kTx * 8 + kTy] += fragment_A[kTx] * fragment_B[kTy];
-                    if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x==224){
-                        printf("kBlock is %d, kFragment is %d, accum is %f\n", kBlock, kFragment, accum[kTx * 8 + kTy]);
-                    }
                 }
             }
 
