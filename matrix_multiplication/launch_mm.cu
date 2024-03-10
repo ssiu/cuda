@@ -81,7 +81,7 @@ int main(){
 //            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
 //        }
         int num = countZeros(hC.data(), N);
-        std::cout << "number of zeros in hC is "<< num << std::endl;
+        std::cout << "number of zeros in hC is " << num << std::endl;
         std::cout << "Wrong answer" << std::endl;
     } else {
         std::cout << "Correct answer" << std::endl;

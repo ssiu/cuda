@@ -29,9 +29,17 @@ int isSameMatrices(float* A_1, float* A_2, int N){
 
 int countZeros(float* A, int N) {
     int num = 0;
-    for (int i = 0; i < N*N; i++) {
-        if (A[i] == 0.0f) {
-            num += 1;
+//    for (int i = 0; i < N*N; i++) {
+//        if (A[i] == 0.0f) {
+//            num += 1;
+//        }
+//    }
+
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 128; j++) {
+            if (A[i*N + j] == 0.0f) {
+                num += 1;
+            }
         }
     }
     return num;
