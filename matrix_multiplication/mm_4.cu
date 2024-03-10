@@ -19,6 +19,7 @@
 // dim3 dimGrid(16, 16);
 // dim3 dimBlock(256, 1);
 
+#include <iostream>
 #define TILE_WIDTH 32
 #define TILE_LENGTH 128
 
