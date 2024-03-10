@@ -95,14 +95,14 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
 
         __syncthreads();
 
-        if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 0){
-            for (int i =0; i<TILE_LENGTH; i++){
-                for (int j =0; j< TILE_WIDTH; j++){
-                    printf("%f ", sA[i*TILE_WIDTH + j]);
-                }
-                printf("\n");
-            }
-        }
+//        if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 0){
+//            for (int i =0; i<TILE_LENGTH; i++){
+//                for (int j =0; j< TILE_WIDTH; j++){
+//                    printf("%f ", sA[i*TILE_WIDTH + j]);
+//                }
+//                printf("\n");
+//            }
+//        }
 
         #pragma unroll
         //load a fragment from shared memory to register
@@ -134,9 +134,12 @@ __global__ void mm_4(float* A, float* B, float* C, int N){
             // todo: make vectorized access
             for (int i=0; i<32; i+=4){
                 fragment_A[i] = sA[(warp_offset_row + thread_offset_row + i) * TILE_WIDTH + kFragment];
-//                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
-//                    printf("kBlock is %d, kFragment is %d, frag_A is %f\n", kBlock, kFragment, fragment_A[i]);
-//                }
+                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 224, kBlock, kFragment, fragment_A[i]);
+                }
+                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 1){
+                    printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
+                }
             }
 
             #pragma unroll
