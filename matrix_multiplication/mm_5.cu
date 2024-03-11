@@ -52,7 +52,7 @@ __global__ void mm_5(float* A, float* B, float* C, int N){
     int sCol_B;
 
     __shared__ float sA[TILE_LENGTH * (TILE_WIDTH + 1)];
-    __shared__ float sB[(TILE_LENGTH + 1)* TILE_WIDTH];
+    __shared__ float sB[TILE_LENGTH * TILE_WIDTH];
 
     // fragments
     float fragment_A[8] = {};
@@ -143,6 +143,8 @@ __global__ void mm_5(float* A, float* B, float* C, int N){
 //                }
             }
 
+
+// this has bank conflict
             #pragma unroll
             for (int i=0; i<4; i++){
                 fragment_B[i] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + i];
