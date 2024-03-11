@@ -155,12 +155,11 @@ __global__ void mm_5(float* A, float* B, float* C, int N){
 //            }
 
             //reinterpret_cast<float2*>(d_out)[i]
-            reinterpret_cast<float4*>(fragment_B)[0] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH + (warp_offset_col + thread_offset_col) / 4];
-            reinterpret_cast<float4*>(fragment_B)[1] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH + (warp_offset_col + thread_offset_col + 32) / 4];
+            reinterpret_cast<float4*>(fragment_B)[0] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH / 4 + (warp_offset_col + thread_offset_col) / 4];
+            reinterpret_cast<float4*>(fragment_B)[1] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH / 4 + (warp_offset_col + thread_offset_col + 32) / 4];
 
 
             #pragma unroll
-
             for (int kTx=0; kTx<8; kTx++){
                 for (int kTy=0; kTy<8; kTy++){
                     accum[kTx * 8 + kTy] += fragment_A[kTx] * fragment_B[kTy];
