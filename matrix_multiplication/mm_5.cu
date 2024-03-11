@@ -145,15 +145,18 @@ __global__ void mm_5(float* A, float* B, float* C, int N){
 
 
 // this has bank conflict
-            #pragma unroll
-            for (int i=0; i<4; i++){
-                fragment_B[i] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + i];
-                fragment_B[i+4] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + 32 + i];
-//                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
-//                    printf("kBlock is %d, kFragment is %d, frag_B is %f\n", kBlock, kFragment, fragment_B[i]);
-//                }
-            }
+//            #pragma unroll
+//            for (int i=0; i<4; i++){
+//                fragment_B[i] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + i];
+//                fragment_B[i+4] = sB[kFragment * TILE_LENGTH + warp_offset_col + thread_offset_col + 32 + i];
+////                if (blockIdx.x == 0 and blockIdx.y == 0 and threadIdx.x == 224){
+////                    printf("kBlock is %d, kFragment is %d, frag_B is %f\n", kBlock, kFragment, fragment_B[i]);
+////                }
+//            }
 
+            //reinterpret_cast<float2*>(d_out)[i]
+            reinterpret_cast<float4*>(fragment_B)[0] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH + (warp_offset_col + thread_offset_col) / 4];
+            reinterpret_cast<float4*>(fragment_B)[1] = reinterpret_cast<float4*>(sB)[kFragment * TILE_LENGTH + (warp_offset_col + thread_offset_col + 32) / 4];
 
 
             #pragma unroll
