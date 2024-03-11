@@ -27,7 +27,7 @@
 
 // df/dx = (f(t+dt) - f(t)) / dt
 
-__global__ void mm_4(float* A, float* B, float* C, int N){
+__global__ void mm_5(float* A, float* B, float* C, int N){
 
     int warp_id = threadIdx.x / 32;
     int lane_id = threadIdx.x % 32;
