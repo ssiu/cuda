@@ -25,12 +25,15 @@
 #include <iostream>
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
+#define thread_id threadIdx.x
+#define warp_id threadIdx.x / 32
+#define lane_id threadIdx.x % 32
 
 
 __global__ void mm_7(float* A, float* B, float* C, int N){
-    int thread_id = threadIdx.x;
-    int warp_id = threadIdx.x / 32;
-    int lane_id = threadIdx.x % 32;
+//    int thread_id = threadIdx.x;
+//    int warp_id = threadIdx.x / 32;
+//    int lane_id = threadIdx.x % 32;
 
     int warp_row = (warp_id / 2) * 32;
     int warp_col = (warp_id % 2) * 64;
