@@ -96,7 +96,7 @@ int main(){
 //        }
 
         for (int i=0;i<100;i++){
-            std::cout << hC[i] << " " << hC_cublas[i] << std::endl;
+            std::cout << i << hC[i] << " " << hC_cublas[i] << std::endl;
         }
 //        int num = countZeros(hC.data(), N);
 //        std::cout << "number of zeros in hC is " << num << std::endl;
