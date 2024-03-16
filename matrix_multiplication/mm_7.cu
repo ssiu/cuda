@@ -29,30 +29,51 @@
 #define warp_id threadIdx.x / 32
 #define lane_id threadIdx.x % 32
 
+// warp tiling
+#define warp_row (warp_id / 2) * 32
+#define warp_col (warp_id % 2) * 64
+#define thread_row lane_id / 8
+#define thread_col (lane_id % 8) * 4
+
+
+#define gC_row TILE_WIDTH * blockIdx.y
+#define gC_col TILE_WIDTH * blockIdx.x
+
+// shared memory offsets
+#define sA_row thread_id / 2
+#define sA_col (thread_id % 2) * 4
+#define sB_row threadIdx.x / 32
+#define sB_col (threadIdx.x % 32) * 4
+
+#define gA_row gC_row + sA_row
+#define gA_col kBlock * BLOCK_WIDTH + sA_col
+#define gB_row kBlock * BLOCK_WIDTH + sB_row
+#define gB_col gC_col + sB_col
+
 
 __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x / 32;
 //    int lane_id = threadIdx.x % 32;
 
-    int warp_row = (warp_id / 2) * 32;
-    int warp_col = (warp_id % 2) * 64;
-    int thread_row = lane_id / 8;
-    int thread_col = (lane_id % 8) * 4;
+//    int warp_row = (warp_id / 2) * 32;
+//    int warp_col = (warp_id % 2) * 64;
+//    int thread_row = lane_id / 8;
+//    int thread_col = (lane_id % 8) * 4;
 
     // offset for output matrix C
-    int gC_row =  TILE_WIDTH * blockIdx.y;
-    int gC_col =  TILE_WIDTH * blockIdx.x;
+//    int gC_row =  TILE_WIDTH * blockIdx.y;
+//    int gC_col =  TILE_WIDTH * blockIdx.x;
 
-    int gA_row;
-    int gA_col;
-    int gB_row;
-    int gB_col;
-
-    int sA_row;
-    int sA_col;
-    int sB_row;
-    int sB_col;
+//    int gA_row;
+//    int gA_col;
+//    int gB_row;
+//    int gB_col;
+//
+//    int sA_row;
+//    int sA_col;
+//    int sB_row;
+//    int sB_col;
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
@@ -63,15 +84,19 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
     float accum[64] = {};
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
-        sA_row = thread_id / 2;
-        sA_col = (thread_id % 2) * 4;
-        sB_row = threadIdx.x / 32;
-        sB_col = (threadIdx.x % 32) * 4;
+//        sA_row = thread_id / 2;
+//        sA_col = (thread_id % 2) * 4;
+//        sB_row = threadIdx.x / 32;
+//        sB_col = (threadIdx.x % 32) * 4;
+//
+//        gA_row = gC_row + sA_row;
+//        gA_col = kBlock * BLOCK_WIDTH + sA_col;
+//        gB_row = kBlock * BLOCK_WIDTH + sB_row;
+//        gB_col = gC_col + sB_col;
 
-        gA_row = gC_row + sA_row;
-        gA_col = kBlock * BLOCK_WIDTH + sA_col;
-        gB_row = kBlock * BLOCK_WIDTH + sB_row;
-        gB_col = gC_col + sB_col;
+
+
+
         // each thread loads 16 floats for each A, B, broken into 16 loads
         // load A, B tile into shared memory
         // each thread load every 8th row
