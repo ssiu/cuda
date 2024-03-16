@@ -36,8 +36,8 @@
 #define thread_col (lane_id % 8) * 4
 
 
-//#define gC_row TILE_WIDTH * blockIdx.y
-//#define gC_col TILE_WIDTH * blockIdx.x
+#define gC_row TILE_WIDTH * blockIdx.y
+#define gC_col TILE_WIDTH * blockIdx.x
 //
 //// shared memory offsets
 //#define sA_row thread_id / 2
@@ -62,8 +62,8 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int thread_col = (lane_id % 8) * 4;
 
     // offset for output matrix C
-    int gC_row =  TILE_WIDTH * blockIdx.y;
-    int gC_col =  TILE_WIDTH * blockIdx.x;
+//    int gC_row =  TILE_WIDTH * blockIdx.y;
+//    int gC_col =  TILE_WIDTH * blockIdx.x;
 
     int gA_row;
     int gA_col;
