@@ -104,8 +104,8 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
 //            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
 //        }
-        reinterpret_cast<float4*>(sA)[sA_row * BLOCK_WIDTH + sA_col] = reinterpret_cast<float4*>(A)[gA_row * N + gA_col];
-        reinterpret_cast<float4*>(sB)[sB_row * TILE_WIDTH + sB_col] = reinterpret_cast<float4*>(B)[gB_row * N + gB_col];
+        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
         __syncthreads();
 
