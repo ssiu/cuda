@@ -63,7 +63,7 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         sA_row = thread_id / 2;
         sA_col = (thread_id % 2) * 4;
         sB_row = threadIdx.x / 32;
-        sB_col = threadIdx.x % 32;
+        sB_col = (threadIdx.x % 32) * 4;
 
         gA_row = gC_row + sA_row;
         gA_col = kBlock * BLOCK_WIDTH + sA_col;
