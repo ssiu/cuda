@@ -59,8 +59,8 @@ int main(){
 //    cudaFuncSetAttribute(mm_6, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 //    mm_6<<<dimGrid4, dimBlock4, maxbytes>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
-    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
+//    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
 
     hC = dC;
 
