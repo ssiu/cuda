@@ -100,7 +100,7 @@ int main(){
         }
 //        int num = countZeros(hC.data(), N);
 //        std::cout << "number of zeros in hC is " << num << std::endl;
-//        std::cout << "Wrong answer" << std::endl;
+        std::cout << "Wrong answer" << std::endl;
     } else {
         std::cout << "Correct answer" << std::endl;
     }

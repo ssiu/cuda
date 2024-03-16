@@ -112,14 +112,14 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         __syncthreads();
     }
     // non-vectorized
-    for (int x=0; x<4; x+=1){
-        for (int y=0; y<4; y+=1){
-            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
-            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 64] = accum[x * 8 + y + 4];
-            C[(gC_row + warp_row + thread_row + x + 32) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
-            C[(gC_row + warp_row + thread_row + x + 32) * N + gC_col + warp_col + thread_col + y + 64] = accum[(x + 4) * 8 + y + 4];
-        }
-    }
+//    for (int x=0; x<4; x+=1){
+//        for (int y=0; y<4; y+=1){
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 64] = accum[x * 8 + y + 4];
+//            C[(gC_row + warp_row + thread_row + x + 32) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
+//            C[(gC_row + warp_row + thread_row + x + 32) * N + gC_col + warp_col + thread_col + y + 64] = accum[(x + 4) * 8 + y + 4];
+//        }
+//    }
 
     //vectorized
     // reinterpret_cast<float2*>(d_out)[i]
