@@ -130,6 +130,7 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
             // Compute accumulator, 64 floats
             #pragma unroll
             for (int x=0; x<8; x++){
+                #pragma unroll
                 for (int y=0; y<8; y++){
                     accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
@@ -139,20 +140,22 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         __syncthreads();
     }
     // non-vectorized
+//    for (int x=0; x<4; x+=1){
+//        for (int y=0; y<4; y+=1){
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 32] = accum[x * 8 + y + 4];
+//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
+//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y + 32] = accum[(x + 4) * 8 + y + 4];
+//        }
+//    }
+    #pragma unroll
     for (int x=0; x<4; x+=1){
-        for (int y=0; y<4; y+=1){
-            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
-            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 32] = accum[x * 8 + y + 4];
-            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
-            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y + 32] = accum[(x + 4) * 8 + y + 4];
-        }
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
     }
 
-    //vectorized
-    // reinterpret_cast<float2*>(d_out)[i]
-//    for (int x=0; x<8; x+=1){
-//        reinterpret_cast<float4*>(C)[(gC_row + warp_row + thread_row + x * 4) * N + (gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[x*8];
-//        reinterpret_cast<float4*>(C)[(gC_row + warp_row + thread_row + x * 4) * N + (gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[x * 8 + 1];
-//    }
+
 
 }
