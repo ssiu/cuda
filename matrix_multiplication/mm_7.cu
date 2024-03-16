@@ -51,8 +51,8 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
     int sB_row;
     int sB_col;
 
-    __shared__ float sA[];
-    __shared__ float sB[];
+    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
 
     // fragments
     float fragment_A[8] = {};
