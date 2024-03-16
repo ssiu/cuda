@@ -29,8 +29,6 @@
 #define TILE_LENGTH 128
 
 
-// df/dx = (f(t+dt) - f(t)) / dt
-
 __global__ void mm_4(float* A, float* B, float* C, int N){
 
     int warp_id = threadIdx.x / 32;
