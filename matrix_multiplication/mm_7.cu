@@ -38,12 +38,12 @@
 
 #define gC_row TILE_WIDTH * blockIdx.y
 #define gC_col TILE_WIDTH * blockIdx.x
-//
-//// shared memory offsets
-//#define sA_row thread_id / 2
-//#define sA_col (thread_id % 2) * 4
-//#define sB_row threadIdx.x / 32
-//#define sB_col (threadIdx.x % 32) * 4
+
+// shared memory offsets
+#define sA_row thread_id / 2
+#define sA_col (thread_id % 2) * 4
+#define sB_row threadIdx.x / 32
+#define sB_col (threadIdx.x % 32) * 4
 //
 //#define gA_row gC_row + sA_row
 //#define gA_col kBlock * BLOCK_WIDTH + sA_col
@@ -65,15 +65,17 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int gC_row =  TILE_WIDTH * blockIdx.y;
 //    int gC_col =  TILE_WIDTH * blockIdx.x;
 
+//    int sA_row;
+//    int sA_col;
+//    int sB_row;
+//    int sB_col;
+
     int gA_row;
     int gA_col;
     int gB_row;
     int gB_col;
 
-    int sA_row;
-    int sA_col;
-    int sB_row;
-    int sB_col;
+
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
@@ -84,10 +86,10 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
     float accum[64] = {};
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
-        sA_row = thread_id / 2;
-        sA_col = (thread_id % 2) * 4;
-        sB_row = threadIdx.x / 32;
-        sB_col = (threadIdx.x % 32) * 4;
+//        sA_row = thread_id / 2;
+//        sA_col = (thread_id % 2) * 4;
+//        sB_row = threadIdx.x / 32;
+//        sB_col = (threadIdx.x % 32) * 4;
 
         gA_row = gC_row + sA_row;
         gA_col = kBlock * BLOCK_WIDTH + sA_col;
