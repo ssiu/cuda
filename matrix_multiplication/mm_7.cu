@@ -90,14 +90,14 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
             #pragma unroll
             for (int i=0; i<4; i++){
                 fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 32 + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
             }
 
             // Load B fragment, 8 floats
             #pragma unroll
             for (int i=0; i<4; i++){
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 64 + i];
+                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
             }
 
             // Compute accumulator, 64 floats
