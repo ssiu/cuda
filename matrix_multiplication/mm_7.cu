@@ -96,19 +96,16 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         gB_row = kBlock * BLOCK_WIDTH + sB_row;
         gB_col = gC_col + sB_col;
 
-
-
-
-        // each thread loads 16 floats for each A, B, broken into 16 loads
-        // load A, B tile into shared memory
-        // each thread load every 8th row
-        #pragma unroll
-
-        for (int i=0; i<4; i+=1) {
-            // load shared memory A
-            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
-            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
-        }
+        // global memory load -> shared memory store
+//        #pragma unroll
+//
+//        for (int i=0; i<4; i+=1) {
+//            // load shared memory A
+//            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
+//            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
+//        }
+        reinterpret_cast<float4*>(sA)[sA_row * BLOCK_WIDTH + sA_col] = reinterpret_cast<float4*>(A)[gA_row * N + gA_col];
+        reinterpret_cast<float4*>(sB)[sB_row * TILE_WIDTH + sB_col] = reinterpret_cast<float4*>(B)[gB_row * N + gB_col];
 
         __syncthreads();
 
