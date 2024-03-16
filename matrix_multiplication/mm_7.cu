@@ -45,10 +45,10 @@
 #define sB_row threadIdx.x / 32
 #define sB_col (threadIdx.x % 32) * 4
 //
-#define gA_row gC_row + sA_row
-#define gA_col kBlock * BLOCK_WIDTH + sA_col
-#define gB_row kBlock * BLOCK_WIDTH + sB_row
-#define gB_col gC_col + sB_col
+//#define gA_row gC_row + sA_row
+//#define gA_col kBlock * BLOCK_WIDTH + sA_col
+//#define gB_row kBlock * BLOCK_WIDTH + sB_row
+//#define gB_col gC_col + sB_col
 
 
 __global__ void mm_7(float* A, float* B, float* C, int N){
@@ -70,10 +70,10 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int sB_row;
 //    int sB_col;
 
-//    int gA_row;
-//    int gA_col;
-//    int gB_row;
-//    int gB_col;
+    int gA_row;
+    int gA_col;
+    int gB_row;
+    int gB_col;
 
 
 
@@ -91,10 +91,10 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //        sB_row = threadIdx.x / 32;
 //        sB_col = (threadIdx.x % 32) * 4;
 
-//        gA_row = gC_row + sA_row;
-//        gA_col = kBlock * BLOCK_WIDTH + sA_col;
-//        gB_row = kBlock * BLOCK_WIDTH + sB_row;
-//        gB_col = gC_col + sB_col;
+        gA_row = gC_row + sA_row;
+        gA_col = kBlock * BLOCK_WIDTH + sA_col;
+        gB_row = kBlock * BLOCK_WIDTH + sB_row;
+        gB_col = gC_col + sB_col;
 
 
 
