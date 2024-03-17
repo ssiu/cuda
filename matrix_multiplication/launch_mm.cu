@@ -8,7 +8,7 @@
 #include "mm.cuh"
 #include "utils.cuh"
 
-#DEFINE TILE_WIDTH 128
+#define TILE_WIDTH 128
 int main(){
     int N = 8192;
 
