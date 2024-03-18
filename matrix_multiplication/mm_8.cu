@@ -115,7 +115,7 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
         reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(buffer_A)[pointer];
         reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(buffer_B)[pointer];
 
-        pointer = (pointer = 0) ? 1 : 0;
+        pointer = (pointer == 0) ? 1 : 0;
         // global -> reg for kBlock = k + 1
         reinterpret_cast<float4*>(buffer_A)[pointer] = reinterpret_cast<float4*>(A)[((gC_row + sA_row) * N + (kBlock + 1) * BLOCK_WIDTH + sA_col) / 4];
         reinterpret_cast<float4*>(buffer_B)[pointer] = reinterpret_cast<float4*>(B)[(((kBlock + 1) * BLOCK_WIDTH + sB_row) * N + gC_col + sB_col) / 4];
