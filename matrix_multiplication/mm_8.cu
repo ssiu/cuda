@@ -1,10 +1,10 @@
-// matrix multiplication for 8192 x 8192
+// matrix multiplication for 8192 x 8192 x 8192
 
 // global memory coalescing
 // shared memory blocking
 // register blocking
 // vectorized memory load
-
+// global + shared memory pipelining
 
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
 
@@ -50,7 +50,7 @@
 //#define gB_col gC_col + sB_col
 
 
-__global__ void mm_7(float* A, float* B, float* C, int N){
+__global__ void mm_8(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x / 32;
 //    int lane_id = threadIdx.x % 32;
@@ -69,10 +69,11 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int sB_row;
 //    int sB_col;
 
-    int gA_row;
-    int gA_col;
-    int gB_row;
-    int gB_col;
+
+//    int gA_row;
+//    int gA_col;
+//    int gB_row;
+//    int gB_col;
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
@@ -82,27 +83,40 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
     float fragment_B[8] = {};
     float accum[64] = {};
 
-    for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
-//        sA_row = thread_id / 2;
-//        sA_col = (thread_id % 2) * 4;
-//        sB_row = threadIdx.x / 32;
-//        sB_col = (threadIdx.x % 32) * 4;
+    float buffer_A[4] = {};
+    float buffer_B[4] = {};
 
-        gA_row = gC_row + sA_row;
-        gA_col = kBlock * BLOCK_WIDTH + sA_col;
-        gB_row = kBlock * BLOCK_WIDTH + sB_row;
-        gB_col = gC_col + sB_col;
+    // prologue
+    // global -> reg for kBlock = 0
+    // reinterpret_cast<float4*>(buffer_A)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+    // reinterpret_cast<float4*>(buffer_B)[0] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+    reinterpret_cast<float4*>(buffer_A)[0] = reinterpret_cast<float4*>(A)[((gC_row + sA_row) * N + sA_col) / 4];
+    reinterpret_cast<float4*>(buffer_B)[0] = reinterpret_cast<float4*>(B)[(sB_row * N + gC_col + sB_col) / 4];
 
-        // global memory load -> shared memory store
-//        #pragma unroll
-//
-//        for (int i=0; i<4; i+=1) {
-//            // load shared memory A
-//            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
-//            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
-//        }
-        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
-        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+    // mainloop
+    // for kBlock = 0,..., N/BLOCK_WIDTH - 1
+    // reg -> shared for kBlock = k
+    // global -> reg for kBlock = k + 1
+    // FMA for kBlock = k
+
+    for (int kBlock = 0; kBlock < N / BLOCK_WIDTH - 1; kBlock++){
+//        gA_row = gC_row + sA_row;
+//        gA_col = kBlock * BLOCK_WIDTH + sA_col;
+//        gB_row = kBlock * BLOCK_WIDTH + sB_row;
+//        gB_col = gC_col + sB_col;
+
+
+
+
+//        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+//        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+
+        // reg -> shared for kBlock = k
+        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(buffer_A)[0];
+        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(buffer_B)[0];
+        // global -> reg for kBlock = k + 1
+        reinterpret_cast<float4*>(buffer_A)[0] = reinterpret_cast<float4*>(A)[((gC_row + sA_row) * N + (kBlock + 1) * BLOCK_WIDTH + sA_col) / 4];
+        reinterpret_cast<float4*>(buffer_B)[0] = reinterpret_cast<float4*>(B)[(((kBlock + 1) * BLOCK_WIDTH + sB_row) * N + gC_col + sB_col) / 4];
 
         __syncthreads();
 
@@ -135,15 +149,42 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         }
         __syncthreads();
     }
-    // non-vectorized
-//    for (int x=0; x<4; x+=1){
-//        for (int y=0; y<4; y+=1){
-//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
-//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 32] = accum[x * 8 + y + 4];
-//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
-//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y + 32] = accum[(x + 4) * 8 + y + 4];
-//        }
-//    }
+
+
+    // epilogue
+    // reg -> shared for kBlock = N/BLOCK - 1
+    // FMA for kBlock = N/BLOCK - 1
+
+    // reg -> shared for kBlock = N/BLOCK - 1
+    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(buffer_A)[0];
+    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(buffer_B)[0];
+    // FMA for kBlock = N/BLOCK - 1
+    #pragma unroll
+    for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
+
+        #pragma unroll
+        for (int i=0; i<4; i++){
+            // Load A fragment, 8 floats
+            fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+            fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+
+            // Load B fragment, 8 floats
+            fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
+            fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+          }
+
+
+        // Compute accumulator, 64 floats
+        #pragma unroll
+        for (int x=0; x<8; x++){
+            #pragma unroll
+            for (int y=0; y<8; y++){
+                accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
+            }
+        }
+
+    }
+
     #pragma unroll
     for (int x=0; x<4; x+=1){
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];

@@ -9,4 +9,6 @@ __global__ void mm_4(float* A, float* B, float*C, int N);
 __global__ void mm_5(float* A, float* B, float*C, int N);
 __global__ void mm_6(float* A, float* B, float*C, int N);
 __global__ void mm_7(float* A, float* B, float*C, int N);
+__global__ void mm_8(float* A, float* B, float*C, int N);
+
 #endif
