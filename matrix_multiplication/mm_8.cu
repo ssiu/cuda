@@ -87,7 +87,6 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     float accum[64] = {};
 
     //0 or TILE_WIDTH * BLOCK_WIDTH
-    int pointer = 0;
     // prologue
     // global -> shared0 for kBlock = 0, pointer = 0
     reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
@@ -101,8 +100,8 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH - 1; kBlock++){
 
-        gA_col = kBlock * BLOCK_WIDTH + sA_col;
-        gB_row = kBlock * BLOCK_WIDTH + sB_row;
+        gA_col = (kBlock + 1) * BLOCK_WIDTH + sA_col;
+        gB_row = (kBlock + 1) * BLOCK_WIDTH + sB_row;
 
 
 
@@ -154,7 +153,6 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     // reg -> shared for kBlock = N/BLOCK - 1
 
     // FMA for kBlock = N/BLOCK - 1
-    #pragma unroll
     for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
         #pragma unroll
