@@ -8,6 +8,9 @@
 
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
 
+//https://github.com/siboehm/SGEMM_CUDA/blob/master/src/kernels/11_kernel_double_buffering.cuh
+
+
 // thread-tiling: each thread loads 8+8 = 16 floats and computes 8x8 = 64 results
 // warp-tiling: each warp computes 64x32 = 2048 results
 // block-tiling: each thread block has 2x4 = 8 warps = 256 threads computing 128x128 = 16384 results
@@ -75,8 +78,8 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 //    int gB_row;
 //    int gB_col;
 
-    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
-    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sA[2*TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sB[2*TILE_WIDTH * BLOCK_WIDTH];
 
     // fragments
     float fragment_A[8] = {};
@@ -85,13 +88,13 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 
     float buffer_A[8] = {};
     float buffer_B[8] = {};
+
+    //0 or TILE_WIDTH * BLOCK_WIDTH
     int pointer = 0;
     // prologue
-    // global -> reg for kBlock = 0
-    // reinterpret_cast<float4*>(buffer_A)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
-    // reinterpret_cast<float4*>(buffer_B)[0] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
-    reinterpret_cast<float4*>(buffer_A)[0] = reinterpret_cast<float4*>(A)[((gC_row + sA_row) * N + sA_col) / 4];
-    reinterpret_cast<float4*>(buffer_B)[0] = reinterpret_cast<float4*>(B)[(sB_row * N + gC_col + sB_col) / 4];
+    // global -> shared0 for kBlock = 0, pointer = 0
+    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
     // mainloop
     // for kBlock = 0,..., N/BLOCK_WIDTH - 1
@@ -111,31 +114,26 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 //        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
 //        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
-        // reg -> shared for kBlock = k
-        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(buffer_A)[pointer];
-        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(buffer_B)[pointer];
 
-        pointer = (pointer == 0) ? 1 : 0;
-        // global -> reg for kBlock = k + 1
-        reinterpret_cast<float4*>(buffer_A)[pointer] = reinterpret_cast<float4*>(A)[((gC_row + sA_row) * N + (kBlock + 1) * BLOCK_WIDTH + sA_col) / 4];
-        reinterpret_cast<float4*>(buffer_B)[pointer] = reinterpret_cast<float4*>(B)[(((kBlock + 1) * BLOCK_WIDTH + sB_row) * N + gC_col + sB_col) / 4];
+        pointer = (pointer == 0) ? TILE_WIDTH * BLOCK_WIDTH : 0;
+        // global -> shared for kBlock = k + 1
+        reinterpret_cast<float4*>(sA)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(sB)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
-        __syncthreads();
 
 
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
-
             #pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
-                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i+4] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
                 // Load B fragment, 8 floats
-                fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+                fragment_B[i] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
               }
 
 
@@ -158,8 +156,7 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     // FMA for kBlock = N/BLOCK - 1
 
     // reg -> shared for kBlock = N/BLOCK - 1
-    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(buffer_A)[pointer];
-    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(buffer_B)[pointer];
+
     // FMA for kBlock = N/BLOCK - 1
     #pragma unroll
     for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
@@ -167,12 +164,12 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
         #pragma unroll
         for (int i=0; i<4; i++){
             // Load A fragment, 8 floats
-            fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-            fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+            fragment_A[i] = sA[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+            fragment_A[i+4] = sA[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
             // Load B fragment, 8 floats
-            fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
-            fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+            fragment_B[i] = sB[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
+            fragment_B[i+4] = sB[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
           }
 
 
