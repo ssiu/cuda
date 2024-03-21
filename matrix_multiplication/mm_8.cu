@@ -16,7 +16,7 @@
 // block-tiling: each thread block has 2x4 = 8 warps = 256 threads computing 128x128 = 16384 results
 
 // shared memory:
-// 128 * 8 * 4 * 2 = 8KB
+// 128(M) * 8(N) * 4(size) * 2(A,B) = 16KB
 // registers:
 // each thread needs at least 64 * 4 = 256B
 // so a threadblock needs at least 256 * 256 = 64 KB
@@ -53,7 +53,9 @@
 #define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_8(float* A, float* B, float* C, int N){
+__global__ void
+__launch_bounds__(128)
+mm_8(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x / 32;
 //    int lane_id = threadIdx.x % 32;
