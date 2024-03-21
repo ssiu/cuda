@@ -48,8 +48,8 @@
 #define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
-#define gA_col (kBlock * BLOCK_WIDTH + sA_col)
-#define gB_row (kBlock * BLOCK_WIDTH + sB_row)
+#define gA_col ((kBlock + 1) * BLOCK_WIDTH + sA_col)
+#define gB_row ((kBlock + 1) * BLOCK_WIDTH + sB_row)
 #define gB_col (gC_col + sB_col)
 
 
