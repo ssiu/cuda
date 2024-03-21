@@ -61,7 +61,9 @@ int main(){
 //                                   thrust::raw_pointer_cast(dC.data()), N);
     mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
-    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
+    mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
     hC = dC;
 
