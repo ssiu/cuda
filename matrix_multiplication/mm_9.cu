@@ -28,24 +28,24 @@
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
-#define warp_id (threadIdx.x >> 5)
-#define lane_id (threadIdx.x & 31)
+#define warp_id threadIdx.x >> 5
+#define lane_id threadIdx.x % 32
 
 // warp tiling
 #define warp_row (warp_id >> 1) * 32
-#define warp_col (warp_id & 1) * 64
-#define thread_row (lane_id >> 3)
-#define thread_col (lane_id & 7) * 4
+#define warp_col (warp_id % 2) * 64
+#define thread_row lane_id >> 3
+#define thread_col (lane_id % 8) * 4
 
 
 #define gC_row TILE_WIDTH * blockIdx.y
 #define gC_col TILE_WIDTH * blockIdx.x
 
 // shared memory offsets
-#define sA_row (thread_id >> 1)
-#define sA_col (thread_id & 1) * 4
-#define sB_row (threadIdx.x >> 5)
-#define sB_col (threadIdx.x & 31) * 4
+#define sA_row thread_id >> 1
+#define sA_col (thread_id % 2) * 4
+#define sB_row threadIdx.x >> 5
+#define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
 #define gA_col ((kBlock + 1) * BLOCK_WIDTH + sA_col)
@@ -53,15 +53,15 @@
 #define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_9(float* A, float* B, float* C, int N){
+__global__ void mm_8(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x >> 5;
-//    int lane_id = threadIdx.x & 31;
+//    int lane_id = threadIdx.x % 32;
 //
 //    int warp_row = (warp_id >> 1) * 32;
-//    int warp_col = (warp_id & 1) * 64;
+//    int warp_col = (warp_id % 2) * 64;
 //    int thread_row = lane_id >> 3;
-//    int thread_col = (lane_id & 7) * 4;
+//    int thread_col = (lane_id % 8) * 4;
 
     // offset for output matrix C
 //    int gC_row =  TILE_WIDTH * blockIdx.y;
@@ -99,8 +99,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
 
 
         // global -> shared for kBlock = k + 1
-        reinterpret_cast<float4*>(sA)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
-        reinterpret_cast<float4*>(sB)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
+        reinterpret_cast<float4*>(sA)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
+        reinterpret_cast<float4*>(sB)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
 
 
 
@@ -110,12 +110,12 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
             #pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
-                fragment_A[i] = sA[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i+4] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
                 // Load B fragment, 8 floats
-                fragment_B[i] = sB[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+                fragment_B[i] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
               }
 
 
@@ -145,12 +145,12 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
         #pragma unroll
         for (int i=0; i<4; i++){
             // Load A fragment, 8 floats
-            fragment_A[i] = sA[(((N / BLOCK_WIDTH - 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-            fragment_A[i+4] = sA[(((N / BLOCK_WIDTH - 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+            fragment_A[i] = sA[(((N / BLOCK_WIDTH - 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+            fragment_A[i+4] = sA[(((N / BLOCK_WIDTH - 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
             // Load B fragment, 8 floats
-            fragment_B[i] = sB[(((N / BLOCK_WIDTH - 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
-            fragment_B[i+4] = sB[(((N / BLOCK_WIDTH - 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+            fragment_B[i] = sB[(((N / BLOCK_WIDTH - 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
+            fragment_B[i+4] = sB[(((N / BLOCK_WIDTH - 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
           }
 
 
