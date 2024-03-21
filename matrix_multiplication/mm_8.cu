@@ -47,10 +47,10 @@
 #define sB_row threadIdx.x / 32
 #define sB_col (threadIdx.x % 32) * 4
 //
-//#define gA_row gC_row + sA_row
-//#define gA_col kBlock * BLOCK_WIDTH + sA_col
-//#define gB_row kBlock * BLOCK_WIDTH + sB_row
-//#define gB_col gC_col + sB_col
+#define gA_row (gC_row + sA_row)
+#define gA_col (kBlock * BLOCK_WIDTH + sA_col)
+#define gB_row (kBlock * BLOCK_WIDTH + sB_row)
+#define gB_col (gC_col + sB_col)
 
 
 __global__ void mm_8(float* A, float* B, float* C, int N){
@@ -71,12 +71,6 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 //    int sA_col;
 //    int sB_row;
 //    int sB_col;
-
-
-    int gA_row = gC_row + sA_row;
-    int gA_col;
-    int gB_row;
-    int gB_col = gC_col + sB_col;
 
     __shared__ float sA[2 * TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[2 * TILE_WIDTH * BLOCK_WIDTH];
@@ -99,13 +93,6 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     // FMA for kBlock = k
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH - 1; kBlock++){
-
-        gA_col = (kBlock + 1) * BLOCK_WIDTH + sA_col;
-        gB_row = (kBlock + 1) * BLOCK_WIDTH + sB_row;
-
-
-
-
 
 //        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
 //        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];

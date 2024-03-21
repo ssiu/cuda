@@ -68,7 +68,6 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
 //    int sA_col;
 //    int sB_row;
 //    int sB_col;
-    float test[16] = {};
     int gA_row;
     int gA_col;
     int gB_row;
