@@ -53,7 +53,7 @@
 #define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_8(float* A, float* B, float* C, int N){
+__global__ void mm_9(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x >> 5;
 //    int lane_id = threadIdx.x & 31;
