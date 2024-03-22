@@ -65,7 +65,7 @@
 
 
 __global__ void kernel_test(float* A, float* B, float* C, int N){
-    printf("thread id is %d, warp id is %d ", threadIdx.x, threadIdx.x >> 5);
+    printf("thread id is %d, warp id is %d \n", threadIdx.x, threadIdx.x >> 5);
 
 }
 
