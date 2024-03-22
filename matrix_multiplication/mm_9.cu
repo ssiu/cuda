@@ -54,7 +54,7 @@
 
 
 __global__ void
-__maxnreg__(128)
+__launch_bounds__(256, 2)
 mm_9(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
 //    int warp_id = threadIdx.x / 32;
