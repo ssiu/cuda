@@ -101,8 +101,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
         // WRONG ANSWER IF WE CHANGE / 4 to >> 2, WHY
         // ==================================================
         // global -> shared for kBlock = k + 1
-        reinterpret_cast<float4*>(sA)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
-        reinterpret_cast<float4*>(sB)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        reinterpret_cast<float4*>(sA)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH + sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
+        reinterpret_cast<float4*>(sB)[(((kBlock + 1) & 1) * TILE_WIDTH * BLOCK_WIDTH + sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
 
 
 
