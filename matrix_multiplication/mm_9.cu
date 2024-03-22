@@ -28,7 +28,7 @@
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
-#define warp_id (threadIdx.x / 32)
+#define warp_id (threadIdx.x >> 5)
 #define lane_id (threadIdx.x % 32)
 
 // warp tiling
