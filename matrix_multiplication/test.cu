@@ -38,14 +38,41 @@
 #include <iostream>
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
+//#define thread_id threadIdx.x
+//#define warp_id threadIdx.x / 32
+//#define lane_id threadIdx.x % 32
+//
+//// warp tiling
+//#define warp_row (warp_id / 2) * 32
+//#define warp_col (warp_id % 2) * 64
+//#define thread_row lane_id / 8
+//#define thread_col (lane_id % 8) * 4
+//
+//
+//#define gC_row TILE_WIDTH * blockIdx.y
+//#define gC_col TILE_WIDTH * blockIdx.x
+//
+//// shared memory offsets
+//#define sA_row thread_id / 2
+//#define sA_col (thread_id % 2) * 4
+//#define sB_row threadIdx.x / 32
+//#define sB_col (threadIdx.x % 32) * 4
+////
+//#define gA_row (gC_row + sA_row)
+//#define gA_col ((kBlock + 1) * BLOCK_WIDTH + sA_col)
+//#define gB_row ((kBlock + 1) * BLOCK_WIDTH + sB_row)
+//#define gB_col (gC_col + sB_col)
+
+
+
 #define thread_id threadIdx.x
-#define warp_id threadIdx.x / 32
+#define warp_id (threadIdx.x >> 5)
 #define lane_id threadIdx.x % 32
 
 // warp tiling
-#define warp_row (warp_id / 2) * 32
+#define warp_row (warp_id >> 1) * 32
 #define warp_col (warp_id % 2) * 64
-#define thread_row lane_id / 8
+#define thread_row (lane_id >> 3)
 #define thread_col (lane_id % 8) * 4
 
 
@@ -53,9 +80,9 @@
 #define gC_col TILE_WIDTH * blockIdx.x
 
 // shared memory offsets
-#define sA_row thread_id / 2
+#define sA_row (thread_id >> 1)
 #define sA_col (thread_id % 2) * 4
-#define sB_row threadIdx.x / 32
+#define sB_row (threadIdx.x >> 5)
 #define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
@@ -63,9 +90,8 @@
 #define gB_row ((kBlock + 1) * BLOCK_WIDTH + sB_row)
 #define gB_col (gC_col + sB_col)
 
-
 __global__ void kernel_test(float* A, float* B, float* C, int N){
-    printf("thread id is %d, warp id is %d \n", threadIdx.x, threadIdx.x >> 5);
+    printf("thread id is %d, warp id is %d, warp_row is %d, thread_row is %d \n", threadIdx.x, warp_id, warp_row, thread_row);
 
 }
 
