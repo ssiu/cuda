@@ -83,8 +83,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     //0 or TILE_WIDTH * BLOCK_WIDTH
     // prologue
     // global -> shared0 for kBlock = 0, pointer = 0
-    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
-    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) / 4];
+    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) >> 2];
+    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) >> 2];
 
     // mainloop
     // for kBlock = 0,..., N/BLOCK_WIDTH - 1
