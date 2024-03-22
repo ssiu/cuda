@@ -169,10 +169,10 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
 
     #pragma unroll
     for (int x=0; x<4; x+=1){
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) >> 2];
     }
 
 
