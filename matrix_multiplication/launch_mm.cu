@@ -7,7 +7,7 @@
 #include <random>
 #include "mm.cuh"
 #include "utils.cuh"
-/
+
 #define TILE_WIDTH 128
 int main(){
     int N = 1024;
