@@ -18,8 +18,9 @@ clean_mm:
 
 test: clean_test matrix_multiplication/test.o
 
+
 matrix_multiplication/test.o: matrix_multiplication/test.cu
-    nvcc -o $@ -std=c++17 -arch=sm_70  $<
+	nvcc -o $@ -std=c++17 -arch=sm_70  $<
 
 clean_test:
 	rm -f matrix_multiplication/test.o
