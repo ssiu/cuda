@@ -10,7 +10,7 @@
 
 #define TILE_WIDTH 128
 int main(){
-    int N = 8192;
+    int N = 1024;
 
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
@@ -43,7 +43,7 @@ int main(){
     dim3 dimBlock4(256, 1);
     mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                    thrust::raw_pointer_cast(dC.data()), N);
-
+////////////////////////////////////////////////////////////////////////////////////////////////
 //    mm_5<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
 //
@@ -59,8 +59,11 @@ int main(){
 //    cudaFuncSetAttribute(mm_6, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
 //    mm_6<<<dimGrid4, dimBlock4, maxbytes>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
+////////////////////////////////////////////////////////////////////////////////////////////////////
     mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
+
+
 //    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                               thrust::raw_pointer_cast(dC.data()), N);
     mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),

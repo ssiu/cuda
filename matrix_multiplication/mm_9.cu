@@ -28,13 +28,13 @@
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
-#define warp_id (threadIdx.x >> 5)
-#define lane_id threadIdx.x % 32
+#define warp_id (threadIdx.x / 32)
+#define lane_id (threadIdx.x % 32)
 
 // warp tiling
-#define warp_row (warp_id >> 1) * 32
+#define warp_row (warp_id / 2) * 32
 #define warp_col (warp_id % 2) * 64
-#define thread_row (lane_id >> 3)
+#define thread_row (lane_id / 8)
 #define thread_col (lane_id % 8) * 4
 
 
@@ -42,9 +42,9 @@
 #define gC_col TILE_WIDTH * blockIdx.x
 
 // shared memory offsets
-#define sA_row (thread_id >> 1)
+#define sA_row (thread_id / 2)
 #define sA_col (thread_id % 2) * 4
-#define sB_row (threadIdx.x >> 5)
+#define sB_row threadIdx.x / 32
 #define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
@@ -53,14 +53,14 @@
 #define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_9(float* A, float* B, float* C, int N){
+__global__ void mm_8(float* A, float* B, float* C, int N){
 //    int thread_id = threadIdx.x;
-//    int warp_id = threadIdx.x >> 5;
+//    int warp_id = threadIdx.x / 32;
 //    int lane_id = threadIdx.x % 32;
 //
-//    int warp_row = (warp_id >> 1) * 32;
+//    int warp_row = (warp_id / 2) * 32;
 //    int warp_col = (warp_id % 2) * 64;
-//    int thread_row = lane_id >> 3;
+//    int thread_row = lane_id / 8;
 //    int thread_col = (lane_id % 8) * 4;
 
     // offset for output matrix C
@@ -83,8 +83,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     //0 or TILE_WIDTH * BLOCK_WIDTH
     // prologue
     // global -> shared0 for kBlock = 0, pointer = 0
-    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) >> 2];
-    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) >> 2];
+    reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
+    reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) / 4];
 
     // mainloop
     // for kBlock = 0,..., N/BLOCK_WIDTH - 1
@@ -94,13 +94,13 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH - 1; kBlock++){
 
-//        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
-//        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
+//        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+//        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
 
         // global -> shared for kBlock = k + 1
-        reinterpret_cast<float4*>(sA)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
-        reinterpret_cast<float4*>(sB)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) >> 2 + (sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
+        reinterpret_cast<float4*>(sA)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(sB)[(((kBlock + 1) % 2) * TILE_WIDTH * BLOCK_WIDTH) / 4 + (sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
 
 
@@ -167,10 +167,10 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
 
     #pragma unroll
     for (int x=0; x<4; x+=1){
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
     }
 
 

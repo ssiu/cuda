@@ -28,13 +28,13 @@
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
-#define warp_id threadIdx.x / 32
-#define lane_id threadIdx.x % 32
+#define warp_id (threadIdx.x / 32)
+#define lane_id (threadIdx.x % 32)
 
 // warp tiling
 #define warp_row (warp_id / 2) * 32
 #define warp_col (warp_id % 2) * 64
-#define thread_row lane_id / 8
+#define thread_row (lane_id / 8)
 #define thread_col (lane_id % 8) * 4
 
 
@@ -42,7 +42,7 @@
 #define gC_col TILE_WIDTH * blockIdx.x
 
 // shared memory offsets
-#define sA_row thread_id / 2
+#define sA_row (thread_id / 2)
 #define sA_col (thread_id % 2) * 4
 #define sB_row threadIdx.x / 32
 #define sB_col (threadIdx.x % 32) * 4
