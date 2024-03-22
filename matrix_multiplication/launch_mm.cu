@@ -7,7 +7,7 @@
 #include <random>
 #include "mm.cuh"
 #include "utils.cuh"
-
+/
 #define TILE_WIDTH 128
 int main(){
     int N = 1024;
@@ -22,6 +22,7 @@ int main(){
     thrust::device_vector<float> dC = hC;
     thrust::device_vector<float> dC_cublas(N*N);
 
+//uncomment mm4,mm7,mm9
 
 //    dim3 dimGrid(64, 64);
 //    dim3 dimBlock(32, 32);
@@ -43,6 +44,7 @@ int main(){
     dim3 dimBlock4(256, 1);
     mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                    thrust::raw_pointer_cast(dC.data()), N);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //    mm_5<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
