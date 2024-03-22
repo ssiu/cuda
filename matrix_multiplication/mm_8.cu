@@ -44,7 +44,7 @@
 // shared memory offsets
 #define sA_row (thread_id / 2)
 #define sA_col (thread_id % 2) * 4
-#define sB_row threadIdx.x / 32
+#define sB_row (threadIdx.x / 32)
 #define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
