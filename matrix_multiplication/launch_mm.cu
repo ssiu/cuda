@@ -10,7 +10,7 @@
 
 #define TILE_WIDTH 128
 int main(){
-    int N = 1024;
+    int N = 8192;
 
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
