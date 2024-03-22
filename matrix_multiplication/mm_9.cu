@@ -112,12 +112,12 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
             #pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
-                fragment_A[i] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i] = sA[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i+4] = sA[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + (warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
                 // Load B fragment, 8 floats
-                fragment_B[i] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[((kBlock % 2) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+                fragment_B[i] = sB[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[((kBlock & 1) * TILE_WIDTH * BLOCK_WIDTH) + kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
               }
 
 
