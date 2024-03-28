@@ -31,7 +31,7 @@
 // warp tiling
 #define warp_row (warp_id / 2) * 32
 #define warp_col (warp_id % 2) * 64
-#define thread_row (lane_id / 8)
+#define thread_row (lane_id / 8) * 4
 #define thread_col (lane_id % 8) * 4
 
 
@@ -93,10 +93,10 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 
                 // bank conflict free load
                 // column shift resets every 16 rows
-                // the row % 4
+                // thread_row / 4 gives us the permutation status
                 //
-                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
