@@ -71,15 +71,15 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
         tmpA = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         tmpB = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
-        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 0] = tmpA.x;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 1] = tmpA.y;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 2] = tmpA.z;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 3] = tmpA.w;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) + 0] = tmpA.x;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) + 1] = tmpA.y;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) + 2] = tmpA.z;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) + 3] = tmpA.w;
 
-        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 0] = tmpB.x;
-        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 1] = tmpB.y;
-        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 2] = tmpB.z;
-        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 3] = tmpB.w;
+        sB[(sB_row * TILE_WIDTH + sB_col) + 0] = tmpB.x;
+        sB[(sB_row * TILE_WIDTH + sB_col) + 1] = tmpB.y;
+        sB[(sB_row * TILE_WIDTH + sB_col) + 2] = tmpB.z;
+        sB[(sB_row * TILE_WIDTH + sB_col) + 3] = tmpB.w;
 
         __syncthreads();
 
