@@ -56,6 +56,8 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
 
+    float4 tmpA;
+    float4 tmpB;
     // fragments
     float fragment_A[8] = {};
     float fragment_B[8] = {};
@@ -63,8 +65,21 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
 
-        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
-        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+//        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+//        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+
+        tmpA = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        tmpB = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+
+        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 1] = tmpA.x;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 2] = tmpA.y;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 3] = tmpA.z;
+        sA[(sA_row * BLOCK_WIDTH + sA_col) / 4 + 4] = tmpA.w;
+
+        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 1] = tmpB.x;
+        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 2] = tmpB.y;
+        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 3] = tmpB.z;
+        sB[(sB_row * TILE_WIDTH + sB_col) / 4 + 4] = tmpB.w;
 
         __syncthreads();
 
