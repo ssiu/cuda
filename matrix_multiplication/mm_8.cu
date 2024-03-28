@@ -4,7 +4,7 @@
 // shared memory blocking
 // register blocking
 // vectorized memory load
-
+// shared memory bank conflict
 
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
 
@@ -56,8 +56,8 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
 
-    float4 tmpA;
-    float4 tmpB;
+    float tmp_original[4];
+    float tmp_permuted[4];
     // fragments
     float fragment_A[8] = {};
     float fragment_B[8] = {};
@@ -65,21 +65,19 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
 
-//        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
-//        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        // no bank conflict for B
+        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
-        tmpA = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
-        tmpB = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        // bank conflict for A, first load it to a tmp register then permute the data
+        reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        #pragma unroll
+        for (int i=0;i<4;i++) {
+            tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
+        }
+        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
 
-        sA[(sA_row * BLOCK_WIDTH + sA_col) + 0] = tmpA.x;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) + 1] = tmpA.y;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) + 2] = tmpA.z;
-        sA[(sA_row * BLOCK_WIDTH + sA_col) + 3] = tmpA.w;
 
-        sB[(sB_row * TILE_WIDTH + sB_col) + 0] = tmpB.x;
-        sB[(sB_row * TILE_WIDTH + sB_col) + 1] = tmpB.y;
-        sB[(sB_row * TILE_WIDTH + sB_col) + 2] = tmpB.z;
-        sB[(sB_row * TILE_WIDTH + sB_col) + 3] = tmpB.w;
 
         __syncthreads();
 
@@ -90,9 +88,15 @@ __global__ void mm_8(float* A, float* B, float* C, int N){
             #pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
+//                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+//                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+
+                // bank conflict free load
+                // column shift resets every 16 rows
+                // the row % 4
+                //
                 fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
                 fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
-
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
