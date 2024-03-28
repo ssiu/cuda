@@ -50,7 +50,7 @@
 #define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_7(float* A, float* B, float* C, int N){
+__global__ void mm_8(float* A, float* B, float* C, int N){
 
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
