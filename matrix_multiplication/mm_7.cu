@@ -31,7 +31,7 @@
 // warp tiling
 #define warp_row (warp_id / 2) * 32
 #define warp_col (warp_id % 2) * 64
-#define thread_row (lane_id / 8) * 4
+#define thread_row (lane_id / 8)
 #define thread_col (lane_id % 8) * 4
 
 
