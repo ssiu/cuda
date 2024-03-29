@@ -1,32 +1,25 @@
-// matrix multiplication for 8192 x 8192
-
-// global memory coalescing
-// shared memory blocking
-// register blocking
-// vectorized memory load
-
-
+// matrix multiplication for 128 x 128 submatrix
+// https://leimao.github.io/blog/CUDA-Shared-Memory-Capacity/
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
 
-// thread-tiling: each thread loads 8+8 = 16 floats and computes 8x8 = 64 results
-// warp-tiling: each warp computes 64x32 = 2048 results
-// block-tiling: each thread block has 2x4 = 8 warps = 256 threads computing 128x128 = 16384 results
+// global memory coalescing
+// block tiling
+
+
 
 // shared memory:
-// 128 * 8 * 4 * 2 = 8KB
-// registers:
-// each thread needs at least 64 * 4 = 256B
-// so a threadblock needs at least 256 * 256 = 64 KB
+// 128(m) * 32(n) * 4 (float) * 2 (A and B) = 32KB
 
 // dim3 dimGrid(16, 16);
 // dim3 dimBlock(256, 1);
 
 #include <iostream>
-#define BLOCK_WIDTH 8
+#define BLOCK_A_WIDTH 32
+#define BLOCK_B_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
-#define warp_id threadIdx.x / 32
-#define lane_id threadIdx.x % 32
+#define warp_id (threadIdx.x / 32)
+#define lane_id (threadIdx.x % 32)
 
 // warp tiling
 #define warp_row (warp_id / 2) * 32
@@ -35,43 +28,23 @@
 #define thread_col (lane_id % 8) * 4
 
 
-#define gC_row TILE_WIDTH * blockIdx.y
-#define gC_col TILE_WIDTH * blockIdx.x
+#define gC_row (TILE_WIDTH * blockIdx.y)
+#define gC_col (TILE_WIDTH * blockIdx.x)
 
 // shared memory offsets
-#define sA_row thread_id / 2
+#define sA_row (thread_id / 2)
 #define sA_col (thread_id % 2) * 4
-#define sB_row threadIdx.x / 32
+#define sB_row (threadIdx.x / 32)
 #define sB_col (threadIdx.x % 32) * 4
 //
-//#define gA_row gC_row + sA_row
-//#define gA_col kBlock * BLOCK_WIDTH + sA_col
-//#define gB_row kBlock * BLOCK_WIDTH + sB_row
-//#define gB_col gC_col + sB_col
+#define gA_row (gC_row + sA_row)
+#define gA_col (kBlock * BLOCK_WIDTH + sA_col)
+#define gB_row (kBlock * BLOCK_WIDTH + sB_row)
+#define gB_col (gC_col + sB_col)
 
 
 __global__ void mm_7(float* A, float* B, float* C, int N){
-//    int thread_id = threadIdx.x;
-//    int warp_id = threadIdx.x / 32;
-//    int lane_id = threadIdx.x % 32;
-//
-//    int warp_row = (warp_id / 2) * 32;
-//    int warp_col = (warp_id % 2) * 64;
-//    int thread_row = lane_id / 8;
-//    int thread_col = (lane_id % 8) * 4;
 
-    // offset for output matrix C
-//    int gC_row =  TILE_WIDTH * blockIdx.y;
-//    int gC_col =  TILE_WIDTH * blockIdx.x;
-
-//    int sA_row;
-//    int sA_col;
-//    int sB_row;
-//    int sB_col;
-    int gA_row;
-    int gA_col;
-    int gB_row;
-    int gB_col;
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
@@ -119,7 +92,7 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
-              }
+            }
 
 
             // Compute accumulator, 64 floats
