@@ -73,7 +73,7 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
         reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
         #pragma unroll
         for (int i=0;i<4;i++) {
-            tmp_permuted[(i + lane_id >> 3) & 3] = tmp_original[i];
+            tmp_permuted[((i + lane_id) >> 3) & 3] = tmp_original[i];
         }
         reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(tmp_permuted)[0];
 
@@ -95,8 +95,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
                 // column shift resets every 16 rows
                 // thread_row >> 2 gives us the permutation status
                 //
-                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row >> 2 + kFragment & 3) & 3 + (kFragment >> 2) * 4];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row >> 2 + kFragment & 3) & 3 + (kFragment >> 2) * 4];
+                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + ((thread_row >> 2) + (kFragment & 3)) & 3 + (kFragment >> 2) * 4];
+                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + ((thread_row >> 2) + (kFragment & 3)) & 3 + (kFragment >> 2) * 4];
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
@@ -117,10 +117,10 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     }
     #pragma unroll
     for (int x=0; x<4; x+=1){
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
-        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) >> 2];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) >> 2] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) >> 2];
     }
 
 }
