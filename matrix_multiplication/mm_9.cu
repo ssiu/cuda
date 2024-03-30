@@ -136,32 +136,36 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
 
 
     // epilogue
-    #pragma unroll
-    for (int i=0; i<4; i++){
-        // Load A fragment, 8 floats
+    for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
+
+            #pragma unroll
+            for (int i=0; i<4; i++){
+                // Load A fragment, 8 floats
 //                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
 //                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
-        // bank conflict free load
-        // column shift resets every 16 rows
-        // thread_row / 4 gives us the permutation status
-        //
-        fragment_A[i] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
-        fragment_A[i+4] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
-        // Load B fragment, 8 floats
-        fragment_B[i] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + i];
-        fragment_B[i+4] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
-      }
+                // bank conflict free load
+                // column shift resets every 16 rows
+                // thread_row / 4 gives us the permutation status
+                //
+                fragment_A[i] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                // Load B fragment, 8 floats
+                fragment_B[i] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+              }
 
 
-    // Compute accumulator, 64 floats
-    #pragma unroll
-    for (int x=0; x<8; x++){
-        #pragma unroll
-        for (int y=0; y<8; y++){
-            accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
+            // Compute accumulator, 64 floats
+            #pragma unroll
+            for (int x=0; x<8; x++){
+                #pragma unroll
+                for (int y=0; y<8; y++){
+                    accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
+                }
+            }
+
         }
-    }
 
 
 
