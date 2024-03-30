@@ -5,9 +5,12 @@
 // register blocking
 // vectorized memory load
 // shared memory bank conflict
+// double buffering
+//    block 0               block 1             block 0            block 2              block 1          block N / BLOCK_WIDTH - 1   block N / BLOCK_WIDTH - 2       block N / BLOCK_WIDTH - 1
+// global -> shared1  | global -> shared2, shared1 -> FFMA | global -> shared 1, shared 2 -> FFMA | ... |     global -> shared     ,      shared -> FFMA         |        shared -> FFMA
+
 
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
-
 // thread-tiling: each thread loads 8+8 = 16 floats and computes 8x8 = 64 results
 // warp-tiling: each warp computes 64x32 = 2048 results
 // block-tiling: each thread block has 2x4 = 8 warps = 256 threads computing 128x128 = 16384 results
@@ -46,8 +49,8 @@
 #define sB_col (threadIdx.x % 32) * 4
 //
 #define gA_row (gC_row + sA_row)
-#define gA_col (kBlock * BLOCK_WIDTH + sA_col)
-#define gB_row (kBlock * BLOCK_WIDTH + sB_row)
+#define gA_col ((kBlock + 1) * BLOCK_WIDTH + sA_col)
+#define gB_row ((kBlock + 1) * BLOCK_WIDTH + sB_row)
 #define gB_col (gC_col + sB_col)
 
 
@@ -66,23 +69,35 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     float accum[64] = {};
 
 
-    for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
+    // prologue
+    //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+    // no bank conflict for B
+    reinterpret_cast<float4*>(sB[0])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) / 4];
 
+    // bank conflict for A, first load it to a tmp register then permute the data
+    reinterpret_cast<float4*>(tmp_original[0])[0] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
+    #pragma unroll
+    for (int i=0;i<4;i++) {
+        tmp_permuted[0][(i + lane_id / 8) % 4] = tmp_original[0][i];
+    }
+    reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted[0])[0];
+
+    __syncthreads();
+
+
+    for (int kBlock = 0; kBlock < N / BLOCK_WIDTH - 1; kBlock++){
+        // load next block
         //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         // no bank conflict for B
-        reinterpret_cast<float4*>(sB[0])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        reinterpret_cast<float4*>(sB[(kBlock + 1) & 1])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
         // bank conflict for A, first load it to a tmp register then permute the data
-        reinterpret_cast<float4*>(tmp_original[0])[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(tmp_original[(kBlock + 1) & 1])[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         #pragma unroll
         for (int i=0;i<4;i++) {
-            tmp_permuted[0][(i + lane_id / 8) % 4] = tmp_original[0][i];
+            tmp_permuted[(kBlock + 1) & 1][(i + lane_id / 8) % 4] = tmp_original[(kBlock + 1) & 1][i];
         }
-        reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted[0])[0];
-
-
-
-        __syncthreads();
+        reinterpret_cast<float4*>(sA[(kBlock + 1) & 1])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted[(kBlock + 1) & 1])[0];
 
 
         //load a fragment from shared memory to register
@@ -98,11 +113,11 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
                 // column shift resets every 16 rows
                 // thread_row / 4 gives us the permutation status
                 //
-                fragment_A[i] = sA[0][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
-                fragment_A[i+4] = sA[0][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i] = sA[kBlock & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[kBlock & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
                 // Load B fragment, 8 floats
-                fragment_B[i] = sB[0][kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[0][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+                fragment_B[i] = sB[kBlock & 1][kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[kBlock & 1][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
               }
 
 
@@ -118,6 +133,38 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
         }
         __syncthreads();
     }
+
+
+    // epilogue
+    #pragma unroll
+    for (int i=0; i<4; i++){
+        // Load A fragment, 8 floats
+//                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+//                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+
+        // bank conflict free load
+        // column shift resets every 16 rows
+        // thread_row / 4 gives us the permutation status
+        //
+        fragment_A[i] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+        fragment_A[i+4] = sA[(N / BLOCK_WIDTH - 1) & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+        // Load B fragment, 8 floats
+        fragment_B[i] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + i];
+        fragment_B[i+4] = sB[(N / BLOCK_WIDTH - 1) & 1][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+      }
+
+
+    // Compute accumulator, 64 floats
+    #pragma unroll
+    for (int x=0; x<8; x++){
+        #pragma unroll
+        for (int y=0; y<8; y++){
+            accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
+        }
+    }
+
+
+
     #pragma unroll
     for (int x=0; x<4; x+=1){
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
