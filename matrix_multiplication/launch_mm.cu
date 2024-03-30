@@ -9,8 +9,8 @@
 #include "utils.cuh"
 
 #define TILE_WIDTH 128
+#define N 8192
 int main(){
-    int N = 8192;
 
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
