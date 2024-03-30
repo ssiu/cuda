@@ -22,6 +22,7 @@
 // dim3 dimBlock(256, 1);
 
 #include <iostream>
+
 #define BLOCK_WIDTH 8
 #define TILE_WIDTH 128
 #define thread_id threadIdx.x
@@ -50,32 +51,34 @@
 #define gB_col (gC_col + sB_col)
 
 
+
 __global__ void mm_9(float* A, float* B, float* C, int N){
 
 
-    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
-    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sA[2][TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sB[2][TILE_WIDTH * BLOCK_WIDTH];
 
-    float tmp_original[4];
-    float tmp_permuted[4];
+    float tmp_original[2][4];
+    float tmp_permuted[2][4];
     // fragments
     float fragment_A[8] = {};
     float fragment_B[8] = {};
     float accum[64] = {};
 
+
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
 
         //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         // no bank conflict for B
-        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        reinterpret_cast<float4*>(sB[0])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
         // bank conflict for A, first load it to a tmp register then permute the data
-        reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(tmp_original[0])[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         #pragma unroll
         for (int i=0;i<4;i++) {
-            tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
+            tmp_permuted[0][(i + lane_id / 8) % 4] = tmp_original[0][i];
         }
-        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
+        reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted[0])[0];
 
 
 
@@ -95,11 +98,11 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
                 // column shift resets every 16 rows
                 // thread_row / 4 gives us the permutation status
                 //
-                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i] = sA[0][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[0][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
                 // Load B fragment, 8 floats
-                fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
-                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+                fragment_B[i] = sB[0][kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[0][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
               }
 
 
