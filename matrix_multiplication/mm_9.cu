@@ -61,8 +61,8 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     __shared__ float sA[2][TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[2][TILE_WIDTH * BLOCK_WIDTH];
 
-    float tmp_original[2][4];
-    float tmp_permuted[2][4];
+    float tmp_original[4];
+    float tmp_permuted[4];
     // fragments
     float fragment_A[8] = {};
     float fragment_B[8] = {};
@@ -75,12 +75,12 @@ __global__ void mm_9(float* A, float* B, float* C, int N){
     reinterpret_cast<float4*>(sB[0])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(sB_row * N + gB_col) / 4];
 
     // bank conflict for A, first load it to a tmp register then permute the data
-    reinterpret_cast<float4*>(tmp_original[0])[0] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
+    reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
     //#pragma unroll
     for (int i=0;i<4;i++) {
-        tmp_permuted[0][(i + lane_id / 8) % 4] = tmp_original[0][i];
+        tmp_permuted[0][(i + lane_id / 8) % 4] = tmp_original[i];
     }
-    reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted[0])[0];
+    reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
 
     __syncthreads();
 
