@@ -54,8 +54,8 @@
 #define gB_col (gC_col + sB_col)
 
 
-
-__global__ void mm_9(float* A, float* B, float* C, int N){
+__global__ void __launch_bounds__(256, 2)
+mm_9(float* A, float* B, float* C, int N){
 
 
     __shared__ float sA[2][TILE_WIDTH * BLOCK_WIDTH];
