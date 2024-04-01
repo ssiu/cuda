@@ -41,7 +41,7 @@ int main(){
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 
     dim3 dimGrid4(N / TILE_WIDTH, N / TILE_WIDTH);
-    dim3 dimBlock4(1, 1);
+    dim3 dimBlock4(256, 1);
 //    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
 
@@ -62,12 +62,12 @@ int main(){
 //    mm_6<<<dimGrid4, dimBlock4, maxbytes>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
-//
-//
-    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
+//    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
+////
+////
+//    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
     mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
     hC = dC;
