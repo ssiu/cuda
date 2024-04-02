@@ -53,8 +53,8 @@
 __global__ void mm_8(float* A, float* B, float* C, int N){
 
 
-    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH * 2];
-    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH * 2];
+    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
 
     float tmp_original[4];
     float tmp_permuted[4];
