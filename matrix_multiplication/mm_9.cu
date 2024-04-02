@@ -158,9 +158,9 @@ mm_9(float* A, float* B, float* C, int N){
 
 
             // Compute accumulator, 64 floats
-            #pragma unroll 1
+            #pragma unroll 4
             for (int x=0; x<8; x++){
-                #pragma unroll 1
+                #pragma unroll
                 for (int y=0; y<8; y++){
                     accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
