@@ -114,8 +114,8 @@ mm_9(float* A, float* B, float* C, int N){
                 // column shift resets every 16 rows
                 // thread_row / 4 gives us the permutation status
                 //
-                fragment_A[i] = sA[kBlock & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
-                fragment_A[i+4] = sA[kBlock & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i] = sA[kBlock & 1][(warp_row + thread_row + i) * BLOCK_WIDTH + ((thread_row / 4) + (kFragment % 4)) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[kBlock & 1][(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + ((thread_row / 4) + (kFragment % 4)) % 4 + (kFragment / 4) * 4];
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kBlock & 1][kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kBlock & 1][kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
