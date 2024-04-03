@@ -77,10 +77,10 @@ mm_9(float* A, float* B, float* C, int N){
     // bank conflict for A, first load it to a tmp register then permute the data
     reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) >> 2];
     //#pragma unroll
-    for (int i=0;i<4;i++) {
-        tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
+    for (int i=0; i<4; i++) {
+        tmp_permuted[(i + (lane_id >> 3)) % 4] = tmp_original[i];
     }
-    reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
+    reinterpret_cast<float4*>(sA[0])[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(tmp_permuted)[0];
 
     __syncthreads();
 
