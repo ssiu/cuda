@@ -95,10 +95,10 @@ mm_9(float* A, float* B, float* C, int N){
         reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
 
         //#pragma unroll
-        for (int i=0;i<4;i++) {
-            tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
+        for (int i=0; i<4; i++) {
+            tmp_permuted[(i + (lane_id >> 3)) & 3] = tmp_original[i];
         }
-        reinterpret_cast<float4*>(sA[(kBlock + 1) & 1])[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
+        reinterpret_cast<float4*>(sA[(kBlock + 1) & 1])[(sA_row * BLOCK_WIDTH + sA_col) >> 2] = reinterpret_cast<float4*>(tmp_permuted)[0];
 
 
         //load a fragment from shared memory to register
