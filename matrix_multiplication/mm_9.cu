@@ -76,7 +76,7 @@ mm_9(float* A, float* B, float* C, int N){
 
     // bank conflict for A, first load it to a tmp register then permute the data
     reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + sA_col) / 4];
-    #pragma unroll
+    //#pragma unroll
     for (int i=0;i<4;i++) {
         tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
     }
@@ -94,7 +94,7 @@ mm_9(float* A, float* B, float* C, int N){
         // bank conflict for A, first load it to a tmp register then permute the data
         reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
 
-        #pragma unroll
+        //#pragma unroll
         for (int i=0;i<4;i++) {
             tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
         }
@@ -104,7 +104,7 @@ mm_9(float* A, float* B, float* C, int N){
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
-            #pragma unroll
+            //#pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
 //                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
@@ -123,9 +123,9 @@ mm_9(float* A, float* B, float* C, int N){
 
 
             // Compute accumulator, 64 floats
-            #pragma unroll 1
+            //#pragma unroll 1
             for (int x=0; x<8; x++){
-                #pragma unroll 1
+                //#pragma unroll 1
                 for (int y=0; y<8; y++){
                     accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
@@ -139,7 +139,7 @@ mm_9(float* A, float* B, float* C, int N){
     // epilogue
     for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
-            #pragma unroll
+            //#pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
 //                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
@@ -158,9 +158,9 @@ mm_9(float* A, float* B, float* C, int N){
 
 
             // Compute accumulator, 64 floats
-            #pragma unroll 4
+            //#pragma unroll 4
             for (int x=0; x<8; x++){
-                #pragma unroll
+                //#pragma unroll
                 for (int y=0; y<8; y++){
                     accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
@@ -170,7 +170,7 @@ mm_9(float* A, float* B, float* C, int N){
 
 
 
-    #pragma unroll
+    //#pragma unroll
     for (int x=0; x<4; x+=1){
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
