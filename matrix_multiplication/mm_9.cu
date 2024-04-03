@@ -89,10 +89,10 @@ mm_9(float* A, float* B, float* C, int N){
         // load next block
         //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
         // no bank conflict for B
-        reinterpret_cast<float4*>(sB[(kBlock + 1) & 1])[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+        reinterpret_cast<float4*>(sB[(kBlock + 1) & 1])[(sB_row * TILE_WIDTH + sB_col) >> 2] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) >> 2];
 
         // bank conflict for A, first load it to a tmp register then permute the data
-        reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) >> 2];
 
         //#pragma unroll
         for (int i=0; i<4; i++) {
