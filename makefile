@@ -9,7 +9,7 @@ mm: clean_mm matrix_multiplication/launch_mm.o
 
 matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
 	nvcc -o $@ -std=c++17 -arch=sm_70 -I/mnt/shared/swsiu/cutlass/sm70/cutlass/include $< \
-	matrix_multiplication/mm_*.cu -lcublas
+	matrix_multiplication/mm_*.cu matrix_multiplication/yz_mm_*.cu -lcublas
 
 
 clean_mm:
