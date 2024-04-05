@@ -84,19 +84,19 @@ int main(){
     //
     // cublas row major
     //
-    float alpha = 1.0f;
-    float beta = 1.0f;
-
-    cudaError_t cudaStat;  // cudaMalloc status
-    cublasStatus_t stat;   // cuBLAS functions status
-    cublasHandle_t handle; // cuBLAS context
-    cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
-                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
-
-    hC_cublas = dC_cublas;
-
-    cublasDestroy(handle);
+//    float alpha = 1.0f;
+//    float beta = 1.0f;
+//
+//    cudaError_t cudaStat;  // cudaMalloc status
+//    cublasStatus_t stat;   // cuBLAS functions status
+//    cublasHandle_t handle; // cuBLAS context
+//    cublasCreate(&handle);
+//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
+//                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+//
+//    hC_cublas = dC_cublas;
+//
+//    cublasDestroy(handle);
     //
     //
     //
