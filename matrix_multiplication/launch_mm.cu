@@ -65,8 +65,8 @@ int main(){
 //    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                               thrust::raw_pointer_cast(dC.data()), N);
 //
-//    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-//                               thrust::raw_pointer_cast(dC.data()), N);
+    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
 //    mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                               thrust::raw_pointer_cast(dC.data()), N);
 //    hC = dC;
@@ -75,7 +75,7 @@ int main(){
     // yz
     dim3 blockDim(256);
     dim3 gridDim(N / TILE_WIDTH,N / TILE_WIDTH);
-//    mysgemm_v9<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
+    mysgemm_v9<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
     mysgemm_v11<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
 
     hC = dC;
