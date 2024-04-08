@@ -58,7 +58,7 @@ int main() {
     float fa = 8.0f;
     float fb = 3.0f;
     int ia = 8;
-    int ib = 3;
+    int ib = 4;
     thrust::host_vector<float> a(1, fa);
     thrust::host_vector<float> b(1, fb);
 //    thrust::host_vector<float> a(1, fa);
@@ -86,8 +86,8 @@ int main() {
     int_mul<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_div<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_mod<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
-    int_shf<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
-    int_and<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
+    int_shf<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
+    int_and<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
 
     c = dc;
     c_int = dc_int;
