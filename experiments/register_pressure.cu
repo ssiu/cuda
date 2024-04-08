@@ -35,11 +35,11 @@ __global__ void int_mul(int* a, int* b, int* c) {
 }
 
 __global__ void int_div(int* a, int* b, int* c) {
-    c[0] = a[0] / b[0];
+    c[0] = a[0] / 4;
 }
 
 __global__ void int_mod(int* a, int* b, int* c) {
-    c[0] = a[0] % b[0];
+    c[0] = a[0] % 4;
 }
 
 __global__ void int_shf(int* a, int* c) {
@@ -84,8 +84,8 @@ int main() {
     perform_int_operations<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_add<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_mul<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
-    int_div<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
-    int_mod<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
+    int_div<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
+    int_mod<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_shf<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
     int_and<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(dc_int.data()));
 
