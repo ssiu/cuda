@@ -26,11 +26,13 @@ __global__ void perform_int_operations(int* a, int* b, int* c) {
 
 
 int main() {
+    int aa = 5;
+    int bb = 3;
     thrust::host_vector<float> a(1, 5.0f);
     thrust::host_vector<float> b(1, 3.0f);
     thrust::host_vector<float> c(6);
-    thrust::host_vector<int> a_int = {5};
-    thrust::host_vector<int> b_int = {3};
+    thrust::host_vector<int> a_int = {aa};
+    thrust::host_vector<int> b_int = {bb};
     thrust::host_vector<int> c_int(6);
 
 
