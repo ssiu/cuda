@@ -34,11 +34,23 @@ int main() {
     thrust::host_vector<int> c_int[6];
 
 
+    thrust::device_vector<float> da = a;
+    thrust::device_vector<float> db = b;
+    thrust::device_vector<float> dc = c;
+    thrust::device_vector<int> da_int = a_int;
+    thrust::device_vector<int> db_int = b_int;
+    thrust::device_vector<int> dc_int = c_int;
+
+
     dim3 blockDim(1);
     dim3 gridDim(1);
 
-    perform_float_operations<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(a.data()), thrust::raw_pointer_cast(b.data()), thrust::raw_pointer_cast(c.data()));
-    perform_int_operations<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(a.data()), thrust::raw_pointer_cast(b.data()), thrust::raw_pointer_cast(c.data()));
+    perform_float_operations<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da.data()), thrust::raw_pointer_cast(db.data()), thrust::raw_pointer_cast(dc.data()));
+    perform_int_operations<<<gridDim, blockDim>>>(thrust::raw_pointer_cast(da_int.data()), thrust::raw_pointer_cast(db_int.data()), thrust::raw_pointer_cast(dc_int.data()));
+
+    c = dc;
+    c_int = dc_int;
+
     for (int i=0;i<6;i++){
         std::cout << c[i] << std::endl;
     }
