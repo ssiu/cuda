@@ -29,8 +29,8 @@ int main() {
     thrust::host_vector<float> a(1, 5.0f);
     thrust::host_vector<float> b(1, 3.0f);
     thrust::host_vector<float> c(6);
-    thrust::host_vector<int> a_int = (1,5);
-    thrust::host_vector<int> b_int = (1,3);
+    thrust::host_vector<int> a_int = {5};
+    thrust::host_vector<int> b_int = {3};
     thrust::host_vector<int> c_int(6);
 
 
