@@ -1,3 +1,10 @@
+#include <iostream>
+#include <cstdio>
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <random>
 
 __global__ void perform_float_operations(float* a, float* b, float* c) {
     c[0] = a[0] + b[0];
