@@ -7,16 +7,16 @@
 #include <random>
 
 __global__ void perform_float_operations(float* a, float* b, float* c) {
-    ra = a[0];
-    rb = b[0];
+    float ra = a[0];
+    float rb = b[0];
     c[0] = ra + rb;
     c[1] = ra * rb;
     c[2] = ra / rb;
 }
 
 __global__ void perform_int_operations(int* a, int* b, int* c) {
-    ra = a[0];
-    rb = b[0];
+    int ra = a[0];
+    int rb = b[0];
     c[0] = ra + rb;
     c[1] = ra * rb;
     c[2] = ra / rb;
