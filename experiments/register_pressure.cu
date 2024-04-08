@@ -34,11 +34,11 @@ __global__ void int_mul(int* a, int* b, int* c) {
     c[0] = a[0] * b[0];
 }
 
-__global__ void int_div(int* a, int* b, int* c) {
+__global__ void int_div(int* a, int* c) {
     c[0] = a[0] / 4;
 }
 
-__global__ void int_mod(int* a, int* b, int* c) {
+__global__ void int_mod(int* a, int* c) {
     c[0] = a[0] % 4;
 }
 
