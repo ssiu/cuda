@@ -18,7 +18,7 @@ __global__ void perform_int_operations(int* a, int* b, int* c) {
     c[1] = a[0] * b[0];
     c[2] = a[0] / b[0];
     c[3] = a[0] % b[0];
-    c[4] = a[0] >> 4;
+    c[4] = a[0] >> 2;
     c[5] = a[0] & 3;
 
 }
@@ -26,9 +26,9 @@ __global__ void perform_int_operations(int* a, int* b, int* c) {
 
 
 int main() {
-    float fa = 5.0;
+    float fa = 8.0f;
     float fb = 3.0f;
-    int ia = 5;
+    int ia = 8;
     int ib = 3;
     thrust::host_vector<float> a(1, fa);
     thrust::host_vector<float> b(1, fb);
