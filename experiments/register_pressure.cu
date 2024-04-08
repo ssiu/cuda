@@ -32,7 +32,7 @@ int main() {
     int ib[1] = {3};
 //    thrust::host_vector<float> a(1, 5.0f);
 //    thrust::host_vector<float> b(1, 3.0f);
-    thrust::host_vector<float> a(1) = {5.0f};
+    thrust::host_vector<float> a = {5.0f};
     thrust::host_vector<float> b(1) = fb;
     thrust::host_vector<float> c(6);
     thrust::host_vector<int> a_int(1) = ia;
