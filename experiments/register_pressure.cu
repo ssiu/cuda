@@ -32,11 +32,11 @@ int main() {
     int* ib = {3};
 //    thrust::host_vector<float> a(1, 5.0f);
 //    thrust::host_vector<float> b(1, 3.0f);
-    thrust::host_vector<float> a = fa;
-    thrust::host_vector<float> b = fb;
+    thrust::host_vector<float> a(1) = fa;
+    thrust::host_vector<float> b(1) = fb;
     thrust::host_vector<float> c(6);
-    thrust::host_vector<int> a_int = ia;
-    thrust::host_vector<int> b_int = ib;
+    thrust::host_vector<int> a_int(1) = ia;
+    thrust::host_vector<int> b_int(1) = ib;
     thrust::host_vector<int> c_int(6);
 
 
