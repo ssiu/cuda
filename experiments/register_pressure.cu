@@ -7,19 +7,22 @@
 #include <random>
 
 __global__ void perform_float_operations(float* a, float* b, float* c) {
-    c[0] = a[0] + b[0];
-    c[1] = a[0] * b[0];
-    c[2] = a[0] / b[0];
+    ra = a[0];
+    rb = b[0];
+    c[0] = ra + rb;
+    c[1] = ra * rb;
+    c[2] = ra / rb;
 }
 
 __global__ void perform_int_operations(int* a, int* b, int* c) {
-
-    c[0] = a[0] + b[0];
-    c[1] = a[0] * b[0];
-    c[2] = a[0] / b[0];
-    c[3] = a[0] % b[0];
-    c[4] = a[0] >> 2;
-    c[5] = a[0] & 3;
+    ra = a[0];
+    rb = b[0];
+    c[0] = ra + rb;
+    c[1] = ra * rb;
+    c[2] = ra / rb;
+    c[3] = ra % rb;
+    c[4] = ra >> 2;
+    c[5] = ra & 3;
 
 }
 
