@@ -26,10 +26,10 @@ __global__ void perform_int_operations(int* a, int* b, int* c) {
 
 
 int main() {
-    float* fa = {5.0f};
-    float* fb = {3.0f};
-    int* ia = {5};
-    int* ib = {3};
+    float fa[1] = {5.0f};
+    float fb[1] = {3.0f};
+    int ia[1] = {5};
+    int ib[1] = {3};
 //    thrust::host_vector<float> a(1, 5.0f);
 //    thrust::host_vector<float> b(1, 3.0f);
     thrust::host_vector<float> a(1) = fa;
