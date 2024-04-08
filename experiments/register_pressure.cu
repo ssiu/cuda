@@ -26,7 +26,7 @@ __global__ void perform_int_operations(int* a, int* b, int* c) {
 
 
 int main() {
-    float fa = 5.0};
+    float fa = 5.0;
     float fb[1] = {3.0f};
     int ia[1] = {5};
     int ib[1] = {3};
