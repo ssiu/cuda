@@ -62,49 +62,27 @@ int main(){
 //    mm_6<<<dimGrid4, dimBlock4, maxbytes>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+
+//    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                               thrust::raw_pointer_cast(dC.data()), N);
-//
-    mm_8<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
-    mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
+//    mm_9<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
 //    hC = dC;
 
 
     // yz
-    dim3 blockDim(256);
-    dim3 gridDim(N / TILE_WIDTH,N / TILE_WIDTH);
-    mysgemm_v9<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
-    mysgemm_v11<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
-
-    hC = dC;
+//    dim3 blockDim(256);
+//    dim3 gridDim(N / TILE_WIDTH,N / TILE_WIDTH);
+//    mysgemm_v9<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
+//    mysgemm_v11<<<gridDim, blockDim>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
+//
+//    hC = dC;
 
 
     //
     // cublas row major
-    //
-//    float alpha = 1.0f;
-//    float beta = 1.0f;
-//
-//    cudaError_t cudaStat;  // cudaMalloc status
-//    cublasStatus_t stat;   // cuBLAS functions status
-//    cublasHandle_t handle; // cuBLAS context
-//    cublasCreate(&handle);
-//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
-//                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
-//
-//    hC_cublas = dC_cublas;
-//
-//    cublasDestroy(handle);
-    //
-    //
-    //
-
-
-
-    //
-    // cublas column major
     //
     float alpha = 1.0f;
     float beta = 1.0f;
@@ -113,15 +91,37 @@ int main(){
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
-                     thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
+                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
     hC_cublas = dC_cublas;
 
     cublasDestroy(handle);
+
+
+
+
+
+
     //
+    // cublas column major
     //
-    //
+//    float alpha = 1.0f;
+//    float beta = 1.0f;
+//
+//    cudaError_t cudaStat;  // cudaMalloc status
+//    cublasStatus_t stat;   // cuBLAS functions status
+//    cublasHandle_t handle; // cuBLAS context
+//    cublasCreate(&handle);
+//    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
+//                     thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+//
+//    hC_cublas = dC_cublas;
+//
+//    cublasDestroy(handle);
+//    //
+//    //
+//    //
 
 
 
