@@ -8,10 +8,9 @@
 #include "mm.cuh"
 #include "utils.cuh"
 
-#define TILE_WIDTH 128
-#define N 8192
-int main(){
 
+int main(){
+    int N = 1024;
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
@@ -40,8 +39,8 @@ int main(){
 //    mm_3<<<dimGrid3, dimBlock3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                    thrust::raw_pointer_cast(dC.data()), N);
 
-    dim3 dimGrid4(N / TILE_WIDTH, N / TILE_WIDTH);
-    dim3 dimBlock4(256, 1);
+//    dim3 dimGrid4(N / TILE_WIDTH, N / TILE_WIDTH);
+//    dim3 dimBlock4(256, 1);
 //    mm_4<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                                   thrust::raw_pointer_cast(dC.data()), N);
 
@@ -59,8 +58,8 @@ int main(){
 ////// Host code
 //    int maxbytes = 98304; // 96 KB
 //    cudaFuncSetAttribute(mm_6, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-    mm_6<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                                   thrust::raw_pointer_cast(dC.data()), N);
+//    mm_6<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                                   thrust::raw_pointer_cast(dC.data()), N);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //    mm_7<<<dimGrid4, dimBlock4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
 //                               thrust::raw_pointer_cast(dC.data()), N);
@@ -80,23 +79,37 @@ int main(){
 //
 //    hC = dC;
 
+    #if 1
+    {
+        int TILE_WIDTH = 32;
+        dim3 gridDim_mm_new_1(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_1(TILE_WIDTH,TILE_WIDTH);
+        mm_new_1<<<gridDim_mm_new_1, blockDim_mm_new_1>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N)
+        hC = dC;
+    }
+    #endif
 
-    //
-    // cublas row major
-    //
-    float alpha = 1.0f;
-    float beta = 1.0f;
+    #if 1
+    {
+        //
+        // cublas row major
+        //
+        float alpha = 1.0f;
+        float beta = 1.0f;
 
-    cudaError_t cudaStat;  // cudaMalloc status
-    cublasStatus_t stat;   // cuBLAS functions status
-    cublasHandle_t handle; // cuBLAS context
-    cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
-                     thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+        cudaError_t cudaStat;  // cudaMalloc status
+        cublasStatus_t stat;   // cuBLAS functions status
+        cublasHandle_t handle; // cuBLAS context
+        cublasCreate(&handle);
+        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dB.data()), N,
+                         thrust::raw_pointer_cast(dA.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
-    hC_cublas = dC_cublas;
+        hC_cublas = dC_cublas;
 
-    cublasDestroy(handle);
+        cublasDestroy(handle);
+    }
+    #endif
 
 
 
