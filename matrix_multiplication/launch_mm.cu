@@ -10,7 +10,7 @@
 
 
 int main(){
-    int N = 32;
+    int N = 1024;
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);

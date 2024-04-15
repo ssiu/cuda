@@ -33,8 +33,8 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
     A = &A[gRow*N];
     B = &B[gCol];
     C = &C[gRow*N + gCol];
-    __shared__ float sA[1024];
-    __shared__ float sB[1024];
+    __shared__ float sA[TILE_WIDTH*TILE_WIDTH];
+    __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
 
     float sum = 0;
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
@@ -51,7 +51,7 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
         // sync thread
 
 
-        for (int k=0; k<N; k++) {
+        for (int k=0; k<TILE_WIDTH; k++) {
             sum += sA[ty*TILE_WIDTH + k] * sB[k*TILE_WIDTH + tx];
         }
     }
