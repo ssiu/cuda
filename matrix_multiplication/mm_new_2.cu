@@ -45,11 +45,12 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
         // store to sram
 
         //shift A,B pointers
+        __syncthreads();
         A += TILE_WIDTH;
         B += TILE_WIDTH * N;
         // sync thread
 
-        __syncthreads();
+
         for (int k=0; k<N; k++) {
             sum += sA[ty*TILE_WIDTH + k] * sB[k*TILE_WIDTH + tx];
         }
