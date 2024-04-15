@@ -54,6 +54,8 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
         for (int k=0; k<TILE_WIDTH; k++) {
             sum += sA[ty*TILE_WIDTH + k] * sB[k*TILE_WIDTH + tx];
         }
+        __syncthreads();
+
     }
     C[gPos] = sum;
 
