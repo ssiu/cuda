@@ -32,11 +32,11 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
     A = &A[gRow*N];
     B = &B[gCol];
 
-    __shared__ sA[1024];
-    __shared__ sB[1024];
+    __shared__ float sA[1024];
+    __shared__ float sB[1024];
 
     float sum = 0;
-    for (kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
+    for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
         //load from gmem
         sA[sPos] = A[sPos];
         sB[sPos] = B[sPos];
