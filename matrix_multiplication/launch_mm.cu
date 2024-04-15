@@ -92,6 +92,17 @@ int main(){
 
     #if 1
     {
+        int TILE_WIDTH = 32;
+        dim3 gridDim_mm_new_2(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_2(TILE_WIDTH,TILE_WIDTH);
+        mm_new_2<<<gridDim_mm_new_2, blockDim_mm_new_2>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+    #if 1
+    {
         //
         // cublas row major
         //
