@@ -28,20 +28,23 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
     int ty = threadIdx.y;
     int gRow = by*TILE_WIDTH;
     int gCol = bx*TILE_WIDTH;
+    int gPos = ty*N+tx;
     int sPos = ty*TILE_WIDTH + tx;
     A = &A[gRow*N];
     B = &B[gCol];
-
+    C = &C[gRow*N + gCol];
     __shared__ float sA[1024];
     __shared__ float sB[1024];
 
     float sum = 0;
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
         //load from gmem
-        sA[sPos] = A[sPos];
-        sB[sPos] = B[sPos];
+        sA[sPos] = A[gPos];
+        sB[sPos] = B[gPos];
 
         // store to sram
+
+        //shift A,B pointers
         A += TILE_WIDTH;
         B += TILE_WIDTH * N;
         // sync thread
@@ -51,6 +54,6 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
             sum += sA[ty*TILE_WIDTH + k] * sB[k*TILE_WIDTH + tx];
         }
     }
-    C[gRow*N + gCol] = sum;
+    C[gPos] = sum;
 
 }
