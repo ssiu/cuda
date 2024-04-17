@@ -103,6 +103,17 @@ int main(){
 
     #if 1
     {
+        int TILE_WIDTH = 128;
+        dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_3(TILE_WIDTH,TILE_WIDTH);
+        mm_new_3<<<gridDim_mm_new_3, blockDim_mm_new_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+    #if 1
+    {
         //
         // cublas row major
         //

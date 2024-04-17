@@ -13,6 +13,7 @@ __global__ void mm_8(float* A, float* B, float*C, int N);
 __global__ void mm_9(float* A, float* B, float*C, int N);
 __global__ void mm_new_1(float* A, float* B, float*C, int N);
 __global__ void mm_new_2(float* A, float* B, float*C, int N);
+__global__ void mm_new_3(float* A, float* B, float*C, int N);
 __global__ void mysgemm_v9(int M, int N, int K, float alpha, float* A, float* B, float beta, float* C);
 __global__ void mysgemm_v11(int M, int N, int K, float alpha, float* A, float* B, float beta, float* C);
 #endif

@@ -46,7 +46,7 @@ __device__ void storeToGmem(float* accum, float* C, int offset){
 }
 
 
-__global__ void mm_new_2(float* A, float* B, float* C, int N){
+__global__ void mm_new_3(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
     int thread_id = threadIdx.x;
