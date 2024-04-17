@@ -90,7 +90,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 32;
         dim3 gridDim_mm_new_2(N / TILE_WIDTH,N / TILE_WIDTH);
