@@ -35,14 +35,13 @@ __device__ void computeOuterProduct(float* rA, float* rB, float* accum){
     }
 }
 
-__device__ void storeToGmem(float* accum, float* C, int offset){
+__device__ void storeToGmem(float* accum, float* C, int N, int offset){
     for (int i=0;i<4;i++) {
         reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i])[0];
         reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 32])[0];
         reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH])[0];
         reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH + 32])[0];
     }
-
 }
 
 
@@ -59,7 +58,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     int sA_col = (thread_id & 1) * 4;
 
     int sB_row = thread_id >> 5;
-    int sb_col = (thread_id & 31) * 4;
+    int sB_col = (thread_id & 31) * 4;
 
     int sA_gOffset = sA_row * BLOCK_WIDTH + sA_col;
     int sB_gOffset = sB_row * TILE_WIDTH + sB_col;
@@ -88,12 +87,12 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 //        sB[sPos] = B[gPos];
 
         //load from gmem
-        loadFromGmem(A, &rA, sA_gOffset);
-        loadFromGmem(B, &rB, sB_gOffset);
+        loadFromGmem(A, rA, sA_gOffset);
+        loadFromGmem(B, rB, sB_gOffset);
 
         // store to sram
-        storeToSmem(&rA, sA, sA_gOffset);
-        storeToSmem(&rB, sB, sB_gOffset);
+        storeToSmem(rA, sA, sA_gOffset);
+        storeToSmem(rB, sB, sB_gOffset);
 
         //shift A,B pointers
         __syncthreads();
@@ -103,8 +102,8 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 
         for (int k=0; k<TILE_WIDTH; k++) {
 
-            loadFromSmemA(sA, &rA, sA_rOffset);
-            loadFromSmemB(sB, &rB, sB_rOffset);
+            loadFromSmemA(sA, rA, sA_rOffset);
+            loadFromSmemB(sB, rB, sB_rOffset);
             sA_rOffset += 1;
             sB_rOffset += TILE_WIDTH;
 
@@ -115,6 +114,6 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         __syncthreads();
 
     }
-    storeToGmem(accum, C, C_gOffset);
+    storeToGmem(accum, C, N, C_gOffset);
 
 }
