@@ -78,9 +78,9 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     C = &C[g_row*N + g_col];
     __shared__ float sA[BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[BLOCK_WIDTH * TILE_WIDTH];
-    float rA[8];
-    float rB[8];
-    float accum[64];
+    float rA[8] = {};
+    float rB[8] = {};
+    float accum[64] = {};
 
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
 //        sA[sPos] = A[gPos];
@@ -99,6 +99,10 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         A += BLOCK_WIDTH;
         B += BLOCK_WIDTH * N;
         // sync thread
+        if (kBlock==0 and block_idx==0 and thread_id==0) {
+            //printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
+            printf("kBlock is %d, thread id is %d, sA[0] is %f\n", 1, kBlock, thread_id, sA[0]);
+        }
 
         for (int k=0; k<TILE_WIDTH; k++) {
 
