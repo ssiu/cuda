@@ -112,7 +112,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         //
         // cublas row major
@@ -158,24 +158,25 @@ int main(){
 //    //
 //    //
 
-
-
-    if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
+    #if 0
+        if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
 //        for (int i=0;i<N;i += 128){
 //            for (int j=0;j<N; j+=128){
 //                std::cout << N * i + j << " " << hC[N * i + j] << " " << hC_cublas[N * i + j] << std::endl;
 //            }
 //        }
 
-        for (int i=0;i<100;i++){
-            std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
+            for (int i=0;i<100;i++){
+                std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
+            }
+        //        int num = countZeros(hC.data(), N);
+        //        std::cout << "number of zeros in hC is " << num << std::endl;
+                std::cout << "Wrong answer" << std::endl;
+        } else {
+            std::cout << "Correct answer" << std::endl;
         }
-//        int num = countZeros(hC.data(), N);
-//        std::cout << "number of zeros in hC is " << num << std::endl;
-        std::cout << "Wrong answer" << std::endl;
-    } else {
-        std::cout << "Correct answer" << std::endl;
-    }
+    #endif
+
 
     return 0;
 }
