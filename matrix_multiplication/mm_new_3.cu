@@ -78,8 +78,11 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     C = &C[g_row*N + g_col];
     __shared__ float sA[BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[BLOCK_WIDTH * TILE_WIDTH];
-    float rA[8] = {};
-    float rB[8] = {};
+    float rA[4];
+    float rB[4];
+
+    float fA[8] = {};
+    float fB[8] = {};
     float accum[64] = {};
 
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
@@ -101,18 +104,18 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         // sync thread
         if (kBlock==0 and block_idx==0 and thread_id==0) {
             //printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
-            printf("kBlock is %d, thread id is %d, sA[0] is %f\n", 1, kBlock, thread_id, sA[0]);
+            printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", 1, kBlock, thread_id, rA[0], sA[0]);
         }
 
         for (int k=0; k<TILE_WIDTH; k++) {
 
-            loadFromSmemA3(sA, rA, sA_rOffset);
-            loadFromSmemB3(sB, rB, sB_rOffset);
+            loadFromSmemA3(sA, fA, sA_rOffset);
+            loadFromSmemB3(sB, fB, sB_rOffset);
             sA_rOffset += 1;
             sB_rOffset += TILE_WIDTH;
 
             //load from sram
-            computeOuterProduct3(rA, rB, accum);
+            computeOuterProduct3(fA, fB, accum);
 
         }
         __syncthreads();
