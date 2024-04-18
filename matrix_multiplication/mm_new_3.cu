@@ -107,7 +107,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
             printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", kBlock, thread_id, rA[0], sA[0]);
         }
 
-        for (int k=0; k<TILE_WIDTH; k++) {
+        for (int k=0; k<BLOCK_WIDTH; k++) {
 
             loadFromSmemA_3(sA, fA, sA_rOffset);
             loadFromSmemB_3(sB, fB, sB_rOffset);
