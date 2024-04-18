@@ -90,7 +90,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         std::cout << "Running kernel 2" << std::endl;
         int TILE_WIDTH = 32;
