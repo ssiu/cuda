@@ -10,7 +10,7 @@
 
 
 int main(){
-    int N = 1024;
+    int N = 128;
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
@@ -107,7 +107,7 @@ int main(){
         std::cout << "Running kernel 3" << std::endl;
         int TILE_WIDTH = 128;
         dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);
-        dim3 blockDim_mm_new_3(TILE_WIDTH,TILE_WIDTH);
+        dim3 blockDim_mm_new_3(256);
         mm_new_3<<<gridDim_mm_new_3, blockDim_mm_new_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
