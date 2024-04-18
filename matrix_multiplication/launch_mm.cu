@@ -103,6 +103,7 @@ int main(){
 
     #if 1
     {
+        std::cout << "Running kernel 3" << std::endl;
         int TILE_WIDTH = 128;
         dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_mm_new_3(TILE_WIDTH,TILE_WIDTH);
