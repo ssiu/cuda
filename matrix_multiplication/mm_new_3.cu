@@ -84,7 +84,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     float fA[8] = {};
     float fB[8] = {};
     float accum[64] = {};
-
+    printf("hi");
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
 //        sA[sPos] = A[gPos];
 //        sB[sPos] = B[gPos];
