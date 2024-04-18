@@ -27,10 +27,10 @@ __device__ void loadFromSmemB3(float* sM, float* r, int offset){
 
 }
 
-__device__ void computeOuterProduct3(float* rA, float* rB, float* accum){
+__device__ void computeOuterProduct3(float* fA, float* fB, float* accum){
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
-            accum[i*8+j] = rA[i] * rB[j];
+            accum[i*8+j] = fA[i] * fB[j];
         }
     }
 }
@@ -108,18 +108,18 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
             printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", kBlock, thread_id, rA[0], sA[0]);
         }
 
-        for (int k=0; k<TILE_WIDTH; k++) {
-
-            loadFromSmemA3(sA, fA, sA_rOffset);
-            loadFromSmemB3(sB, fB, sB_rOffset);
-            sA_rOffset += 1;
-            sB_rOffset += TILE_WIDTH;
-
-            //load from sram
-            computeOuterProduct3(fA, fB, accum);
-
-        }
-        __syncthreads();
+//        for (int k=0; k<TILE_WIDTH; k++) {
+//
+//            loadFromSmemA3(sA, fA, sA_rOffset);
+//            loadFromSmemB3(sB, fB, sB_rOffset);
+//            sA_rOffset += 1;
+//            sB_rOffset += TILE_WIDTH;
+//
+//            //load from sram
+//            computeOuterProduct3(fA, fB, accum);
+//
+//        }
+//        __syncthreads();
 
     }
     storeToGmem3(accum, C, N, C_gOffset);
