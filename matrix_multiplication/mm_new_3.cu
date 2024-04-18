@@ -4,30 +4,30 @@
 #define BLOCK_WIDTH 8
 
 
-__device__ void loadFromGmem3(float* gM, float* r, int offset){
+__device__ void loadFromGmem_3(float* gM, float* r, int offset){
     reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
 }
 
-__device__ void storeToSmem3(float* r, float* sM, int offset){
+__device__ void storeToSmem_3(float* r, float* sM, int offset){
     reinterpret_cast<float4*>(&sM[offset])[0] = reinterpret_cast<float4*>(r)[0];
 }
 
-__device__ void loadFromSmemA3(float* sM, float* r, int offset){
+__device__ void loadFromSmemA_3(float* sM, float* f, int offset){
     for (int i=0; i<4; i++) {
-        r[i] = sM[offset + i*BLOCK_WIDTH];
-        r[i+4] = sM[offset + i*BLOCK_WIDTH + 16];
+        f[i] = sM[offset + i*BLOCK_WIDTH];
+        f[i+4] = sM[offset + i*BLOCK_WIDTH + 16];
     }
 }
 
-__device__ void loadFromSmemB3(float* sM, float* r, int offset){
+__device__ void loadFromSmemB_3(float* sM, float* f, int offset){
     for (int i=0; i<4; i++) {
-        r[i] = sM[offset + i];
-        r[i+4] = sM[offset + i + 32];
+        f[i] = sM[offset + i];
+        f[i+4] = sM[offset + i + 32];
     }
 
 }
 
-__device__ void computeOuterProduct3(float* fA, float* fB, float* accum){
+__device__ void computeOuterProduct_3(float* fA, float* fB, float* accum){
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
             accum[i*8+j] = fA[i] * fB[j];
@@ -35,14 +35,13 @@ __device__ void computeOuterProduct3(float* fA, float* fB, float* accum){
     }
 }
 
-__device__ void storeToGmem3(float* accum, float* C, int N, int offset){
-    C[0] = accum[0];
-//    for (int i=0;i<4;i++) {
-//        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i])[0];
-//        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 32])[0];
-//        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH])[0];
-//        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH + 32])[0];
-//    }
+__device__ void storeToGmem_3(float* accum, float* C, int N, int offset){
+    for (int i=0;i<4;i++) {
+        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 32])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH + 32])[0];
+    }
 }
 
 
@@ -91,12 +90,12 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 //        sB[sPos] = B[gPos];
 
         //load from gmem
-        loadFromGmem3(A, rA, sA_gOffset);
-        loadFromGmem3(B, rB, sB_gOffset);
+        loadFromGmem_3(A, rA, sA_gOffset);
+        loadFromGmem_3(B, rB, sB_gOffset);
 
         // store to sram
-        storeToSmem3(rA, sA, sA_gOffset);
-        storeToSmem3(rB, sB, sB_gOffset);
+        storeToSmem_3(rA, sA, sA_gOffset);
+        storeToSmem_3(rB, sB, sB_gOffset);
 
         //shift A,B pointers
         __syncthreads();
@@ -108,20 +107,20 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
             printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", kBlock, thread_id, rA[0], sA[0]);
         }
 
-//        for (int k=0; k<TILE_WIDTH; k++) {
-//
-//            loadFromSmemA3(sA, fA, sA_rOffset);
-//            loadFromSmemB3(sB, fB, sB_rOffset);
-//            sA_rOffset += 1;
-//            sB_rOffset += TILE_WIDTH;
-//
-//            //load from sram
-//            computeOuterProduct3(fA, fB, accum);
-//
-//        }
-//        __syncthreads();
+        for (int k=0; k<TILE_WIDTH; k++) {
+
+            loadFromSmemA_3(sA, fA, sA_rOffset);
+            loadFromSmemB_3(sB, fB, sB_rOffset);
+            sA_rOffset += 1;
+            sB_rOffset += TILE_WIDTH;
+
+            //load from sram
+            computeOuterProduct_3(fA, fB, accum);
+
+        }
+        __syncthreads();
 
     }
-    storeToGmem3(accum, C, N, C_gOffset);
+    storeToGmem_3(accum, C, N, C_gOffset);
 
 }
