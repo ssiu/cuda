@@ -103,7 +103,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         B += BLOCK_WIDTH * N;
         // sync thread
         if (thread_id==2) {
-            printf(sA_gOffset);
+            printf("%d\n", sA_gOffset);
         }
 
 //        if (thread_id==0) {
