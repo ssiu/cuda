@@ -102,10 +102,12 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         A += BLOCK_WIDTH;
         B += BLOCK_WIDTH * N;
         // sync thread
-//        if (kBlock==0 and block_idx==0 and thread_id==0) {
-//            //printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
-//            printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", kBlock, thread_id, rA[0], sA[0]);
-//        }
+        if (thread_id==0) {
+            //printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
+            for (int i=8;i<18; i++){
+                printf("%f\n", sA[i]);
+            }
+        }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 //            if (kBlock==0 and block_idx==0 and thread_id==0) {
