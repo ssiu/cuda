@@ -113,7 +113,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
                 printf("kBlock is %d, kFragment is %d, thread id is %d, sB_rOffset is %d, sB[0] is %f\n", kBlock, kFragment, thread_id, sB_rOffset, sB[0]);
             }
             loadFromSmemA_3(sA, fA, sA_rOffset);
-            loadFromSmemB_3(sB, fB, sB_rOffset);
+            //loadFromSmemB_3(sB, fB, sB_rOffset);
             sA_rOffset += 1;
             sB_rOffset += TILE_WIDTH;
 
