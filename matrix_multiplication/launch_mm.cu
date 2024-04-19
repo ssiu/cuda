@@ -169,7 +169,7 @@ int main(){
 //            }
 //        }
 
-            for (int i=0;i<100;i++){
+            for (int i=0;i<256;i++){
                 std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
             }
         //        int num = countZeros(hC.data(), N);

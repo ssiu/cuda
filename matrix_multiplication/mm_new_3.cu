@@ -54,24 +54,24 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     int g_row = block_idx * TILE_WIDTH;
     int g_col = block_idy * TILE_WIDTH;
 
-    int sA_row = thread_id >> 1;
-    int sA_col = (thread_id & 1) * 4;
+    int sA_row = thread_id >> 1; // 16
+    int sA_col = (thread_id & 1) * 4; // 0
 
-    int sB_row = thread_id >> 5;
-    int sB_col = (thread_id & 31) * 4;
+    int sB_row = thread_id >> 5; // 1
+    int sB_col = (thread_id & 31) * 4; // 0
 
     int sA_gOffset = sA_row * BLOCK_WIDTH + sA_col;
     int sB_gOffset = sB_row * TILE_WIDTH + sB_col;
 
-    int warp_row = (warp_id / 2) * 32;
-    int warp_col = (warp_id % 2) * 64;
-    int thread_row = (lane_id / 8) * 4;
-    int thread_col = (lane_id % 8) * 4;
+    int warp_row = (warp_id / 2) * 32; // 0
+    int warp_col = (warp_id % 2) * 64; // 64
+    int thread_row = (lane_id / 8) * 4; // 0
+    int thread_col = (lane_id % 8) * 4; // 0
 
 
-    int sA_rOffset = (warp_row + thread_row) * BLOCK_WIDTH;
-    int sB_rOffset = warp_col + thread_col;
-    int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col);
+    int sA_rOffset = (warp_row + thread_row) * BLOCK_WIDTH; // 0
+    int sB_rOffset = warp_col + thread_col; // 64
+    int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
 
     A = &A[g_row*N];
     B = &B[g_col];
