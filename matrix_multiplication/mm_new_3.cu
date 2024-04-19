@@ -30,7 +30,7 @@ __device__ void loadFromSmemB_3(float* sM, float* f, int offset){
 __device__ void computeOuterProduct_3(float* fA, float* fB, float* accum){
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
-            accum[i*8+j] = fA[i] * fB[j];
+            accum[i*8+j] += fA[i] * fB[j];
         }
     }
 }
@@ -112,10 +112,9 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 
                 printf("kBlock is %d, kFragment is %d, thread id is %d, sB_rOffset is %d, sB[0] is %f\n", kBlock, kFragment, thread_id, sB_rOffset, sB[0]);
             }
-            loadFromSmemA_3(sA, fA, sA_rOffset);
-            //loadFromSmemB_3(sB, fB, sB_rOffset);
-            sA_rOffset += 1;
-            sB_rOffset += TILE_WIDTH;
+            loadFromSmemA_3(sA, fA, sA_rOffset + kFragment);
+            loadFromSmemB_3(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
+
 
             //load from sram
             computeOuterProduct_3(fA, fB, accum);
