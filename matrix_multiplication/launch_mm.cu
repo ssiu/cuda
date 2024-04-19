@@ -105,7 +105,7 @@ int main(){
     #if 1
     {
         for (int i=128;i<256; i++){
-                printf("%d %f\n", kBlock*8+i, A[i]);
+                printf("%d %f\n", i, A[i]);
          }
 
         int TILE_WIDTH = 128;
