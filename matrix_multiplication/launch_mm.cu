@@ -104,10 +104,13 @@ int main(){
 
     #if 1
     {
-        for (int i=128;i<256; i++){
-                printf("%d %f\n", i, hA[i]);
-         }
+//        for (int i=128;i<256; i++){
+//                printf("%d %f\n", i, hA[i]);
+//         }
 
+        for (int i=0;i<128; i++){
+            printf("%d %f\n", i, hA[i]);
+        }
         int TILE_WIDTH = 128;
         dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_mm_new_3(256);
