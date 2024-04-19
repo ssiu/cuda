@@ -103,7 +103,7 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         if (thread_id==0) {
             //printf("thread is %d, kBlock is %d, kFragment is %d, frag_A is %f\n", 1, kBlock, kFragment, fragment_A[i]);
             for (int i=8;i<16; i++){
-                printf("%d %f\n", j, sA[i], A[j]);
+                printf("%d %f %f\n", j, sA[i], A[j]);
                 j++;
             }
 //            for (int i=0;i<8; i++){
