@@ -104,7 +104,9 @@ int main(){
 
     #if 1
     {
-
+        for (int i=128;i<256; i++){
+                printf("%d %f\n", kBlock*8+i, A[i]);
+         }
 
         int TILE_WIDTH = 128;
         dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);

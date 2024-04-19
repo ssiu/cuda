@@ -109,9 +109,7 @@ __global__ void mm_7(float* A, float* B, float* C, int N){
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
-            for (int i=128;i<256; i++){
-                printf("%d %f\n", kBlock*8+i, A[i]);
-            }
+
             #pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
