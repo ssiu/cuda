@@ -14,8 +14,8 @@ __device__ void storeToSmem_3(float* r, float* sM, int offset){
 
 __device__ void loadFromSmemA_3(float* sM, float* f, int offset){
     for (int i=0; i<4; i++) {
-        f[i] = sM[offset + i*BLOCK_WIDTH];
-        f[i+4] = sM[offset + i*BLOCK_WIDTH + 16];
+        f[i] = sM[offset + i * BLOCK_WIDTH];
+        f[i+4] = sM[offset + (i + 16) * BLOCK_WIDTH];
     }
 }
 
@@ -39,8 +39,8 @@ __device__ void storeToGmem_3(float* accum, float* C, int N, int offset){
     for (int i=0;i<4;i++) {
         reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
         reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
+        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
+        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
     }
 }
 
@@ -108,10 +108,10 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 //        }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
-            if (kBlock==0 and block_idx==0 and thread_id==0) {
-
-                printf("kBlock is %d, kFragment is %d, thread id is %d, sB_rOffset is %d, sB[0] is %f\n", kBlock, kFragment, thread_id, sB_rOffset, sB[0]);
-            }
+//            if (kBlock==0 and block_idx==0 and thread_id==0) {
+//
+//                printf("kBlock is %d, kFragment is %d, thread id is %d, sB_rOffset is %d, sB[0] is %f\n", kBlock, kFragment, thread_id, sB_rOffset, sB[0]);
+//            }
             loadFromSmemA_3(sA, fA, sA_rOffset + kFragment);
             loadFromSmemB_3(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
 
