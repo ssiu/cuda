@@ -107,8 +107,11 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
 //            printf("kBlock is %d, thread id is %d, rA[0] is %f, sA[0] is %f\n", kBlock, thread_id, rA[0], sA[0]);
 //        }
 
-        for (int k=0; k<BLOCK_WIDTH; k++) {
+        for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
+            if (kBlock==0 and block_idx==0 and thread_id==0) {
 
+                printf("kBlock is %d, kFragment is %d, thread id is %d, sB_rOffset is %f, sB[0] is %f\n", kBlock, kFragment, thread_id, sB_rOffset, sB[0]);
+            }
             loadFromSmemA_3(sA, fA, sA_rOffset);
             loadFromSmemB_3(sB, fB, sB_rOffset);
             sA_rOffset += 1;
