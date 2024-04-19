@@ -37,10 +37,10 @@ __device__ void computeOuterProduct_3(float* fA, float* fB, float* accum){
 
 __device__ void storeToGmem_3(float* accum, float* C, int N, int offset){
     for (int i=0;i<4;i++) {
-        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 32])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * BLOCK_WIDTH + 16 * BLOCK_WIDTH + 32])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 16 * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
     }
 }
 
