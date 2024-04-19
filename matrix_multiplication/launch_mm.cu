@@ -107,7 +107,7 @@ int main(){
 
         int TILE_WIDTH = 128;
         dim3 gridDim_mm_new_3(N / TILE_WIDTH,N / TILE_WIDTH);
-        dim3 blockDim_mm_new_3(32);
+        dim3 blockDim_mm_new_3(2);
         std::cout << "Running kernel 3 with " << N / TILE_WIDTH << " x " << N / TILE_WIDTH << " threadblocks with 256 threads" << std::endl;
         mm_new_3<<<gridDim_mm_new_3, blockDim_mm_new_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
