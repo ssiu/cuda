@@ -60,8 +60,10 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
     int sB_row = thread_id >> 5; // 1
     int sB_col = (thread_id & 31) * 4; // 0
 
-    int sA_gOffset = sA_row * BLOCK_WIDTH + sA_col;
-    int sB_gOffset = sB_row * TILE_WIDTH + sB_col;
+    int sA_gOffset = sA_row * N + sA_col;
+    int sB_gOffset = sB_row * N + sB_col;
+    int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
+    int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
 
     int warp_row = (warp_id / 2) * 32; // 0
     int warp_col = (warp_id % 2) * 64; // 64
@@ -94,8 +96,8 @@ __global__ void mm_new_3(float* A, float* B, float* C, int N){
         loadFromGmem_3(B, rB, sB_gOffset);
 
         // store to sram
-        storeToSmem_3(rA, sA, sA_gOffset);
-        storeToSmem_3(rB, sB, sB_gOffset);
+        storeToSmem_3(rA, sA, sA_sOffset);
+        storeToSmem_3(rB, sB, sB_sOffset);
 
         //shift A,B pointers
         __syncthreads();
