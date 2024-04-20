@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -134,7 +134,7 @@ int main(){
         dim3 gridDim_mm_new_4(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_mm_new_4(256);
         std::cout << "Running kernel 4" << std::endl;
-        mm_new_3<<<gridDim_mm_new_4, blockDim_mm_new_4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+        mm_new_4<<<gridDim_mm_new_4, blockDim_mm_new_4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
     }
