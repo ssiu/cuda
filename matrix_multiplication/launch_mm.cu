@@ -79,7 +79,7 @@ int main(){
 //
 //    hC = dC;
 
-    #if 0
+    #if 1
     {
         int TILE_WIDTH = 32;
         dim3 gridDim_mm_new_1(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
         for (int i=128;i<256; i++){
                 printf("%d %f\n", i, hA[i]);
