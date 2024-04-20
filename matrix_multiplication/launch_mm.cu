@@ -104,9 +104,9 @@ int main(){
 
     #if 1
     {
-        for (int i=128;i<256; i++){
-                printf("%d %f\n", i, hA[i]);
-         }
+//        for (int i=128;i<256; i++){
+//                printf("%d %f\n", i, hA[i]);
+//         }
 
 //        for (int i=0;i<128; i++){
 //            printf("%d %f\n", i, hA[i]);
