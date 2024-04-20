@@ -37,7 +37,6 @@ __global__ void mm_new_2(float* A, float* B, float* C, int N){
     __shared__ float sB[TILE_WIDTH*TILE_WIDTH];
     float rA;
     float rB;
-    printf("hi");
     float sum = 0;
     for (int kBlock=0; kBlock<N/TILE_WIDTH; kBlock++){
 //        sA[sPos] = A[gPos];
