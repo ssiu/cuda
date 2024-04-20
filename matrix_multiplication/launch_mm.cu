@@ -10,7 +10,7 @@
 
 
 int main(){
-    int N = 128;
+    int N = 8192;
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
@@ -90,7 +90,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
         std::cout << "Running kernel 2" << std::endl;
         int TILE_WIDTH = 32;
@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         for (int i=128;i<256; i++){
                 printf("%d %f\n", i, hA[i]);
