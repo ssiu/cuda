@@ -4,22 +4,22 @@
 #define BLOCK_WIDTH 8
 
 
-__device__ void loadFromGmem_3(float* gM, float* r, int offset){
+__device__ void loadFromGmem_4(float* gM, float* r, int offset){
     reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
 }
 
-__device__ void storeToSmem_3(float* r, float* sM, int offset){
+__device__ void storeToSmem_4(float* r, float* sM, int offset){
     reinterpret_cast<float4*>(&sM[offset])[0] = reinterpret_cast<float4*>(r)[0];
 }
 
-__device__ void loadFromSmemA_3(float* sM, float* f, int offset){
+__device__ void loadFromSmemA_4(float* sM, float* f, int offset){
     for (int i=0; i<4; i++) {
         f[i] = sM[offset + i * BLOCK_WIDTH];
         f[i+4] = sM[offset + (i + 16) * BLOCK_WIDTH];
     }
 }
 
-__device__ void loadFromSmemB_3(float* sM, float* f, int offset){
+__device__ void loadFromSmemB_4(float* sM, float* f, int offset){
     for (int i=0; i<4; i++) {
         f[i] = sM[offset + i];
         f[i+4] = sM[offset + i + 32];
@@ -27,7 +27,7 @@ __device__ void loadFromSmemB_3(float* sM, float* f, int offset){
 
 }
 
-__device__ void computeOuterProduct_3(float* fA, float* fB, float* accum){
+__device__ void computeOuterProduct_4(float* fA, float* fB, float* accum){
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
             accum[i*8+j] += fA[i] * fB[j];
@@ -35,7 +35,7 @@ __device__ void computeOuterProduct_3(float* fA, float* fB, float* accum){
     }
 }
 
-__device__ void storeToGmem_3(float* accum, float* C, int N, int offset){
+__device__ void storeToGmem_4(float* accum, float* C, int N, int offset){
     for (int i=0;i<4;i++) {
         reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
         reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
@@ -94,8 +94,8 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
 
     //prologue, preload kblock = 0
-    loadFromGmem_3(A, &rA[0], sA_gOffset);
-    loadFromGmem_3(B, &rB[0], sB_gOffset);
+    loadFromGmem_4(A, &rA[0], sA_gOffset);
+    loadFromGmem_4(B, &rB[0], sB_gOffset);
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
@@ -108,13 +108,13 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 //        sB[sPos] = B[gPos];
 
         // store to smem for current block
-        storeToSmem_3(&rA[(kBlock & 1) * 4], sA, sA_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
-        storeToSmem_3(&rB[(kBlock & 1) * 4], sB, sB_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+        storeToSmem_4(&rA[(kBlock & 1) * 4], sA, sA_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+        storeToSmem_4(&rB[(kBlock & 1) * 4], sB, sB_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
 
         if (kBlock < N/BLOCK_WIDTH - 1) {
             //load from gmem for next block
-            loadFromGmem_3(A, &rA[((kBlock + 1) & 1) * 4], sA_gOffset);
-            loadFromGmem_3(B, &rB[((kBlock + 1) & 1) * 4], sB_gOffset);
+            loadFromGmem_4(A, &rA[((kBlock + 1) & 1) * 4], sA_gOffset);
+            loadFromGmem_4(B, &rB[((kBlock + 1) & 1) * 4], sB_gOffset);
         }
 
 
@@ -126,10 +126,10 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-            loadFromSmemA_3(sA, fA, sA_rOffset + kFragment + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
-            loadFromSmemB_3(sB, fB, sB_rOffset + kFragment * TILE_WIDTH + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+            loadFromSmemA_4(sA, fA, sA_rOffset + kFragment + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+            loadFromSmemB_4(sB, fB, sB_rOffset + kFragment * TILE_WIDTH + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
 
-            computeOuterProduct_3(fA, fB, accum);
+            computeOuterProduct_4(fA, fB, accum);
 
         }
     }
@@ -137,6 +137,6 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
 
 
-    storeToGmem_3(accum, C, N, C_gOffset);
+    storeToGmem_4(accum, C, N, C_gOffset);
 
 }
