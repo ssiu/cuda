@@ -132,8 +132,10 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
             computeOuterProduct_4(fA, fB, accum);
 
         }
+        pointer = pointer ^ 1;
+
     }
-    pointer = pointer ^ 1;
+
 
 
 
