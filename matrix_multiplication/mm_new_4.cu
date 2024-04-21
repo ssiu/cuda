@@ -126,7 +126,7 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-            loadFromSmemA_4(&sA[pointer][0], fA, sA_rOffset + kFragment ;
+            loadFromSmemA_4(&sA[pointer][0], fA, sA_rOffset + kFragment) ;
             loadFromSmemB_4(&sB[pointer][0], fB, sB_rOffset + kFragment * TILE_WIDTH);
 
             computeOuterProduct_4(fA, fB, accum);
