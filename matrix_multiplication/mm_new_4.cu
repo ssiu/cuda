@@ -4,9 +4,9 @@
 #define BLOCK_WIDTH 8
 
 
-__device__ void loadFromGmem_4(float* gM, float* r, int offset){
-    reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
-}
+//__device__ void loadFromGmem_4(float* gM, float* r, int offset){
+//    reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+//}
 
 __device__ void storeToSmem_4(float* r, float* sM, int offset){
     reinterpret_cast<float4*>(&sM[offset])[0] = reinterpret_cast<float4*>(r)[0];
@@ -86,16 +86,17 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     float rA[2][4];
     float rB[2][4];
 
-
-
     float fA[8] = {};
     float fB[8] = {};
     float accum[64] = {};
 
     int pointer = 0;
     //prologue, preload kblock = 0
-    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
-    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
+//    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
+//    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
+
+    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
@@ -113,8 +114,11 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         if (kBlock < N/BLOCK_WIDTH - 1) {
             //load from gmem for next block
-            loadFromGmem_4(A, &rA[pointer ^ 1][0], sA_gOffset);
-            loadFromGmem_4(B, &rB[pointer ^ 1][0], sB_gOffset);
+//            loadFromGmem_4(A, &rA[pointer ^ 1][0], sA_gOffset);
+//            loadFromGmem_4(B, &rB[pointer ^ 1][0], sB_gOffset);
+            reinterpret_cast<float4*>(&rA[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+            reinterpret_cast<float4*>(&rB[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+
         }
 
 
@@ -132,7 +136,7 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
             computeOuterProduct_4(fA, fB, accum);
 
         }
-        pointer = pointer ^ 1;
+        pointer ^= 1;
 
     }
 
