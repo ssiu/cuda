@@ -4,9 +4,9 @@
 #define BLOCK_WIDTH 8
 
 
-//__device__ void loadFromGmem_4(float* gM, float* r, int offset){
-//    reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
-//}
+__device__ void loadFromGmem_4(float* gM, float* r, int offset){
+    reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+}
 
 __device__ void storeToSmem_4(float* r, float* sM, int offset){
     reinterpret_cast<float4*>(&sM[offset])[0] = reinterpret_cast<float4*>(r)[0];
@@ -28,6 +28,7 @@ __device__ void loadFromSmemB_4(float* sM, float* f, int offset){
 }
 
 __device__ void computeOuterProduct_4(float* fA, float* fB, float* accum){
+    #pragma unroll 1
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
             accum[i*8+j] += fA[i] * fB[j];
@@ -51,6 +52,8 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     int thread_id = threadIdx.x;
     int warp_id = threadIdx.x >> 5;
     int lane_id = threadIdx.x & 31;
+
+    // addresses for block-tiling
     int g_row = block_idx * TILE_WIDTH;
     int g_col = block_idy * TILE_WIDTH;
 
@@ -65,6 +68,7 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
     int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
 
+    // addresses for warp-tiling
     int warp_row = (warp_id >> 1) << 5; // 0
     int warp_col = (warp_id & 1) << 6; // 64
     int thread_row = (lane_id >> 3) << 2; // 0
@@ -75,6 +79,7 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     int sB_rOffset = warp_col + thread_col; // 64
     int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
 
+    //move to the current block
     A = &A[g_row*N];
     B = &B[g_col];
     C = &C[g_row*N + g_col];
@@ -86,17 +91,19 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     float rA[2][4];
     float rB[2][4];
 
+    // computing the outer products
     float fA[8] = {};
     float fB[8] = {};
     float accum[64] = {};
 
+    //buffer index
     int pointer = 0;
     //prologue, preload kblock = 0
-//    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
-//    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
+    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
+    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
 
-    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset])[0];
-    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset])[0];
+//    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset])[0];
+//    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset])[0];
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
@@ -121,7 +128,6 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         }
 
-
         //shift A,B pointers
         __syncthreads();
 
@@ -134,15 +140,10 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
             loadFromSmemB_4(&sB[pointer][0], fB, sB_rOffset + kFragment * TILE_WIDTH);
 
             computeOuterProduct_4(fA, fB, accum);
-
         }
         pointer ^= 1;
 
     }
 
-
-
-
     storeToGmem_4(accum, C, N, C_gOffset);
-
 }
