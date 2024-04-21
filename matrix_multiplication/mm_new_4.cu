@@ -80,11 +80,11 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     C = &C[g_row*N + g_col];
 
     //double buffer
-    __shared__ float sA[BLOCK_WIDTH * TILE_WIDTH * 2];
-    __shared__ float sB[BLOCK_WIDTH * TILE_WIDTH * 2];
+    __shared__ float sA[2][BLOCK_WIDTH * TILE_WIDTH];
+    __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
 
-    float rA[2*4];
-    float rB[2*4];
+    float rA[2][4];
+    float rB[2][4];
 
 
 
@@ -92,10 +92,10 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     float fB[8] = {};
     float accum[64] = {};
 
-
+    pointer = 0;
     //prologue, preload kblock = 0
-    loadFromGmem_4(A, &rA[0], sA_gOffset);
-    loadFromGmem_4(B, &rB[0], sB_gOffset);
+    loadFromGmem_4(A, &rA[0][0], sA_gOffset);
+    loadFromGmem_4(B, &rB[0][0], sB_gOffset);
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
@@ -108,13 +108,13 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 //        sB[sPos] = B[gPos];
 
         // store to smem for current block
-        storeToSmem_4(&rA[(kBlock & 1) * 4], sA, sA_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
-        storeToSmem_4(&rB[(kBlock & 1) * 4], sB, sB_sOffset + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+        storeToSmem_4(&rA[pointer][0], &sA[pointer][0], sA_sOffset);
+        storeToSmem_4(&rB[pointer][0], &sB[pointer][0], sB_sOffset);
 
         if (kBlock < N/BLOCK_WIDTH - 1) {
             //load from gmem for next block
-            loadFromGmem_4(A, &rA[((kBlock + 1) & 1) * 4], sA_gOffset);
-            loadFromGmem_4(B, &rB[((kBlock + 1) & 1) * 4], sB_gOffset);
+            loadFromGmem_4(A, &rA[pointer ^ 1][0], sA_gOffset);
+            loadFromGmem_4(B, &rB[pointer ^ 1][0], sB_gOffset);
         }
 
 
@@ -126,14 +126,14 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-            loadFromSmemA_4(sA, fA, sA_rOffset + kFragment + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
-            loadFromSmemB_4(sB, fB, sB_rOffset + kFragment * TILE_WIDTH + (kBlock & 1) * BLOCK_WIDTH * TILE_WIDTH);
+            loadFromSmemA_4(&sA[pointer][0], fA, sA_rOffset + kFragment ;
+            loadFromSmemB_4(&sB[pointer][0], fB, sB_rOffset + kFragment * TILE_WIDTH);
 
             computeOuterProduct_4(fA, fB, accum);
 
         }
     }
-
+    pointer = pointer ^ 1;
 
 
 
