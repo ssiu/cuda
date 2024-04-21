@@ -92,10 +92,10 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     float fB[8] = {};
     float accum[64] = {};
 
-    pointer = 0;
+    int pointer = 0;
     //prologue, preload kblock = 0
-    loadFromGmem_4(A, &rA[0][0], sA_gOffset);
-    loadFromGmem_4(B, &rB[0][0], sB_gOffset);
+    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
+    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
