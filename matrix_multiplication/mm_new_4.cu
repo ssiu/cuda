@@ -95,8 +95,8 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 //    loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
 //    loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
 
-    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
-    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset])[0];
+    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset])[0];
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
@@ -116,8 +116,8 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
             //load from gmem for next block
 //            loadFromGmem_4(A, &rA[pointer ^ 1][0], sA_gOffset);
 //            loadFromGmem_4(B, &rB[pointer ^ 1][0], sB_gOffset);
-            reinterpret_cast<float4*>(&rA[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
-            reinterpret_cast<float4*>(&rB[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&gM[offset])[0];
+            reinterpret_cast<float4*>(&rA[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset)[0];
+            reinterpret_cast<float4*>(&rB[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset)[0];
 
         }
 
