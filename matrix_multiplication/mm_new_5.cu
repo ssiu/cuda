@@ -1,50 +1,7 @@
 #include <iostream>
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
-#define float_5(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-
-
-
-__device__ void loadFromGmem_5(float* gM, float* r, int offset){
-    reinterpret_cast<float4*>(r)[0] = reinterpret_cast<float4*>(&gM[offset])[0];
-}
-
-__device__ void storeToSmem_5(float* r, float* sM, int offset){
-    reinterpret_cast<float4*>(&sM[offset])[0] = reinterpret_cast<float4*>(r)[0];
-}
-
-__device__ void loadFromSmemA_5(float* sM, float* f, int offset){
-    for (int i=0; i<4; i++) {
-        f[i] = sM[offset + i * BLOCK_WIDTH];
-        f[i+4] = sM[offset + (i + 16) * BLOCK_WIDTH];
-    }
-}
-
-__device__ void loadFromSmemB_5(float* sM, float* f, int offset){
-    for (int i=0; i<4; i++) {
-        f[i] = sM[offset + i];
-        f[i+4] = sM[offset + i + 32];
-    }
-
-}
-
-__device__ void computeOuterProduct_5(float* fA, float* fB, float* accum){
-    #pragma unroll 1
-    for (int i=0; i<8;i++){
-        for (int j=0; j<8; j++) {
-            accum[i*8+j] += fA[i] * fB[j];
-        }
-    }
-}
-
-__device__ void storeToGmem_5(float* accum, float* C, int N, int offset){
-    for (int i=0;i<4;i++) {
-        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
-        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
-        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
-    }
-}
+#define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
 
 __global__ void mm_new_5(float* A, float* B, float* C, int N){
@@ -94,14 +51,15 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 //        sA[sPos] = A[gPos];
 //        sB[sPos] = B[gPos];
 
-        //load from gmem
-        float_5(rA) = float_5(A[sA_gOffset]);
-        float_5(rB) = float_5(B[sB_gOffset]);
+        //load from gmem A, B
+        FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
+        FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
 
 
-        // store to sram
-        storeToSmem_5(rA, sA, sA_sOffset);
-        storeToSmem_5(rB, sB, sB_sOffset);
+        // store to smem sA, sB
+        FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
+        FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rB);
+
 
         //shift A,B pointers
         __syncthreads();
@@ -111,15 +69,48 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
-            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
+//            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
+//            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
 
-            computeOuterProduct_5(fA, fB, accum);
+
+            // load from smem A
+            for (int i=0; i<4; i++) {
+                fA[i] = sA[sA_rOffset + kFragment + i * BLOCK_WIDTH];
+                fA[i+4] = sA[sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+            }
+
+            // load from smem B
+            for (int i=0; i<4; i++) {
+                fB[i] = sM[sB_rOffset + kFragment * TILE_WIDTH + i];
+                fB[i+4] = sM[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+            }
+
+            // compute outer product
+            for (int i=0; i<8;i++){
+                for (int j=0; j<8; j++) {
+                    accum[i*8+j] += fA[i] * fB[j];
+                }
+             }
 
         }
         __syncthreads();
 
     }
-    storeToGmem_5(accum, C, N, C_gOffset);
+
+//    storeToGmem_5(accum, C, N, C_gOffset);
+
+    // store to gmem C
+    for (int i=0;i<4;i++) {
+        FLOAT_4(C[offset + i * N]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[offset + i * N + 32]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[offset + (i + 16) * N ]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[offset + (i + 16) * N + 32]) = FLOAT_4(accum[i * 8]);
+        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
+        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
+        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
+        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
+    }
+
+
 
 }
