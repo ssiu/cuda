@@ -74,20 +74,33 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
 
-        if (kBlock < N/BLOCK_WIDTH - 1) {
-            //load from gmem for next block
+//        if (kBlock < N/BLOCK_WIDTH - 1) {
+//            //load from gmem for next block
+//
+//            //load from gmem A, B
+//            FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
+//            FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
+//
+//            // store to smem sA, sB
+//            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
+//            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
+//
+//            A += BLOCK_WIDTH;
+//            B += BLOCK_WIDTH * N;
+//        }
 
-            //load from gmem A, B
-            FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
-            FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
+        //load from gmem for next block
 
-            // store to smem sA, sB
-            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
-            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
+        //load from gmem A, B
+        FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
+        FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
 
-            A += BLOCK_WIDTH;
-            B += BLOCK_WIDTH * N;
-        }
+        // store to smem sA, sB
+        FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
+        FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
+
+        A += BLOCK_WIDTH;
+        B += BLOCK_WIDTH * N;
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
@@ -96,6 +109,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
             // load from smem A, B
+            #pragma unroll
             for (int i=0; i<4; i++) {
                 fA[i] = sA[pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
                 fA[i+4] = sA[pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
@@ -111,7 +125,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
                 for (int j=0; j<8; j++) {
                     accum[i*8+j] += fA[i] * fB[j];
                 }
-             }
+            }
 
         }
         pointer ^= 1;
@@ -119,9 +133,45 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
     }
 
+
+    // epilogue
+    for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
+
+//            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
+//            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
+
+
+        // load from smem A, B
+        #pragma unroll
+        for (int i=0; i<4; i++) {
+            fA[i] = sA[pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
+            fA[i+4] = sA[pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+            fB[i] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
+            fB[i+4] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+        }
+
+
+        // compute outer product
+        #pragma unroll
+        for (int i=0; i<8;i++){
+            #pragma unroll
+            for (int j=0; j<8; j++) {
+                accum[i*8+j] += fA[i] * fB[j];
+            }
+        }
+
+}
+
+
+
+
+
+
+
 //    storeToGmem_5(accum, C, N, C_gOffset);
 
     // store to gmem C
+    #pragma unroll
     for (int i=0;i<4;i++) {
         FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
         FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
