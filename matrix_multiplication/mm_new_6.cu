@@ -60,6 +60,9 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
     //shift A,B pointers
+    A += BLOCK_WIDTH;
+    B += BLOCK_WIDTH * N;
+
     __syncthreads();
 
 
