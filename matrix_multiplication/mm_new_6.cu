@@ -107,7 +107,7 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
              }
 
         }
-        point ^= 1;
+        pointer ^= 1;
         __syncthreads();
 
     }
