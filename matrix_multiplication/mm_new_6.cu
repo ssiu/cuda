@@ -71,7 +71,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     //mainloop
     // compute kblock = 0,..., N/BLOCK_WIDTH - 2
     // load kblock = 1,..., N/BLOCK_WIDTH - 1
-    for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
+    for (int kBlock=0; kBlock<N/BLOCK_WIDTH-1; kBlock++){
 
 
 //        if (kBlock < N/BLOCK_WIDTH - 1) {
@@ -160,7 +160,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             }
         }
 
-}
+    }
 
 
 
