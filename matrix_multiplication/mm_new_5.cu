@@ -102,9 +102,9 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
     // store to gmem C
     for (int i=0;i<4;i++) {
         FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
 //        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
 //        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
 //        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
