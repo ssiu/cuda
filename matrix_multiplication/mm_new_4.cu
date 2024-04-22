@@ -1,5 +1,4 @@
 #include <iostream>
-// 1024 threads computing a 128*128 block
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
 
@@ -53,58 +52,51 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     int warp_id = threadIdx.x >> 5;
     int lane_id = threadIdx.x & 31;
 
-    // addresses for block-tiling
+    // addresses for block-tiling, gmem -> smem
     int g_row = block_idx * TILE_WIDTH;
     int g_col = block_idy * TILE_WIDTH;
-
     int sA_row = thread_id >> 1; // 16
     int sA_col = (thread_id & 1) << 2; // 0
-
     int sB_row = thread_id >> 5; // 1
     int sB_col = (thread_id & 31) << 2; // 0
-
     int sA_gOffset = sA_row * N + sA_col;
     int sB_gOffset = sB_row * N + sB_col;
     int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
     int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
 
-    // addresses for warp-tiling
+    // addresses for warp-tiling, smem -> outer product
     int warp_row = (warp_id >> 1) << 5; // 0
     int warp_col = (warp_id & 1) << 6; // 64
     int thread_row = (lane_id >> 3) << 2; // 0
     int thread_col = (lane_id & 7) << 2; // 0
-
-
     int sA_rOffset = (warp_row + thread_row) * BLOCK_WIDTH; // 0
     int sB_rOffset = warp_col + thread_col; // 64
     int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
 
-    //move to the current block
+    // move to the current thread block for C
     A = &A[g_row*N];
     B = &B[g_col];
     C = &C[g_row*N + g_col];
 
-    //double buffer
+    // double buffer
     __shared__ float sA[2][BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
-
     float rA[2][4];
     float rB[2][4];
 
-    // computing the outer products
+    // registers for computing the outer products
     float fA[8] = {};
     float fB[8] = {};
     float accum[64] = {};
 
     //buffer index
     int pointer = 0;
+
     //prologue, preload kblock = 0
     loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
     loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
 
-//    reinterpret_cast<float4*>(&rA[pointer][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset])[0];
-//    reinterpret_cast<float4*>(&rB[pointer][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset])[0];
-
+    //
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
 
@@ -121,8 +113,6 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
 
         if (kBlock < N/BLOCK_WIDTH - 1) {
             //load from gmem for next block
-//            loadFromGmem_4(A, &rA[pointer ^ 1][0], sA_gOffset);
-//            loadFromGmem_4(B, &rB[pointer ^ 1][0], sB_gOffset);
             reinterpret_cast<float4*>(&rA[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&A[sA_gOffset])[0];
             reinterpret_cast<float4*>(&rB[pointer ^ 1][0])[0] = reinterpret_cast<float4*>(&B[sB_gOffset])[0];
 
