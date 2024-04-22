@@ -81,8 +81,8 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 
             // load from smem B
             for (int i=0; i<4; i++) {
-                fB[i] = sM[sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[i+4] = sM[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
+                fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
             }
 
             // compute outer product
@@ -101,14 +101,14 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 
     // store to gmem C
     for (int i=0;i<4;i++) {
-        FLOAT_4(C[offset + i * N]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[offset + i * N + 32]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[offset + (i + 16) * N ]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[offset + (i + 16) * N + 32]) = FLOAT_4(accum[i * 8]);
-        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
-        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
-        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
-        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
+        FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[i * 8]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[i * 8]);
+//        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
+//        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
+//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
+//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
     }
 
 
