@@ -58,7 +58,7 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 
         // store to smem sA, sB
         FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
-        FLOAT_4(sB[sA_sOffset]) = FLOAT_4(rB);
+        FLOAT_4(sB[sB_sOffset]) = FLOAT_4(rB);
 
 
         //shift A,B pointers
