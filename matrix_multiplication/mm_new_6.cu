@@ -65,7 +65,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
     __syncthreads();
     if (block_idx==0 and block_idy==0 and thread_id ==0) {
-        printf('%f %f %f', rA[pointer][0], sA[pointer][0], sB[pointer][0])
+        printf('%f %f %f', rA[pointer][0], sA[pointer][0], sB[pointer][0]);
     }
 
     //mainloop
