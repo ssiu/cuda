@@ -27,7 +27,6 @@ __device__ void loadFromSmemB_4(float* sM, float* f, int offset){
 }
 
 __device__ void computeOuterProduct_4(float* fA, float* fB, float* accum){
-    #pragma unroll 1
     for (int i=0; i<8;i++){
         for (int j=0; j<8; j++) {
             accum[i*8+j] += fA[i] * fB[j];
@@ -95,6 +94,7 @@ __global__ void mm_new_4(float* A, float* B, float* C, int N){
     //prologue, preload kblock = 0
     loadFromGmem_4(A, &rA[pointer][0], sA_gOffset);
     loadFromGmem_4(B, &rB[pointer][0], sB_gOffset);
+
 
     //
     A += BLOCK_WIDTH;
