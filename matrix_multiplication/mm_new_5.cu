@@ -73,17 +73,14 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 //            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
 
 
-            // load from smem A
+            // load from smem A, B
             for (int i=0; i<4; i++) {
                 fA[i] = sA[sA_rOffset + kFragment + i * BLOCK_WIDTH];
                 fA[i+4] = sA[sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-            }
-
-            // load from smem B
-            for (int i=0; i<4; i++) {
                 fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
                 fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
             }
+
 
             // compute outer product
             for (int i=0; i<8;i++){
