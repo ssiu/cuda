@@ -2,7 +2,12 @@
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-
+#define COMPUTE_OUTER_PRODUCT(accum, fA, fB) \
+    for (int i = 0; i < 8; i++) { \
+        for (int j = 0; j < 8; j++) { \
+            accum[i * 8 + j] += fA[i] * fB[j]; \
+        } \
+    }
 
 __global__ void mm_new_6(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
@@ -105,13 +110,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
             // compute outer product
-            #pragma unroll
-            for (int i=0; i<8;i++){
-                #pragma unroll
-                for (int j=0; j<8; j++) {
-                    accum[i*8+j] += fA[i] * fB[j];
-                }
-             }
+            COMPUTE_OUTER_PRODUCT(accum, fA, fB);
 
         }
         pointer ^= 1;
