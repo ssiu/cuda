@@ -93,7 +93,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             A += BLOCK_WIDTH;
             B += BLOCK_WIDTH * N;
         }
-
+        #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
 //            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
@@ -101,6 +101,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
             // load from smem A, B
+            #pragma unroll
             for (int i=0; i<4; i++) {
                 fA[i] = sA[pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
                 fA[i+4] = sA[pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
