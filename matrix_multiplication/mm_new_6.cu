@@ -5,7 +5,7 @@
 #define COMPUTE_OUTER_PRODUCT(accum, fA, fB) \
     for (int i = 0; i < 8; i++) { \
         for (int j = 0; j < 8; j++) { \
-            (accum)[i * 8 + j] += (fA)[i] * (fB)[j]; \
+            accum[i * 8 + j] += fA[i] * fB[j]; \
         } \
     }
 
