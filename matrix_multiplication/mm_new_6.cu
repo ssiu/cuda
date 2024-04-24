@@ -92,10 +92,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
         //
         for (int i=0; i<4; i++) {
-                fA[reg_pointer][i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
-                fA[reg_pointer][i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-                fB[reg_pointer][i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[reg_pointer][i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                fA[reg_pointer][i] = sA[shared_pointer][sA_rOffset + i * BLOCK_WIDTH];
+                fA[reg_pointer][i+4] = sA[shared_pointer][sA_rOffset + (i + 16) * BLOCK_WIDTH];
+                fB[reg_pointer][i] = sB[shared_pointer][sB_rOffset + i];
+                fB[reg_pointer][i+4] = sB[shared_pointer][sB_rOffset + i + 32];
         }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
@@ -104,10 +104,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             if (kFragment < BLOCK_WIDTH -1) {
                 // load from smem A,B for next tile
                 for (int i=0; i<4; i++) {
-                    fA[reg_pointer ^ 1][i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
-                    fA[reg_pointer ^ 1][i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-                    fB[reg_pointer ^ 1][i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
-                    fB[reg_pointer ^ 1][i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                    fA[reg_pointer ^ 1][i] = sA[shared_pointer][sA_rOffset + kFragment + 1 + i * BLOCK_WIDTH];
+                    fA[reg_pointer ^ 1][i+4] = sA[shared_pointer][sA_rOffset + kFragment + 1 + (i + 16) * BLOCK_WIDTH];
+                    fB[reg_pointer ^ 1][i] = sB[shared_pointer][sB_rOffset + (kFragment + 1) * TILE_WIDTH + i];
+                    fB[reg_pointer ^ 1][i+4] = sB[shared_pointer][sB_rOffset + (kFragment + 1) * TILE_WIDTH + i + 32];
                 }
             }
 
