@@ -1,13 +1,8 @@
 #include <iostream>
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
-#define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-#define COMPUTE_OUTER_PRODUCT(accum, fA, fB) \
-    for (int i = 0; i < 8; i++) { \
-        for (int j = 0; j < 8; j++) { \
-            accum[i * 8 + j] += fA[i] * fB[j]; \
-        } \
-    }
+#define FLOAT_4(shared_pointer) reinterpret_cast<float4*>(&(shared_pointer))[0]
+
 
 __global__ void mm_new_6(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
@@ -53,24 +48,24 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     float fB[8] = {};
     float accum[64] = {};
 
-    int pointer = 0;
+    int shared_pointer = 0;
     // prologue, load kBLock = 0 from global to shared
     //load from gmem A, B
-    FLOAT_4(rA[pointer][0]) = FLOAT_4(A[sA_gOffset]);
-    FLOAT_4(rB[pointer][0]) = FLOAT_4(B[sB_gOffset]);
+    FLOAT_4(rA[shared_pointer][0]) = FLOAT_4(A[sA_gOffset]);
+    FLOAT_4(rB[shared_pointer][0]) = FLOAT_4(B[sB_gOffset]);
 
     // store to smem sA, sB
-    FLOAT_4(sA[pointer][sA_sOffset]) = FLOAT_4(rA[pointer][0]);
-    FLOAT_4(sB[pointer][sB_sOffset]) = FLOAT_4(rB[pointer][0]);
+    FLOAT_4(sA[shared_pointer][sA_sOffset]) = FLOAT_4(rA[shared_pointer][0]);
+    FLOAT_4(sB[shared_pointer][sB_sOffset]) = FLOAT_4(rB[shared_pointer][0]);
 
 
-    //shift A,B pointers
+    //shift A,B shared_pointers
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
 
     __syncthreads();
 //    if (block_idx==0 and block_idy==0 and thread_id ==0) {
-//        printf("%f %f %f", rA[pointer][0], sA[pointer][0], sB[pointer][0]);
+//        printf("%f %f %f", rA[shared_pointer][0], sA[shared_pointer][0], sB[shared_pointer][0]);
 //    }
 
     //mainloop
@@ -82,48 +77,44 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
             //load from gmem A, B
-            FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
-            FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
-
+            FLOAT_4(rA[shared_pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
+            FLOAT_4(rB[shared_pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
+            
+            // store to smem sA, sB
+            FLOAT_4(sA[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[shared_pointer ^ 1][0]);
+            FLOAT_4(sB[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[shared_pointer ^ 1][0]);
+            
             A += BLOCK_WIDTH;
             B += BLOCK_WIDTH * N;
         }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-//            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
-//            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
-
-
             // load from smem A, B
 
             for (int i=0; i<4; i++) {
-                fA[i] = sA[pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
-                fA[i+4] = sA[pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-                fB[i] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[i+4] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                fA[i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
+                fA[i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+                fB[i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
+                fB[i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
             }
 
 
             // compute outer product
-            COMPUTE_OUTER_PRODUCT(accum, fA, fB);
+            for (int i = 0; i < 8; i++) { 
+                for (int j = 0; j < 8; j++) { 
+                    accum[i * 8 + j] += fA[i] * fB[j]; 
+                }   
+            }
 
         }
 
-        if (kBlock < N/BLOCK_WIDTH - 1) {
-
-            // store to smem sA, sB
-            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
-            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
-
-        }
-
-        pointer ^= 1;
+        shared_pointer ^= 1;
+        
         __syncthreads();
 
     }
 
-//    storeToGmem_5(accum, C, N, C_gOffset);
 
     // store to gmem C
     for (int i=0;i<4;i++) {
