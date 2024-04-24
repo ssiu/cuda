@@ -1,7 +1,7 @@
 #include <iostream>
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
-#define FLOAT_4(shared_pointer) reinterpret_cast<float4*>(&(shared_pointer))[0]
+#define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 #define COMPUTE_OUTER_PRODUCT(accum, fA, fB) \
     for (int i = 0; i < 8; i++) { \
         for (int j = 0; j < 8; j++) { \
@@ -49,28 +49,28 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     float rA[2][4];
     float rB[2][4];
 
-    float fA[2][8] = {};
-    float fB[2][8] = {};
+    float fA[8] = {};
+    float fB[8] = {};
     float accum[64] = {};
 
-    int shared_pointer = 0;
+    int pointer = 0;
     // prologue, load kBLock = 0 from global to shared
     //load from gmem A, B
-    FLOAT_4(rA[shared_pointer][0]) = FLOAT_4(A[sA_gOffset]);
-    FLOAT_4(rB[shared_pointer][0]) = FLOAT_4(B[sB_gOffset]);
+    FLOAT_4(rA[pointer][0]) = FLOAT_4(A[sA_gOffset]);
+    FLOAT_4(rB[pointer][0]) = FLOAT_4(B[sB_gOffset]);
 
     // store to smem sA, sB
-    FLOAT_4(sA[shared_pointer][sA_sOffset]) = FLOAT_4(rA[shared_pointer][0]);
-    FLOAT_4(sB[shared_pointer][sB_sOffset]) = FLOAT_4(rB[shared_pointer][0]);
+    FLOAT_4(sA[pointer][sA_sOffset]) = FLOAT_4(rA[pointer][0]);
+    FLOAT_4(sB[pointer][sB_sOffset]) = FLOAT_4(rB[pointer][0]);
 
 
-    //shift A,B shared_pointers
+    //shift A,B pointers
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
 
     __syncthreads();
 //    if (block_idx==0 and block_idy==0 and thread_id ==0) {
-//        printf("%f %f %f", rA[shared_pointer][0], sA[shared_pointer][0], sB[shared_pointer][0]);
+//        printf("%f %f %f", rA[pointer][0], sA[pointer][0], sB[pointer][0]);
 //    }
 
     //mainloop
@@ -78,22 +78,22 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     // load kblock = 1,..., N/BLOCK_WIDTH - 1
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
+
         if (kBlock < N/BLOCK_WIDTH - 1) {
             //load from gmem for next block
 
             //load from gmem A, B
-            FLOAT_4(rA[shared_pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
-            FLOAT_4(rB[shared_pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
+            FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
+            FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
 
             // store to smem sA, sB
-            FLOAT_4(sA[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[shared_pointer ^ 1][0]);
-            FLOAT_4(sB[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[shared_pointer ^ 1][0]);
+            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
+            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
 
             A += BLOCK_WIDTH;
             B += BLOCK_WIDTH * N;
         }
-        
-        
+        #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
 //            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
@@ -103,10 +103,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             // load from smem A, B
 
             for (int i=0; i<4; i++) {
-                fA[i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
-                fA[i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-                fB[i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                fA[i] = sA[pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
+                fA[i+4] = sA[pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+                fB[i] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
+                fB[i+4] = sB[pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
             }
 
 
@@ -114,7 +114,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             COMPUTE_OUTER_PRODUCT(accum, fA, fB);
 
         }
-        shared_pointer ^= 1;
+        pointer ^= 1;
         __syncthreads();
 
     }
@@ -127,6 +127,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
         FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
         FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
         FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
+//        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
+//        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
+//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
+//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
     }
 
 
