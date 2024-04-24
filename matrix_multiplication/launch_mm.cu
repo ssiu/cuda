@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -160,7 +160,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -179,8 +179,20 @@ int main(){
     }
     #endif
 
-
     #if 1
+    {
+        dim3 blockDim_yz(256);
+        dim3 gridDim_yz(N / TILE_WIDTH,N / TILE_WIDTH);
+        mysgemm_v9<<<gridDim_yz, blockDim_yz>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
+        mysgemm_v11<<<gridDim_yz, blockDim_yz>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
+
+        hC = dC;
+    }
+
+
+
+
+    #if 0
     {
         //
         // cublas row major
@@ -203,7 +215,29 @@ int main(){
 
 
 
+    #if 1
+    {
+        //
+        // cublas column major
+        //
+        float alpha = 1.0f;
+        float beta = 1.0f;
 
+        cudaError_t cudaStat;  // cudaMalloc status
+        cublasStatus_t stat;   // cuBLAS functions status
+        cublasHandle_t handle; // cuBLAS context
+        cublasCreate(&handle);
+        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
+                         thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+
+        hC_cublas = dC_cublas;
+
+        cublasDestroy(handle);
+        //
+        //
+        //
+    }
+    #endif
 
 
     //
