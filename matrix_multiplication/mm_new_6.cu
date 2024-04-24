@@ -44,9 +44,16 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     float rA[2][4];
     float rB[2][4];
 
-    float fA[2][8] = {};
-    float fB[2][8] = {};
-    float accum[64] = {};
+    float fA[2][8];
+    float fB[2][8];
+    float accum[8][8];
+    #pragma unroll
+    for(int i=0; i<8; i++){
+        #pragma unroll
+        for(int j=0; j<8; j++){
+            accum[i][j]=0.0;
+        }
+    }
 
     int shared_pointer = 0;
     int reg_pointer = 0;
@@ -113,11 +120,9 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
             // compute outer product
-            #pragma unroll 1
             for (int i = 0; i < 8; i++) {
-                #pragma unroll
                 for (int j = 0; j < 8; j++) { 
-                    accum[i * 8 + j] += fA[reg_pointer][i] * fB[reg_pointer][j];
+                    accum[i][j] += fA[reg_pointer][i] * fB[reg_pointer][j];
                 }   
             }
 
@@ -133,10 +138,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
     // store to gmem C
     for (int i=0;i<4;i++) {
-        FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
-        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
-        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
-        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
+        FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i][0]);
+        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i][4]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[i+4][0]);
+        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[i+4][4]);
     }
 
 
