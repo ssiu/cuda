@@ -44,11 +44,12 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     float rA[2][4];
     float rB[2][4];
 
-    float fA[8] = {};
-    float fB[8] = {};
+    float fA[2][8] = {};
+    float fB[2][8] = {};
     float accum[64] = {};
 
     int shared_pointer = 0;
+    int reg_pointer = 0;
     // prologue, load kBLock = 0 from global to shared
     //load from gmem A, B
     FLOAT_4(rA[shared_pointer][0]) = FLOAT_4(A[sA_gOffset]);
@@ -88,25 +89,37 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             B += BLOCK_WIDTH * N;
         }
 
+
+        //
+        for (int i=0; i<4; i++) {
+                fA[reg_pointer][i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
+                fA[reg_pointer][i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+                fB[reg_pointer][i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
+                fB[reg_pointer][i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+        }
+
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-            // load from smem A, B
 
-            for (int i=0; i<4; i++) {
-                fA[i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
-                fA[i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
-                fB[i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+            if (kFragment < BLOCK_WIDTH -1) {
+                // load from smem A,B for next tile
+                for (int i=0; i<4; i++) {
+                    fA[reg_pointer ^ 1][i] = sA[shared_pointer][sA_rOffset + kFragment + i * BLOCK_WIDTH];
+                    fA[reg_pointer ^ 1][i+4] = sA[shared_pointer][sA_rOffset + kFragment + (i + 16) * BLOCK_WIDTH];
+                    fB[reg_pointer ^ 1][i] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i];
+                    fB[reg_pointer ^ 1][i+4] = sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+                }
             }
 
 
             // compute outer product
             for (int i = 0; i < 8; i++) { 
                 for (int j = 0; j < 8; j++) { 
-                    accum[i * 8 + j] += fA[i] * fB[j]; 
+                    accum[i * 8 + j] += fA[reg_pointer][i] * fB[reg_pointer][j];
                 }   
             }
 
+            reg_pointer ^= 1;
         }
 
         shared_pointer ^= 1;
