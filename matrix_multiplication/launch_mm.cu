@@ -181,6 +181,7 @@ int main(){
 
     #if 1
     {
+        int TILE_WIDTH = 128;
         dim3 blockDim_yz(256);
         dim3 gridDim_yz(N / TILE_WIDTH,N / TILE_WIDTH);
         mysgemm_v9<<<gridDim_yz, blockDim_yz>>>(N,N,N,1.0f,thrust::raw_pointer_cast(dA.data()),thrust::raw_pointer_cast(dB.data()),0.0f,thrust::raw_pointer_cast(dC.data()));
