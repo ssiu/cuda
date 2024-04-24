@@ -78,22 +78,17 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
     // load kblock = 1,..., N/BLOCK_WIDTH - 1
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
-
+        //load from gmem for next block
         if (kBlock < N/BLOCK_WIDTH - 1) {
-            //load from gmem for next block
 
             //load from gmem A, B
             FLOAT_4(rA[pointer ^ 1][0]) = FLOAT_4(A[sA_gOffset]);
             FLOAT_4(rB[pointer ^ 1][0]) = FLOAT_4(B[sB_gOffset]);
 
-            // store to smem sA, sB
-            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
-            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
-
             A += BLOCK_WIDTH;
             B += BLOCK_WIDTH * N;
         }
-        #pragma unroll
+
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
 //            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
@@ -114,6 +109,15 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             COMPUTE_OUTER_PRODUCT(accum, fA, fB);
 
         }
+
+        if (kBlock < N/BLOCK_WIDTH - 1) {
+
+            // store to smem sA, sB
+            FLOAT_4(sA[pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[pointer ^ 1][0]);
+            FLOAT_4(sB[pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[pointer ^ 1][0]);
+
+        }
+
         pointer ^= 1;
         __syncthreads();
 
@@ -127,10 +131,6 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
         FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
         FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
         FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
-//        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
-//        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
-//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
-//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
     }
 
 
