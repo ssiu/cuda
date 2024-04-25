@@ -91,9 +91,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             // store to smem sA, sB
             FLOAT_4(sA[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[shared_pointer ^ 1][0]);
             FLOAT_4(sB[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[shared_pointer ^ 1][0]);
-            
-            A += BLOCK_WIDTH;
-            B += BLOCK_WIDTH * N;
+
         }
 
 
@@ -130,6 +128,18 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
             }
 
             reg_pointer ^= 1;
+
+        }
+
+        // store to smem for next block
+        if (kBlock < N/BLOCK_WIDTH - 1) {
+
+            // store to smem sA, sB
+            FLOAT_4(sA[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rA[shared_pointer ^ 1][0]);
+            FLOAT_4(sB[shared_pointer ^ 1][sA_sOffset]) = FLOAT_4(rB[shared_pointer ^ 1][0]);
+
+            A += BLOCK_WIDTH;
+            B += BLOCK_WIDTH * N;
         }
 
         shared_pointer ^= 1;
