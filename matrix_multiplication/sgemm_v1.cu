@@ -367,4 +367,5 @@ int main() {
     free(h_B);
     free(h_C);
     free(h_C1);
+    return 0;
 }
