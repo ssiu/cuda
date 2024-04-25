@@ -98,6 +98,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
         //
+        #pragma unroll
         for (int i=0; i<4; i++) {
                 fA[reg_pointer][i] = sA[shared_pointer][sA_rOffset + i * BLOCK_WIDTH];
                 fA[reg_pointer][i+4] = sA[shared_pointer][sA_rOffset + (i + 16) * BLOCK_WIDTH];
@@ -105,9 +106,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
                 fB[reg_pointer][i+4] = sB[shared_pointer][sB_rOffset + i + 32];
         }
 
+        #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-
+            #pragma unroll
             if (kFragment < BLOCK_WIDTH -1) {
                 // load from smem A,B for next tile
                 for (int i=0; i<4; i++) {
@@ -118,9 +120,10 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
                 }
             }
 
-
+            #pragma unroll
             // compute outer product
             for (int i = 0; i < 8; i++) {
+                #pragma unroll
                 for (int j = 0; j < 8; j++) { 
                     accum[i][j] += fA[reg_pointer][i] * fB[reg_pointer][j];
                 }   
@@ -137,6 +140,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
     // store to gmem C
+    #pragma unroll
     for (int i=0;i<4;i++) {
         FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i][0]);
         FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i][4]);
