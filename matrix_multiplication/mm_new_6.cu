@@ -107,7 +107,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-
+            #pragma unroll
             if (kFragment < BLOCK_WIDTH -1) {
                 // load from smem A,B for next tile
                 for (int i=0; i<4; i++) {
