@@ -96,7 +96,7 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
         //
-
+        #pragma unroll
         for (int i=0; i<4; i++) {
                 fA[reg_pointer][i] = sA[shared_pointer][sA_rOffset + i * BLOCK_WIDTH];
                 fA[reg_pointer][i+4] = sA[shared_pointer][sA_rOffset + (i + 16) * BLOCK_WIDTH];
