@@ -120,9 +120,8 @@ __global__ void mm_new_6(float* A, float* B, float* C, int N){
 
 
             // compute outer product
-            #pragma unroll
+
             for (int i = 0; i < 8; i++) {
-                #pragma unroll
                 for (int j = 0; j < 8; j++) { 
                     accum[i][j] += fA[reg_pointer][i] * fB[reg_pointer][j];
                 }   
