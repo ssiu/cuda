@@ -141,7 +141,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -180,7 +180,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -200,7 +200,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -214,6 +214,25 @@ int main(){
         dim3 blockDim_mm_new_8(256);
         std::cout << "Running kernel 8" << std::endl;
         mm_new_8<<<gridDim_mm_new_8, blockDim_mm_new_8>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+    #if 1
+    {
+//        for (int i=128;i<256; i++){
+//                printf("%d %f\n", i, hA[i]);
+//         }
+
+//        for (int i=0;i<128; i++){
+//            printf("%d %f\n", i, hA[i]);
+//        }
+        int TILE_WIDTH = 128;
+        dim3 gridDim_mm_new_9(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_9(256);
+        std::cout << "Running kernel 9" << std::endl;
+        mm_new_9<<<gridDim_mm_new_9, blockDim_mm_new_9>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
     }
