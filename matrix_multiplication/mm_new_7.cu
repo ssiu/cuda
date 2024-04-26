@@ -81,13 +81,16 @@ __global__ void mm_new_7(float* A, float* B, float* C, int N){
 
 
             // load from smem A, B
-            for (int i=0; i<4; i++) {
-                fA[i] = sA[sA_rOffset + kFragment * TILE_WIDTH + i];
-                fA[i+4] = sA[sA_rOffset + kFragment * TILE_WIDTH + (i + 16)];
-                fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
-                fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
-            }
-
+//            for (int i=0; i<4; i++) {
+//                fA[i] = sA[sA_rOffset + kFragment * TILE_WIDTH + i];
+//                fA[i+4] = sA[sA_rOffset + kFragment * TILE_WIDTH + (i + 16)];
+//                fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
+//                fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
+//            }
+            FLOAT_4(fA[0]) = FLOAT_4(sA[sA_rOffset + kFragment * TILE_WIDTH]);
+            FLOAT_4(fA[4]) = FLOAT_4(sA[sA_rOffset + kFragment * TILE_WIDTH + 16]);
+            FLOAT_4(fB[0]) = FLOAT_4(sB[sB_rOffset + kFragment * TILE_WIDTH]);
+            FLOAT_4(fB[4]) = FLOAT_4(sB[sB_rOffset + kFragment * TILE_WIDTH + 32]);
 
             // compute outer product
             for (int i=0; i<8;i++){
