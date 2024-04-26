@@ -49,6 +49,7 @@ __global__ void mm_new_7(float* A, float* B, float* C, int N){
     float fA[8] = {};
     float fB[8] = {};
     float accum[64] = {};
+
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 //        sA[sPos] = A[gPos];
 //        sB[sPos] = B[gPos];
@@ -81,8 +82,8 @@ __global__ void mm_new_7(float* A, float* B, float* C, int N){
 
             // load from smem A, B
             for (int i=0; i<4; i++) {
-                fA[i] = sA[sA_rOffset + kFragment + i];
-                fA[i+4] = sA[sA_rOffset + kFragment + (i + 16)];
+                fA[i] = sA[sA_rOffset + kFragment * TILE_WIDTH + i];
+                fA[i+4] = sA[sA_rOffset + kFragment * TILE_WIDTH + (i + 16)];
                 fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
                 fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
             }
