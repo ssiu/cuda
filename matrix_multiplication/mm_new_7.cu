@@ -60,7 +60,7 @@ __global__ void mm_new_5(float* A, float* B, float* C, int N){
 
         // store to smem sA, sB
         //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
-        for (i=0; i<4;i++){
+        for (int i=0; i<4;i++){
             sA[sA_sOffset + i*TILE_WIDTH] = rA[i];
         }
 
