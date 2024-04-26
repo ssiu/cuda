@@ -81,19 +81,19 @@ __global__ void mm_new_8(float* A, float* B, float* C, int N){
         }
 
         // load first fragment
-        FLOAT_4(fA[reg_pointer][0]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH]);
-        FLOAT_4(fA[reg_pointer][4]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH + 16]);
-        FLOAT_4(fB[reg_pointer][0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH]);
-        FLOAT_4(fB[reg_pointer][4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
+        FLOAT_4(fA[reg_pointer][0]) = FLOAT_4(sA[shared_pointer][sA_rOffset]);
+        FLOAT_4(fA[reg_pointer][4]) = FLOAT_4(sA[shared_pointer][sA_rOffset+ 16]);
+        FLOAT_4(fB[reg_pointer][0]) = FLOAT_4(sB[shared_pointer][sB_rOffset]);
+        FLOAT_4(fB[reg_pointer][4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + 32]);
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
             // load next fragment
             if (kFragment < BLOCK_WIDTH - 1) {
-                FLOAT_4(fA[reg_pointer ^ 1][0]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH]);
-                FLOAT_4(fA[reg_pointer ^ 1][4]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH + 16]);
-                FLOAT_4(fB[reg_pointer ^ 1][0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH]);
-                FLOAT_4(fB[reg_pointer ^ 1][4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
+                FLOAT_4(fA[reg_pointer ^ 1][0]) = FLOAT_4(sA[shared_pointer][sA_rOffset + (kFragment + 1) * TILE_WIDTH]);
+                FLOAT_4(fA[reg_pointer ^ 1][4]) = FLOAT_4(sA[shared_pointer][sA_rOffset + (kFragment + 1) * TILE_WIDTH + 16]);
+                FLOAT_4(fB[reg_pointer ^ 1][0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + (kFragment + 1) * TILE_WIDTH]);
+                FLOAT_4(fB[reg_pointer ^ 1][4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + (kFragment + 1) * TILE_WIDTH + 32]);
             }
 
 
