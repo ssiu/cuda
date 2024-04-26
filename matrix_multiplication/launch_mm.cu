@@ -141,7 +141,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -160,7 +160,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -178,6 +178,27 @@ int main(){
         hC = dC;
     }
     #endif
+
+
+    #if 1
+    {
+//        for (int i=128;i<256; i++){
+//                printf("%d %f\n", i, hA[i]);
+//         }
+
+//        for (int i=0;i<128; i++){
+//            printf("%d %f\n", i, hA[i]);
+//        }
+        int TILE_WIDTH = 128;
+        dim3 gridDim_mm_new_7(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_7(256);
+        std::cout << "Running kernel 7" << std::endl;
+        mm_new_6<<<gridDim_mm_new_7, blockDim_mm_new_7>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
 
     #if 0
     {
