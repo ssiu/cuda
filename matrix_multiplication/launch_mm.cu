@@ -193,7 +193,7 @@ int main(){
         dim3 gridDim_mm_new_7(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_mm_new_7(256);
         std::cout << "Running kernel 7" << std::endl;
-        mm_new_6<<<gridDim_mm_new_7, blockDim_mm_new_7>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+        mm_new_7<<<gridDim_mm_new_7, blockDim_mm_new_7>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
     }
