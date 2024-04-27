@@ -3,8 +3,8 @@
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
-
-__global__ void mm_new_7(float* A, float* B, float* C, int N){
+__global__ __launch_bounds__(256)
+void mm_new_7(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
     int thread_id = threadIdx.x;
