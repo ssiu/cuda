@@ -2,7 +2,11 @@
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-
+#define VS_MUL(vc, sa, vb) \
+        vc.x += sa * vb.x; \
+        vc.y += sa * vb.y; \
+        vc.z += sa * vb.z; \
+        vc.w += sa * vb.w;
 
 __global__ void mm_new_8(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
@@ -21,7 +25,7 @@ __global__ void mm_new_8(float* A, float* B, float* C, int N){
 
     int sA_gOffset = sA_row * N + sA_col;
     int sB_gOffset = sB_row * N + sB_col;
-    // need to transpose A tile
+    // need to transpose A tile to give vectorized shared memory load
     //int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
     int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
     int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
@@ -69,8 +73,6 @@ __global__ void mm_new_8(float* A, float* B, float* C, int N){
 
 
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
-//        sA[sPos] = A[gPos];
-//        sB[sPos] = B[gPos];
 
         // load from gmem A, B for next block
         if (kBlock < N/BLOCK_WIDTH - 1) {
@@ -81,28 +83,34 @@ __global__ void mm_new_8(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
 
-//            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
-//            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
-
-
             // load from smem A, B
-//            for (int i=0; i<4; i++) {
-//                fA[i] = sA[sA_rOffset + kFragment * TILE_WIDTH + i];
-//                fA[i+4] = sA[sA_rOffset + kFragment * TILE_WIDTH + (i + 16)];
-//                fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
-//                fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
-//            }
             FLOAT_4(fA[0]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH]);
             FLOAT_4(fA[4]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH + 16]);
             FLOAT_4(fB[0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH]);
             FLOAT_4(fB[4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
 
             // compute outer product
-            for (int i=0; i<8;i++){
-                for (int j=0; j<8; j++) {
-                    accum[i*8+j] += fA[i] * fB[j];
-                }
-             }
+//            for (int i=0; i<8;i++){
+//                for (int j=0; j<8; j++) {
+//                    accum[i*8+j] += fA[i] * fB[j];
+//                }
+//             }
+            VS_MUL(FLOAT_4(accum[0]), FLOAT_4(fA[0]).x, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[4]), FLOAT_4(fA[0]).x, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[8]), FLOAT_4(fA[0]).y, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[12]), FLOAT_4(fA[0]).y, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[16]), FLOAT_4(fA[0]).z, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[20]), FLOAT_4(fA[0]).z, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[24]), FLOAT_4(fA[0]).w, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[28]), FLOAT_4(fA[0]).w, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[32]), FLOAT_4(fA[4]).x, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[36]), FLOAT_4(fA[4]).x, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[40]), FLOAT_4(fA[4]).y, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[44]), FLOAT_4(fA[4]).y, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[48]), FLOAT_4(fA[4]).z, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[52]), FLOAT_4(fA[4]).z, FLOAT_4(fB[4]));
+            VS_MUL(FLOAT_4(accum[56]), FLOAT_4(fA[4]).w, FLOAT_4(fB[0]));
+            VS_MUL(FLOAT_4(accum[60]), FLOAT_4(fA[4]).w, FLOAT_4(fB[4]));
 
         }
 
