@@ -91,27 +91,27 @@ void mm_new_8(float* A, float* B, float* C, int N){
             FLOAT_4(fB[4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
 
             // compute outer product
-//            for (int i=0; i<8;i++){
-//                for (int j=0; j<8; j++) {
-//                    accum[i*8+j] += fA[i] * fB[j];
-//                }
-//             }
-            VS_MUL(FLOAT_4(accum[0]), FLOAT_4(fA[0]).x, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[4]), FLOAT_4(fA[0]).x, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[8]), FLOAT_4(fA[0]).y, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[12]), FLOAT_4(fA[0]).y, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[16]), FLOAT_4(fA[0]).z, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[20]), FLOAT_4(fA[0]).z, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[24]), FLOAT_4(fA[0]).w, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[28]), FLOAT_4(fA[0]).w, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[32]), FLOAT_4(fA[4]).x, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[36]), FLOAT_4(fA[4]).x, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[40]), FLOAT_4(fA[4]).y, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[44]), FLOAT_4(fA[4]).y, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[48]), FLOAT_4(fA[4]).z, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[52]), FLOAT_4(fA[4]).z, FLOAT_4(fB[4]));
-            VS_MUL(FLOAT_4(accum[56]), FLOAT_4(fA[4]).w, FLOAT_4(fB[0]));
-            VS_MUL(FLOAT_4(accum[60]), FLOAT_4(fA[4]).w, FLOAT_4(fB[4]));
+            for (int i=0; i<8;i++){
+                for (int j=0; j<8; j++) {
+                    accum[i*8+j] += fA[i] * fB[j];
+                }
+             }
+//            VS_MUL(FLOAT_4(accum[0]), FLOAT_4(fA[0]).x, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[4]), FLOAT_4(fA[0]).x, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[8]), FLOAT_4(fA[0]).y, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[12]), FLOAT_4(fA[0]).y, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[16]), FLOAT_4(fA[0]).z, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[20]), FLOAT_4(fA[0]).z, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[24]), FLOAT_4(fA[0]).w, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[28]), FLOAT_4(fA[0]).w, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[32]), FLOAT_4(fA[4]).x, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[36]), FLOAT_4(fA[4]).x, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[40]), FLOAT_4(fA[4]).y, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[44]), FLOAT_4(fA[4]).y, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[48]), FLOAT_4(fA[4]).z, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[52]), FLOAT_4(fA[4]).z, FLOAT_4(fB[4]));
+//            VS_MUL(FLOAT_4(accum[56]), FLOAT_4(fA[4]).w, FLOAT_4(fB[0]));
+//            VS_MUL(FLOAT_4(accum[60]), FLOAT_4(fA[4]).w, FLOAT_4(fB[4]));
 
         }
 
