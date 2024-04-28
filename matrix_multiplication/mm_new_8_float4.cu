@@ -9,7 +9,7 @@
         vc.w += sa * vb.w;
 
 __global__ __launch_bounds__(256)
-void mm_new_8(float* A, float* B, float* C, int N){
+void mm_new_8_float4(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
     int thread_id = threadIdx.x;
@@ -49,8 +49,8 @@ void mm_new_8(float* A, float* B, float* C, int N){
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
 
 
-    float rA[4];
-    float rB[4];
+    float4 rA;
+    float4 rB;
 
     float fA[8] = {};
     float fB[8] = {};
@@ -59,8 +59,8 @@ void mm_new_8(float* A, float* B, float* C, int N){
 
     int shared_pointer = 0;
     // load first block
-    FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
-    FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
+    rA = FLOAT_4(A[sA_gOffset]);
+    rB = FLOAT_4(B[sB_gOffset]);
 
     for (int i=0; i<4;i++){
         sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];

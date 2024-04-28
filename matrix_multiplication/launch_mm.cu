@@ -219,6 +219,28 @@ int main(){
     }
     #endif
 
+    #if 1
+    {
+//        for (int i=128;i<256; i++){
+//                printf("%d %f\n", i, hA[i]);
+//         }
+
+//        for (int i=0;i<128; i++){
+//            printf("%d %f\n", i, hA[i]);
+//        }
+        int TILE_WIDTH = 128;
+        dim3 gridDim_mm_new_8_float4(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_mm_new_8_float4(256);
+        std::cout << "Running kernel 8" << std::endl;
+        mm_new_8_float4<<<gridDim_mm_new_8_float4, blockDim_mm_new_8_float4>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+
+
+
     #if 0
     {
 //        for (int i=128;i<256; i++){
