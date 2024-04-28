@@ -49,10 +49,10 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
 
 
-//    float4 rA;
+    float4 rA;
 //    float4 rB;
 
-    float rA[4];
+//    float rA[4];
     float rB[4];
 
     float fA[8] = {};
@@ -65,14 +65,14 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
     FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
 
-    for (int i=0; i<4;i++){
-        sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
-    }
+//    for (int i=0; i<4;i++){
+//        sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
+//    }
 
-//    sA[shared_pointer][sA_sOffset + 0 << 7] = rA.x;
-//    sA[shared_pointer][sA_sOffset + 1 << 7] = rA.y;
-//    sA[shared_pointer][sA_sOffset + 2 << 7] = rA.z;
-//    sA[shared_pointer][sA_sOffset + 3 << 7] = rA.w;
+    sA[shared_pointer][sA_sOffset + (0 << 7)] = rA.x;
+    sA[shared_pointer][sA_sOffset + (1 << 7)] = rA.y;
+    sA[shared_pointer][sA_sOffset + (2 << 7)] = rA.z;
+    sA[shared_pointer][sA_sOffset + (3 << 7)] = rA.w;
 
 
     FLOAT_4(sB[shared_pointer][sB_sOffset]) = FLOAT_4(rB);
@@ -88,7 +88,7 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
         // load from gmem A, B for next block
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
-            FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
+            rA = FLOAT_4(A[sA_gOffset]);
             FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
         }
 
@@ -129,13 +129,13 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
 
-//            sA[shared_pointer^1][sA_sOffset + 0 << 7] = rA.x;
-//            sA[shared_pointer^1][sA_sOffset + 1 << 7] = rA.y;
-//            sA[shared_pointer^1][sA_sOffset + 2 << 7] = rA.z;
-//            sA[shared_pointer^1][sA_sOffset + 3 << 7] = rA.w;
-            for (int i=0; i<4;i++){
-                sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
-            }
+            sA[shared_pointer^1][sA_sOffset + (0 << 7)] = rA.x;
+            sA[shared_pointer^1][sA_sOffset + (1 << 7)] = rA.y;
+            sA[shared_pointer^1][sA_sOffset + (2 << 7)] = rA.z;
+            sA[shared_pointer^1][sA_sOffset + (3 << 7)] = rA.w;
+//            for (int i=0; i<4;i++){
+//                sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
+//            }
 
             FLOAT_4(sB[shared_pointer^1][sB_sOffset]) = FLOAT_4(rB);
 
