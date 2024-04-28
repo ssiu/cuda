@@ -8,15 +8,15 @@
         vc.z += sa * vb.z; \
         vc.w += sa * vb.w;
 
-__global__ __launch_bounds__(256)
+__global__ __launch_bounds__(256, 2)
 void mm_new_8(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
     int thread_id = threadIdx.x;
     int warp_id = threadIdx.x >> 5;
     int lane_id = threadIdx.x & 31;
-    int g_row = block_idx * TILE_WIDTH;
-    int g_col = block_idy * TILE_WIDTH;
+    int g_row = block_idx << 7;
+    int g_col = block_idy << 7;
 
     int sA_row = thread_id >> 1; // 16
     int sA_col = (thread_id & 1) << 2; // 0
@@ -54,6 +54,7 @@ void mm_new_8(float* A, float* B, float* C, int N){
 
     float fA[8] = {};
     float fB[8] = {};
+
     float accum[64] = {};
 
     int shared_pointer = 0;
