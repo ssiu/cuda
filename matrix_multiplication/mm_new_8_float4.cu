@@ -28,8 +28,8 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     int sB_gOffset = sB_row * N + sB_col;
     // need to transpose A tile to give vectorized shared memory load
     //int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
-    int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
-    int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
+    int sA_sOffset = sA_col << 7 + sA_row;
+    int sB_sOffset = sB_row << 7 + sB_col;
 
     int warp_row = (warp_id >> 1) << 5; // 0
     int warp_col = (warp_id & 1) << 6; // 64
