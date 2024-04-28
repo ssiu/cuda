@@ -50,10 +50,10 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
 
 
     float4 rA;
-//    float4 rB;
+    float4 rB;
 
 //    float rA[4];
-    float rB[4];
+//    float rB[4];
 
     float fA[8] = {};
     float fB[8] = {};
@@ -75,7 +75,7 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     sA[shared_pointer][sA_sOffset + (3 << 7)] = rA.w;
 
 
-    FLOAT_4(sB[shared_pointer][sB_sOffset]) = FLOAT_4(rB);
+    FLOAT_4(sB[shared_pointer][sB_sOffset]) = rB;
 
     __syncthreads();
 
@@ -89,7 +89,7 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
             rA = FLOAT_4(A[sA_gOffset]);
-            FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
+            rB = FLOAT_4(B[sB_gOffset]);
         }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
@@ -137,7 +137,7 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
 //                sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
 //            }
 
-            FLOAT_4(sB[shared_pointer^1][sB_sOffset]) = FLOAT_4(rB);
+            FLOAT_4(sB[shared_pointer^1][sB_sOffset]) = rB;
 
             __syncthreads();
 
