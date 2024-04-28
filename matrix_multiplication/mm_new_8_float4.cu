@@ -28,8 +28,8 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     int sB_gOffset = sB_row * N + sB_col;
     // need to transpose A tile to give vectorized shared memory load
     //int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
-    int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
-    int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
+    int sA_sOffset = sA_col << 7 + sA_row;
+    int sB_sOffset = sB_row << 7 + sB_col;
 
     int warp_row = (warp_id >> 1) << 5; // 0
     int warp_col = (warp_id & 1) << 6; // 64
@@ -62,9 +62,15 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     rA = FLOAT_4(A[sA_gOffset]);
     rB = FLOAT_4(B[sB_gOffset]);
 
-    for (int i=0; i<4;i++){
-        sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
-    }
+//    for (int i=0; i<4;i++){
+//        sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
+//    }
+
+    sA[shared_pointer][sA_sOffset + 0 << 7] = rA.x;
+    sA[shared_pointer][sA_sOffset + 1 << 7] = rA.y;
+    sA[shared_pointer][sA_sOffset + 2 << 7] = rA.z;
+    sA[shared_pointer][sA_sOffset + 3 << 7] = rA.w;
+
 
     FLOAT_4(sB[shared_pointer][sB_sOffset]) = FLOAT_4(rB);
 
@@ -79,8 +85,8 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
         // load from gmem A, B for next block
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
-            FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
-            FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
+            rA = FLOAT_4(A[sA_gOffset]);
+            rB = FLOAT_4(B[sB_gOffset]);
         }
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
@@ -120,12 +126,15 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
 
-            //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
-            for (int i=0; i<4;i++){
-                sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
-            }
+            sA[shared_pointer^1][sA_sOffset + 0 << 7] = rA.x;
+            sA[shared_pointer^1][sA_sOffset + 1 << 7] = rA.y;
+            sA[shared_pointer^1][sA_sOffset + 2 << 7] = rA.z;
+            sA[shared_pointer^1][sA_sOffset + 3 << 7] = rA.w;
+//            for (int i=0; i<4;i++){
+//                sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
+//            }
 
-            FLOAT_4(sB[shared_pointer^1][sB_sOffset]) = FLOAT_4(rB);
+            FLOAT_4(sB[shared_pointer^1][sB_sOffset]) = rB;
 
             __syncthreads();
 
