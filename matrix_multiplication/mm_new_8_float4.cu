@@ -49,8 +49,11 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
 
 
-    float4 rA;
-    float4 rB;
+//    float4 rA;
+//    float4 rB;
+
+    float rA[4];
+    float rB[4];
 
     float fA[8] = {};
     float fB[8] = {};
