@@ -239,7 +239,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 blockDim_yz(256);
