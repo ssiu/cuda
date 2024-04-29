@@ -60,6 +60,7 @@ void mm_new_8_float4(float* A, float* B, float* C, int N){
 
     float accum[64] = {};
 
+    memset(accum, 0, sizeof(accum));//clear registers
     int shared_pointer = 0;
     // load first block
     FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
