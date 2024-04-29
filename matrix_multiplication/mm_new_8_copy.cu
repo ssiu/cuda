@@ -48,8 +48,8 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
     int C_col = warp_col + thread_col;
 
 
-//    int sA_rOffset = warp_row + thread_row; // 0
-//    int sB_rOffset = warp_col + thread_col; // 64
+    int sA_rOffset = warp_row + thread_row; // 0
+    int sB_rOffset = warp_col + thread_col; // 64
 //    int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
 
     A = &A((block_idx << 7), 0);
@@ -95,11 +95,14 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
-            FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, (C_row + kFragment), C_col));
-            FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, (C_row + kFragment), C_col + 16));
-            FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, (C_row + kFragment), C_col));
-            FLOAT_4(fB[4]) = FLOAT_4(sB(shared_pointer, (C_row + kFragment), C_col + 32));
-
+//            FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, (C_row + kFragment), C_col));
+//            FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, (C_row + kFragment), C_col + 16));
+//            FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, (C_row + kFragment), C_col));
+//            FLOAT_4(fB[4]) = FLOAT_4(sB(shared_pointer, (C_row + kFragment), C_col + 32));
+            FLOAT_4(fA[0]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH]);
+            FLOAT_4(fA[4]) = FLOAT_4(sA[shared_pointer][sA_rOffset + kFragment * TILE_WIDTH + 16]);
+            FLOAT_4(fB[0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH]);
+            FLOAT_4(fB[4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
             // compute outer product
             for (int i=0; i<8;i++){
                 for (int j=0; j<8; j++) {
@@ -131,7 +134,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
             //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
             for (int i=0; i<4;i++){
-                sA(shared_pointer^1, sA_row + i, sA_col) = rA[i];
+                sA(shared_pointer^1, (sA_row + i), sA_col) = rA[i];
             }
 
             FLOAT_4(sB(shared_pointer^1, sB_row, sB_col)) = FLOAT_4(rB);
