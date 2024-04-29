@@ -23,11 +23,11 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
     int lane_id = threadIdx.x & 31;
 
 
-//    int warp_row = (warp_id >> 1) << 5;
-    int warp_row = warp_id << 4;
+    int warp_row = (warp_id >> 1) << 5;
+//    int warp_row = (warp_id << 4);
     int warp_col = (warp_id & 1) << 6;
-//    int thread_row = (lane_id >> 3) << 2;
-    int thread_row = lane_id >> 1;
+    int thread_row = (lane_id >> 3) << 2;
+//    int thread_row = (lane_id >> 1);
     int thread_col = (lane_id & 7) << 2;
 
 
