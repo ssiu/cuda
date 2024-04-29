@@ -96,7 +96,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
             if (thread_id == 256 and block_idx == 0 and block_idy ==0) {
-                printf("%d", ((C_row + kFragment)<<7) + C_col+32)
+                printf("%d", ((C_row + kFragment)<<7) + C_col+32);
             }
             FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, kFragment, C_row));
             FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, kFragment, C_row + 16));
