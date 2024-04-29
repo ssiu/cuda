@@ -74,7 +74,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
     FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
 
     for (int i=0; i<4;i++){
-        sA(shared_pointer, sA_col, sA_row) = rA[i];
+        sA(shared_pointer, sA_col + i, sA_row) = rA[i];
         // sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
     }
 
@@ -95,10 +95,10 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
-            FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, C_row, C_col + kFragment * TILE_WIDTH));
-            FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, C_row, C_col + kFragment * TILE_WIDTH + 16));
-            FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, C_row, C_col + kFragment * TILE_WIDTH));
-            FLOAT_4(fB[4]) = FLOAT_4(sB(shared_pointer, C_row, C_col + kFragment * TILE_WIDTH + 32));
+            FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, C_row + kFragment, C_col));
+            FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, C_row + kFragment, C_col + 16));
+            FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, C_row + kFragment, C_col));
+            FLOAT_4(fB[4]) = FLOAT_4(sB(shared_pointer, C_row + kFragment, C_col + 32));
 
             // compute outer product
             for (int i=0; i<8;i++){
@@ -131,7 +131,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
             //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
             for (int i=0; i<4;i++){
-                sA(shared_pointer^1, sA_row, sA_col + i*TILE_WIDTH) = rA[i];
+                sA(shared_pointer^1, sA_row + i, sA_col) = rA[i];
             }
 
             FLOAT_4(sB(shared_pointer^1, sB_row, sB_col)) = FLOAT_4(rB);
