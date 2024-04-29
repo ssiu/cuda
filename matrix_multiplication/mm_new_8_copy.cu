@@ -7,11 +7,11 @@
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-#define VS_MUL(vc, sa, vb) \
-        vc.x += sa * vb.x; \
-        vc.y += sa * vb.y; \
-        vc.z += sa * vb.z; \
-        vc.w += sa * vb.w;
+//#define VS_MUL(vc, sa, vb) \
+//        vc.x += sa * vb.x; \
+//        vc.y += sa * vb.y; \
+//        vc.z += sa * vb.z; \
+//        vc.w += sa * vb.w;
 
 __global__ __launch_bounds__(256)
 void mm_new_8_copy(float* A, float* B, float* C, int N){
@@ -41,15 +41,15 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 //    int sB_gOffset = sB_row * N + sB_col;
     // need to transpose A tile to give vectorized shared memory load
 
-    int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
+//    int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
 //    int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
 
     int C_row = warp_row + thread_row;
     int C_col = warp_col + thread_col;
 
 
-    int sA_rOffset = warp_row + thread_row; // 0
-    int sB_rOffset = warp_col + thread_col; // 64
+//    int sA_rOffset = warp_row + thread_row; // 0
+//    int sB_rOffset = warp_col + thread_col; // 64
 //    int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
 
     A = &A((block_idx << 7), 0);
@@ -95,9 +95,6 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
-            if (thread_id == 256 and block_idx == 0 and block_idy ==0) {
-                printf("%d", ((C_row + kFragment)<<7) + C_col+32);
-            }
             FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, kFragment, C_row));
             FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, kFragment, C_row + 16));
             FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, kFragment, C_col));
