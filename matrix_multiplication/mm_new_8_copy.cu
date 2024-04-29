@@ -131,7 +131,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
             //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
             for (int i=0; i<4;i++){
-                sA(shared_pointer^1, sA_row, sA_col + i*TILE_WIDTH]) = rA[i];
+                sA(shared_pointer^1, sA_row, sA_col + i*TILE_WIDTH) = rA[i];
             }
 
             FLOAT_4(sB(shared_pointer^1, sB_row, sB_col)) = FLOAT_4(rB);
