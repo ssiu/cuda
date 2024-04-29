@@ -8,7 +8,7 @@
         vc.z += sa * vb.z; \
         vc.w += sa * vb.w;
 
-__global__ __launch_bounds__(256)
+__global__ __launch_bounds__(256, 2)
 void mm_new_8(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
