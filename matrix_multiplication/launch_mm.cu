@@ -295,7 +295,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
     {
         //
         // cublas row major
@@ -318,7 +318,7 @@ int main(){
 
 
 
-    #if 0
+    #if 1
     {
         //
         // cublas column major
