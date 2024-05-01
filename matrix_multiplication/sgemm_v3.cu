@@ -250,14 +250,11 @@ __global__ void Sgemm(
     }
 }
 
-int main(int argc, char** argv) {
-    if (argc != 4) {
-        printf("usage: ./main [M] [K] [N]\n");
-        exit(0);
-    }
-    size_t M = atoi(argv[1]);
-    size_t K = atoi(argv[2]);
-    size_t N = atoi(argv[3]);
+int main() {
+
+    size_t M = 8192;
+    size_t K = 8192;
+    size_t N = 8192;
 
     assert( M%8 == 0);
     assert( N%8 == 0);
