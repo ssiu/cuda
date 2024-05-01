@@ -13,16 +13,13 @@
 //        vc.z += sa * vb.z; \
 //        vc.w += sa * vb.w;
 
-__global__ __launch_bounds__(256, 2)
+__global__ __launch_bounds__(256)
 void mm_new_8_copy(float* A, float* B, float* C, int N){
     int thread_id = threadIdx.x;
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
-
     int warp_id = threadIdx.x >> 5;
     int lane_id = threadIdx.x & 31;
-
-
     int warp_row = (warp_id >> 1) << 5;
 //    int warp_row = (warp_id << 4);
     int warp_col = (warp_id & 1) << 6;
@@ -87,6 +84,11 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH * N;
+
+
+    // load second block
+    FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
+    FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
 
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
