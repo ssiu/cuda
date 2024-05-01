@@ -180,7 +180,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -219,7 +219,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -261,7 +261,7 @@ int main(){
 
 
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -281,7 +281,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 blockDim_yz(256);
@@ -295,7 +295,7 @@ int main(){
 
 
 
-    #if 0
+    #if 1
     {
         //
         // cublas row major
@@ -318,7 +318,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
     {
         //
         // cublas column major

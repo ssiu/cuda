@@ -87,9 +87,9 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
 
     // load second block
-    FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
-    FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
-
+//    FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
+//    FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
+    #pragma unroll
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
         // load from gmem A, B for next block
