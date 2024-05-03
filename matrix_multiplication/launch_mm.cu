@@ -200,7 +200,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -261,7 +261,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);

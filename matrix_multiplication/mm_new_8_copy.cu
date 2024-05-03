@@ -72,7 +72,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
     // load first block
     FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
     FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
-
+    #pragma unroll
     for (int i=0; i<4;i++){
         sA(shared_pointer, sA_col + i, sA_row) = rA[i];
         // sA[shared_pointer][sA_sOffset + i*TILE_WIDTH] = rA[i];
@@ -89,7 +89,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
     // load second block
 //    FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
 //    FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
-    #pragma unroll
+
     for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
 
         // load from gmem A, B for next block
@@ -97,7 +97,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
             FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
             FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
         }
-
+        #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
             FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, kFragment, C_row));
@@ -109,7 +109,9 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 //            FLOAT_4(fB[0]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH]);
 //            FLOAT_4(fB[4]) = FLOAT_4(sB[shared_pointer][sB_rOffset + kFragment * TILE_WIDTH + 32]);
             // compute outer product
+            #pragma unroll
             for (int i=0; i<8;i++){
+                #pragma unroll
                 for (int j=0; j<8; j++) {
                     accum[i*8+j] += fA[i] * fB[j];
                 }
@@ -138,6 +140,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 
 
             //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
+            #pragma unroll
             for (int i=0; i<4;i++){
                 sA(shared_pointer^1, sA_col + i, sA_row) = rA[i];
                 //sA[shared_pointer^1][sA_sOffset + i*TILE_WIDTH] = rA[i];
@@ -158,6 +161,7 @@ void mm_new_8_copy(float* A, float* B, float* C, int N){
 //    storeToGmem_5(accum, C, N, C_gOffset);
 
     // store to gmem C
+    #pragma unroll
     for (int i=0;i<4;i++) {
 
         FLOAT_4(C(C_row + i, C_col)) = FLOAT_4(accum[i * 8]);
