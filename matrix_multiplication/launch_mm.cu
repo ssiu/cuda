@@ -79,7 +79,7 @@ int main(){
 //
 //    hC = dC;
 
-    #if 0
+    #if 1
     {
         int TILE_WIDTH = 32;
         dim3 gridDim_mm_new_1(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -90,7 +90,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
         std::cout << "Running kernel 2" << std::endl;
         int TILE_WIDTH = 32;
@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -121,7 +121,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -141,7 +141,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -160,7 +160,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -200,7 +200,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -281,7 +281,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
         int TILE_WIDTH = 128;
         dim3 blockDim_yz(256);
@@ -343,7 +343,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
         if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
 //        for (int i=0;i<N;i += 128){
 //            for (int j=0;j<N; j+=128){
