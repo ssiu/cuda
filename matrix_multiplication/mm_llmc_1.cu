@@ -45,9 +45,9 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
     int c_row = warp_row + thread_row;
     int c_col = warp_col + thread_col;
 
-    A = &A((block_idx << 7), 0);
-    B = &B(0, (block_idy << 7));
-    C = &C((block_idx << 7), (block_idy << 7));
+    A = &A(g_row, 0);
+    B = &B(0, g_col);
+    C = &C(g_row, g_col);
 
     __shared__ float sA[BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[BLOCK_WIDTH * TILE_WIDTH];
@@ -71,6 +71,7 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
             sB(s_col + i, s_row) = rB[i];
         }
 
+        __syncthreads();
 
         for (int kFragment=0; kFragment < BLOCK_WIDTH; kFragment++){
 
