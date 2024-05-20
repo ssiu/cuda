@@ -31,8 +31,8 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
 
 
     //shared memory address that this thread is responsible for
-    int s_row = thread_id >> 1; // 16
-    int s_col = (thread_id & 1) << 2; // 0
+    int sA_row_sB_col = thread_id >> 1; // 16
+    int sA_col_sB_row = (thread_id & 1) << 2; // 0
 
 
     //warptiling
@@ -62,8 +62,8 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
 
     for (int kTile=0; kTile < N/BLOCK_WIDTH; kTile++){
 
-        FLOAT_4(rA[0]) = FLOAT_4(A(s_row, s_col));
-        FLOAT_4(rB[0]) = FLOAT_4(B(s_row, s_col));
+        FLOAT_4(rA[0]) = FLOAT_4(A(sA_row_sB_col, sA_col_sB_row));
+        FLOAT_4(rB[0]) = FLOAT_4(B(sA_col_sB_row, sA_row_sB_col));
 
 
         for (int i=0; i<4;i++){
