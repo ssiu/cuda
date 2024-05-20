@@ -74,14 +74,14 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
 
         for (int kFragment=0; kFragment < BLOCK_WIDTH; kFragment++){
 
-            FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, c_row))
-            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, c_row+32))
-            FLOAT_4(fB[0]) = FLOAT_4(sB(kFragment, c_col))
-            FLOAT_4(fB[4]) = FLOAT_4(sB(kFragment, c_col+16))
+            FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, c_row));
+            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, c_row+32));
+            FLOAT_4(fB[0]) = FLOAT_4(sB(kFragment, c_col));
+            FLOAT_4(fB[4]) = FLOAT_4(sB(kFragment, c_col+16));
 
-            #pragma unroll
+
             for (int i=0; i<8;i++){
-                #pragma unroll
+
                 for (int j=0; j<8; j++) {
                     accum[i+8*j] += fA[i] * fB[j];
                 }
