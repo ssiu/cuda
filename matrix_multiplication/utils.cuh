@@ -75,7 +75,7 @@ thrust::host_vector<float> generateTestMatrices(int N) {
     // Generate random matrix
     for (int i=0; i<N; i++) {
         for (int j=0; j<N; j++) {
-            if (i<32 and i<32) {
+            if (i<32 and j<32) {
                 A[i * N + j] = static_cast<float>(i);
             } else {
                 A[i * N + j] = 0.0f;
