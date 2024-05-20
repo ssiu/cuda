@@ -75,8 +75,8 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
         __syncthreads();
         if (kTile==0 and block_idy==0 and block_idx==0 and thread_id==0) {
 
-            for (int i=0;i<32;i++) {
-                for (int j=0;j<8;j++) {
+            for (int i=0;i<8;i++) {
+                for (int j=0;j<32;j++) {
                     printf("%f ", sA[i*TILE_WIDTH+j]);
                 }
                 printf("\n");
