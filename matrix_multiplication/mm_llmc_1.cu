@@ -71,7 +71,27 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
             sB(sA_col_sB_row + i, sA_row_sB_col) = rB[i];
         }
 
+
         __syncthreads();
+        if (kTile==0 and block_idy==0 and block_idx==0 and thread_id==0) {
+
+            for (int i=0;i<32;i++) {
+                for (int j=0;j<8;j++) {
+                    printf("%f ", sA[i*TILE_WIDTH+j]);
+                }
+                printf("\n");
+            }
+        }
+
+        if (kTile==0 and block_idy==0 and block_idx==0 and thread_id==0) {
+
+            for (int i=0;i<32;i++) {
+                for (int j=0;j<8;j++) {
+                    printf("%f ", sB[i*TILE_WIDTH+j]);
+                }
+                printf("\n");
+            }
+        }
 
         for (int kFragment=0; kFragment < BLOCK_WIDTH; kFragment++){
 
