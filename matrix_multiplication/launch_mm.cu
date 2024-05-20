@@ -10,7 +10,7 @@
 
 
 int main(){
-    int N = 8192;
+    int N = 4096;
     thrust::host_vector<float> hA = generateMatrices(N);
     thrust::host_vector<float> hB = generateMatrices(N);
     thrust::host_vector<float> hC(N*N);
@@ -79,7 +79,7 @@ int main(){
 //
 //    hC = dC;
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 32;
         dim3 gridDim_mm_new_1(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -90,7 +90,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         std::cout << "Running kernel 2" << std::endl;
         int TILE_WIDTH = 32;
@@ -102,7 +102,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -121,7 +121,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -141,7 +141,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -160,7 +160,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -180,7 +180,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -261,7 +261,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -281,7 +281,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 blockDim_yz(256);
@@ -394,7 +394,7 @@ int main(){
 //            }
 //        }
 
-            for (int i=0;i<1;i++){
+            for (int i=0;i<100;i++){
                 std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
             }
         //        int num = countZeros(hC.data(), N);
