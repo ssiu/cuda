@@ -351,7 +351,7 @@ int main(){
         dim3 gridDim_llmc_1(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_llmc_1(256);
         std::cout << "Running llmc kernel 1" << std::endl;
-        mm_new_8_float4<<<gridDim_llmc_1, blockDim_llmc_1>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+        mm_llmc_1<<<gridDim_llmc_1, blockDim_llmc_1>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
     }
