@@ -403,6 +403,12 @@ int main(){
             }
             std::cout << "\n";
         }
+        for (int i=0;i<32;i++){
+            for (int j=0;j<32;j++){
+                std::cout << hC_cublas[i + N*j] << " ";
+            }
+            std::cout << "\n";
+        }
         //        int num = countZeros(hC.data(), N);
         //        std::cout << "number of zeros in hC is " << num << std::endl;
             std::cout << "Wrong answer" << std::endl;
