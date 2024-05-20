@@ -219,7 +219,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -295,7 +295,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
     {
         //
         // cublas row major
@@ -343,7 +343,50 @@ int main(){
     #endif
 
 
-    #if 0
+//llm.c
+
+    #if 1
+    {
+        int TILE_WIDTH = 128;
+        dim3 gridDim_llmc_1(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_llmc_1(256);
+        std::cout << "Running llmc kernel 1" << std::endl;
+        mm_new_8_float4<<<gridDim_llmc_1, blockDim_llmc_1>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+
+    #if 1
+    {
+        // A row major
+        // B column major
+        // C column major
+        float alpha = 1.0f;
+        float beta = 1.0f;
+
+        cudaError_t cudaStat;  // cudaMalloc status
+        cublasStatus_t stat;   // cuBLAS functions status
+        cublasHandle_t handle; // cuBLAS context
+        cublasCreate(&handle);
+        cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
+                         thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
+
+        hC_cublas = dC_cublas;
+
+        cublasDestroy(handle);
+        //
+        //
+        //
+    }
+    #endif
+
+
+
+
+
+    #if 1
         if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
 //        for (int i=0;i<N;i += 128){
 //            for (int j=0;j<N; j+=128){
