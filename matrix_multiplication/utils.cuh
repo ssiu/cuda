@@ -46,7 +46,7 @@ int countZeros(float* A, int N) {
 
 }
 
-thrust::host_vector<float> generateMatrices(int N) {
+thrust::host_vector<float> generateRandomMatrices(int N) {
     thrust::host_vector<float> A(N * N);
 
     // Create random engine
@@ -69,3 +69,20 @@ thrust::host_vector<float> generateMatrices(int N) {
 }
 
 
+thrust::host_vector<float> generateTestMatrices(int N) {
+    thrust::host_vector<float> A(N * N);
+
+    // Generate random matrix
+    for (int i=0; i<N; i++) {
+        for (int j=0; j<N; j++) {
+            if (i<32 and i<32) {
+                A[i * N + j] = 1.0f;
+            } else {
+                A[i * N + j] = 0.0f;
+            }
+        }
+    }
+
+    // Return both matrices
+    return A;
+}

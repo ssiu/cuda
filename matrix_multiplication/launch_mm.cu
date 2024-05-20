@@ -11,8 +11,8 @@
 
 int main(){
     int N = 4096;
-    thrust::host_vector<float> hA = generateMatrices(N);
-    thrust::host_vector<float> hB = generateMatrices(N);
+    thrust::host_vector<float> hA = generateTestMatrices(N);
+    thrust::host_vector<float> hB = generateTestMatrices(N);
     thrust::host_vector<float> hC(N*N);
     thrust::host_vector<float> hC_cublas(N*N);
 
@@ -394,12 +394,18 @@ int main(){
 //            }
 //        }
 
-            for (int i=0;i<100;i++){
-                std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
+//            for (int i=0;i<100;i++){
+//                std::cout << i << " " << hC[i] << " " << hC_cublas[i] << std::endl;
+//            }
+        for (int i=0;i<32;i++){
+            for (int j=0;j<32;j++){
+                std::cout << hC[i] << " " << std::endl;
             }
+
+        }
         //        int num = countZeros(hC.data(), N);
         //        std::cout << "number of zeros in hC is " << num << std::endl;
-                std::cout << "Wrong answer" << std::endl;
+            std::cout << "Wrong answer" << std::endl;
         } else {
             std::cout << "Correct answer" << std::endl;
         }
