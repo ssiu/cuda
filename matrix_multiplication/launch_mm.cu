@@ -401,7 +401,7 @@ int main(){
             for (int j=0;j<32;j++){
                 std::cout << hC[i] << " " << std::endl;
             }
-            std::cout << "\n" << std::endl;
+            std::cout << "\n";
         }
         //        int num = countZeros(hC.data(), N);
         //        std::cout << "number of zeros in hC is " << num << std::endl;
