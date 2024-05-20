@@ -67,8 +67,8 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
 
 
         for (int i=0; i<4;i++){
-            sA(s_col + i, s_row) = rA[i];
-            sB(s_col + i, s_row) = rB[i];
+            sA(sA_col_sB_row + i, sA_row_sB_col) = rA[i];
+            sB(sA_col_sB_row + i, sA_row_sB_col) = rB[i];
         }
 
         __syncthreads();
