@@ -358,7 +358,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
         // A row major
         // B column major
@@ -386,7 +386,7 @@ int main(){
 
 
 
-    #if 0
+    #if 1
         if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
 //        for (int i=0;i<N;i += 128){
 //            for (int j=0;j<N; j+=128){

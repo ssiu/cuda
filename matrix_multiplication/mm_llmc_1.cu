@@ -87,7 +87,7 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
 
             for (int i=0;i<8;i++) {
                 for (int j=0;j<32;j++) {
-                    printf("%f ", sB[i*TILE_WIDTH+j]);
+                    printf("%.0f ", sB[i*TILE_WIDTH+j]);
                 }
                 printf("\n");
             }
