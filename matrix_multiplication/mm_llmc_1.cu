@@ -30,7 +30,7 @@ void mm_llmc_1(float* A, float* B, float* C, int N){
     int g_col = block_idy << 7;
 
 
-    //shared memory address that this thread is erspobile for
+    //shared memory address that this thread is responsible for
     int s_row = thread_id >> 1; // 16
     int s_col = (thread_id & 1) << 2; // 0
 
