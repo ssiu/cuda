@@ -399,7 +399,7 @@ int main(){
 //            }
         for (int i=0;i<32;i++){
             for (int j=0;j<32;j++){
-                std::cout << hC[i] << " " << std::endl;
+                std::cout << hC[i] << " ";
             }
             std::cout << "\n";
         }
