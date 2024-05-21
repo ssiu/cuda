@@ -358,7 +358,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_2(N / TILE_WIDTH,N / TILE_WIDTH);
