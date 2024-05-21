@@ -114,16 +114,18 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
         // store next tile from register -> shared memory
         if (kTile < N/BLOCK_WIDTH - 1) {
-            pointer ^= 1;
+
             for (int i=0; i<4;i++){
-                sA(pointer, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
-                sB(pointer, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
+                sA(pointer ^ 1, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
+                sB(pointer ^ 1, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
             }
 
             __syncthreads();
 
             A += BLOCK_WIDTH;
             B += BLOCK_WIDTH;
+
+            pointer ^= 1;
         }
 
     }
