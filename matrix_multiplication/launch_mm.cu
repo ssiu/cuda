@@ -360,6 +360,18 @@ int main(){
 
     #if 1
     {
+        int TILE_WIDTH = 128;
+        dim3 gridDim_llmc_2(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_llmc_2(256);
+        std::cout << "Running llmc kernel 1" << std::endl;
+        mm_llmc_2<<<gridDim_llmc_2, blockDim_llmc_2>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+        hC = dC;
+    }
+    #endif
+
+    #if 1
+    {
         // A row major
         // B column major
         // C column major
