@@ -76,6 +76,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
     // transpose the tiles so that shared memory load is bank conflict free
     // TODO: make it so that shared memory store is also bank conflict free
+    #pragma unroll
     for (int i=0; i<4;i++){
         sA(pointer, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
         sB(pointer, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
@@ -103,9 +104,9 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
             FLOAT_4(fB[0]) = FLOAT_4(sB(pointer, kFragment, c_col));
             FLOAT_4(fB[4]) = FLOAT_4(sB(pointer, kFragment, c_col+16));
 
-
+            #pragma unroll
             for (int i=0; i<8;i++){
-
+                #pragma unroll
                 for (int j=0; j<8; j++) {
                     accum[i+8*j] += fA[i] * fB[j];
                 }
@@ -114,7 +115,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
         // store next tile from register -> shared memory
         if (kTile < N/BLOCK_WIDTH - 1) {
-
+            #pragma unroll
             for (int i=0; i<4;i++){
                 sA(pointer^1, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
                 sB(pointer^1, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
