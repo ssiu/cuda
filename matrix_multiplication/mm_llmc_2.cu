@@ -81,7 +81,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
         sB(pointer, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
     }
 
-    __syncthreads;
+    __syncthreads();
 
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH;
