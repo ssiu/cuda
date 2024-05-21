@@ -116,8 +116,8 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
         if (kTile < N/BLOCK_WIDTH - 1) {
 
             for (int i=0; i<4;i++){
-                sA(pointer ^ 1, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
-                sB(pointer ^ 1, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
+                sA(pointer, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
+                sB(pointer, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
             }
 
             __syncthreads();
