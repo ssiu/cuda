@@ -13,8 +13,8 @@
 #define B(i,j) B[(i) + N * (j)]
 #define C(i,j) C[(i) + N * (j)]
 // shared memory tiles are 128 x 8 row major matrices
-#define sA(pointer, i,j) sA[pointer][((i) << 7) + (j)]
-#define sB(pointer, i,j) sB[pointer][((i) << 7) + (j)]
+#define sA(pointer, i,j) sA[(pointer)][((i) << 7) + (j)]
+#define sB(pointer, i,j) sB[(pointer)][((i) << 7) + (j)]
 //#define sA(pointer, i,j) sA[(pointer)][((i) << 7) + (j)]
 //#define sB(pointer, i,j) sB[(pointer)][((i) << 7) + (j)]
 #define TILE_WIDTH 128
@@ -116,8 +116,8 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
         if (kTile < N/BLOCK_WIDTH - 1) {
 
             for (int i=0; i<4;i++){
-                sA(pointer, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
-                sB(pointer, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
+                sA(pointer^1, sA_col_sB_row + i, sA_row_sB_col) = rA[i];
+                sB(pointer^1, sA_col_sB_row + i, sA_row_sB_col) = rB[i];
             }
 
             __syncthreads();
