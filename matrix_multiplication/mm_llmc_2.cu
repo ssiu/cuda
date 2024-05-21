@@ -97,6 +97,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
 
         // compute the outer product for the current tile
+        #pragma unroll
         for (int kFragment=0; kFragment < BLOCK_WIDTH; kFragment++){
 
             FLOAT_4(fA[0]) = FLOAT_4(sA(pointer, kFragment, c_row));
