@@ -9,17 +9,28 @@
 #include "utils.cuh"
 
 
+__global__ void add_bias(float* out, const float* bias, int N) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int i = idx; i < N * N ; i += N) {
+        out[i] += bias[idx];
+    }
+}
+
+
 int main(){
     int N = 4096;
     thrust::host_vector<float> hA = generateRandomMatrices(N);
     thrust::host_vector<float> hB = generateRandomMatrices(N);
     thrust::host_vector<float> hC(N*N);
     thrust::host_vector<float> hC_cublas(N*N);
+    thrust::host_vector<float> bias(N);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
     thrust::device_vector<float> dC = hC;
     thrust::device_vector<float> dC_cublas(N*N);
+    thrust::device_vector<float> dbias = bias;
+
 
 //uncomment mm4,mm7,mm9
 
@@ -345,7 +356,7 @@ int main(){
 
 //llm.c
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_1(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -354,11 +365,14 @@ int main(){
         mm_llmc_1<<<gridDim_llmc_1, blockDim_llmc_1>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
         hC = dC;
+
+
+
     }
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_2(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -366,9 +380,24 @@ int main(){
         std::cout << "Running llmc kernel 2" << std::endl;
         mm_llmc_2<<<gridDim_llmc_2, blockDim_llmc_2>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
+        add_bias<<<N/256, 256>>>(dC.data(), dC.data(), N)
         hC = dC;
     }
     #endif
+
+    #if 1
+    {
+        // matmul and bias
+        int TILE_WIDTH = 128;
+        dim3 gridDim_llmc_3(N / TILE_WIDTH,N / TILE_WIDTH);
+        dim3 blockDim_llmc_3(256);
+        std::cout << "Running llmc kernel 3" << std::endl;
+        mm_llmc_2<<<gridDim_llmc_3, blockDim_llmc_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+                               thrust::raw_pointer_cast(dC.data()), N);
+
+        hC = dC;
+
+    }
 
     #if 1
     {
@@ -385,9 +414,11 @@ int main(){
         cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
                          thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
+        add_bias<<<N/256, 256>>>(dC_cublas.data(), dC_cublas.data(), N)
         hC_cublas = dC_cublas;
 
         cublasDestroy(handle);
+
         //
         //
         //

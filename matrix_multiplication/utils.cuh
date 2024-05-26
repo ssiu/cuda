@@ -46,6 +46,27 @@ int countZeros(float* A, int N) {
 
 }
 
+thrust::host_vector<float> generateRandomBias(int N) {
+    thrust::host_vector<float> A(N );
+
+    // Create random engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Define distribution range
+    std::uniform_real_distribution<float> dis(0.0, 1.0);
+
+    // Generate random matrix
+    for (int i=0; i<N; i++) {
+        A[i * N + j] = randomFloat;
+    }
+
+    // Return matrix
+    return A;
+}
+
+
+
 thrust::host_vector<float> generateRandomMatrices(int N) {
     thrust::host_vector<float> A(N * N);
 

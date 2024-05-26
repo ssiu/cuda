@@ -6,7 +6,11 @@
 // we launch 256 threads per block, each using 128 registers -> 2 blocks per SM
 // we use 128 x 8 shared memory blocks
 // each thread computes a 8x8x1 outer product
-
+// total shared memory usage = 128 x 8 x 4 (A tile) + 128 x 8 x 4 (B tile) + 128 * 4 (bias) = 4.5MB. This should be fine for most GPU
+//
+// assumptions
+// BT and OC are divisible by 128
+// C is divisible by 8
 
 #include <iostream>
 #define A(i,j) A[(i) * N + (j)]
@@ -15,15 +19,12 @@
 // shared memory tiles are 128 x 8 row major matrices
 #define sA(pointer, i,j) sA[(pointer)][((i) << 7) + (j)]
 #define sB(pointer, i,j) sB[(pointer)][((i) << 7) + (j)]
-//#define sA(pointer, i,j) sA[(pointer)][((i) << 7) + (j)]
-//#define sB(pointer, i,j) sB[(pointer)][((i) << 7) + (j)]
 #define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
-// we use launch bounds to indicate 256 threads per block at compile time.
-// This allows the compiler to reduce some register pressure (saves ~7 registers)
-__global__ __launch_bounds__(256, 2)
+// we use launch bounds to indicate 256 threads per block at compile time (saves ~x registers)
+__global__ __launch_bounds__(256)
 void mm_llmc_2(float* A, float* B, float* C, int N){
 
     int block_idx = blockIdx.x;
@@ -32,7 +33,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
     int warp_id = threadIdx.x >> 5;
     int lane_id = threadIdx.x & 31;
 
-    // global memory offset that this threadblock is responsible for
+    // global memory offset for this block
     int g_row = block_idx << 7;
     int g_col = block_idy << 7;
 
@@ -69,7 +70,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
     float accum[64] = {};
 
-    //prologue, load first tile
+    // prologue, load first tile
 
     FLOAT_4(rA[0]) = FLOAT_4(A(sA_row_sB_col, sA_col_sB_row));
     FLOAT_4(rB[0]) = FLOAT_4(B(sA_col_sB_row, sA_row_sB_col));
@@ -87,6 +88,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
     A += BLOCK_WIDTH;
     B += BLOCK_WIDTH;
 
+    // mainloop
     for (int kTile=0; kTile < N/BLOCK_WIDTH; kTile++){
 
         // load next tile from global memory -> register
@@ -132,6 +134,7 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
 
     }
 
+    // epilogue, apply gelu
 
 
     // store to global memory
