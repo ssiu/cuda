@@ -380,7 +380,6 @@ int main(){
         std::cout << "Running llmc kernel 2" << std::endl;
         mm_llmc_2<<<gridDim_llmc_2, blockDim_llmc_2>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
                                thrust::raw_pointer_cast(dC.data()), N);
-        add_bias<<<N/256, 256>>>(dC.data(), dC.data(), N)
         hC = dC;
     }
     #endif
