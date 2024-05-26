@@ -379,7 +379,7 @@ int main(){
         dim3 blockDim_llmc_2(256);
         std::cout << "Running llmc kernel 2" << std::endl;
         mm_llmc_2<<<gridDim_llmc_2, blockDim_llmc_2>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
+                               thrust::raw_pointer_cast(dC.data()), thrust::raw_pointer_cast(dbias.data()), N);
         hC = dC;
     }
     #endif
@@ -415,7 +415,7 @@ int main(){
         cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
                          thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
-        add_bias<<<N/256, 256>>>(thrust::raw_pointer_cast(dC_cublas.data()), thrust::raw_pointer_cast(dC_cublas.data()), N);
+        add_bias<<<N/256, 256>>>(thrust::raw_pointer_cast(dC_cublas.data()), thrust::raw_pointer_cast(dbias.data()), N);
         hC_cublas = dC_cublas;
 
         cublasDestroy(handle);
