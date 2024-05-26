@@ -387,7 +387,7 @@ int main(){
 
     #if 1
     {
-        // matmul and bias
+        // fused matmul and bias
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_3(N / TILE_WIDTH,N / TILE_WIDTH);
         dim3 blockDim_llmc_3(256);
@@ -398,6 +398,8 @@ int main(){
         hC = dC;
 
     }
+
+    #endif
 
     #if 1
     {
