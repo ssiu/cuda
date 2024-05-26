@@ -59,6 +59,7 @@ void mm_llmc_2(float* A, float* B, float* C, float* bias, int N){
     // shared memory double buffering
     __shared__ float sA[2][BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
+    __shared__ float shared_bias[BLOCK_WIDTH];
 
     int pointer = 0;
 
@@ -71,7 +72,7 @@ void mm_llmc_2(float* A, float* B, float* C, float* bias, int N){
     float accum[64] = {};
 
     if (thread_id < 32) {
-        FLOAT_4(shared_bias[4 * thread_id]) = FLOAT_4(bias[out_row + 4 * thread_id]);
+        FLOAT_4(shared_bias[4 * thread_id]) = FLOAT_4(bias[g_row + 4 * thread_id]);
     }
 
     __syncthreads();
@@ -80,8 +81,8 @@ void mm_llmc_2(float* A, float* B, float* C, float* bias, int N){
     for (int i = 0; i < 4; i++) {
         #pragma unroll
         for (int j = 0; j < 8; j++){
-            accum[i + 8 * j] = shared_bias[accum_row + i];
-            accum[i + 4 + 8 * j] = shared_bias[accum_row + 32 + i];
+            accum[i + 8 * j] = shared_bias[c_row + i];
+            accum[i + 4 + 8 * j] = shared_bias[c_row + 32 + i];
         }
     }
 
