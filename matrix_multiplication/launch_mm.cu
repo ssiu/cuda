@@ -416,7 +416,7 @@ int main(){
         cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, N, N, &alpha, thrust::raw_pointer_cast(dA.data()), N,
                          thrust::raw_pointer_cast(dB.data()), N, &beta, thrust::raw_pointer_cast(dC_cublas.data()), N);
 
-        add_bias<<<N/256, 256>>>(dC_cublas.data(), dC_cublas.data(), N)
+        add_bias<<<N/256, 256>>>(dC_cublas.data(), dC_cublas.data(), N);
         hC_cublas = dC_cublas;
 
         cublasDestroy(handle);
