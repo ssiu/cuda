@@ -58,6 +58,7 @@ thrust::host_vector<float> generateRandomBias(int N) {
 
     // Generate random matrix
     for (int i=0; i<N; i++) {
+        float randomFloat = dis(gen);
         A[i] = randomFloat;
     }
 
