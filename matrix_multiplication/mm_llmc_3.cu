@@ -26,7 +26,9 @@
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
 __global__ __launch_bounds__(256,2)
-void fused_matmul_forward_gelu_kernel(float* A, float* B, float* C, float* bias, int N){
+void fused_matmul_forward_gelu_kernel(float* out,
+                     float* inp, float* weight, float* bias,
+                     int B, int T, int C, int OC){
 
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;

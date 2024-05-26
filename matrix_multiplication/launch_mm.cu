@@ -372,7 +372,7 @@ int main(){
     #endif
 
 
-    #if 0
+    #if 1
     {
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_2(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -385,7 +385,7 @@ int main(){
     }
     #endif
 
-    #if 1
+    #if 0
     {
         // fused matmul and bias
         int TILE_WIDTH = 128;

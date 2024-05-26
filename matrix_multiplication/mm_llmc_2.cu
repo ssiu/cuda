@@ -25,7 +25,7 @@
 
 // we use launch bounds to indicate 256 threads per block at compile time (saves ~x registers)
 __global__ __launch_bounds__(256)
-void mm_llmc_2(float* A, float* B, float* C, int N){
+void mm_llmc_2(float* A, float* B, float* C, float* bias, int N){
 
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
@@ -69,6 +69,22 @@ void mm_llmc_2(float* A, float* B, float* C, int N){
     float fB[8] = {};
 
     float accum[64] = {};
+
+    if (thread_id < 32) {
+        FLOAT_4(shared_bias[4 * thread_id]) = FLOAT_4(bias[out_row + 4 * thread_id]);
+    }
+
+    __syncthreads();
+
+    #pragma unroll
+    for (int i = 0; i < 4; i++) {
+        #pragma unroll
+        for (int j = 0; j < 8; j++){
+            accum[i + 8 * j] = shared_bias[accum_row + i];
+            accum[i + 4 + 8 * j] = shared_bias[accum_row + 32 + i];
+        }
+    }
+
 
     // prologue, load first tile
 
