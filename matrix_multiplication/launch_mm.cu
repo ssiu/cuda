@@ -384,19 +384,19 @@ int main(){
     }
     #endif
 
-    #if 0
-    {
-        // fused matmul and bias
-        int TILE_WIDTH = 128;
-        dim3 gridDim_llmc_3(N / TILE_WIDTH,N / TILE_WIDTH);
-        dim3 blockDim_llmc_3(256);
-        std::cout << "Running llmc kernel 3" << std::endl;
-        mm_llmc_2<<<gridDim_llmc_3, blockDim_llmc_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
-                               thrust::raw_pointer_cast(dC.data()), N);
-
-        hC = dC;
-
-    }
+//    #if 0
+//    {
+//        // fused matmul and bias
+//        int TILE_WIDTH = 128;
+//        dim3 gridDim_llmc_3(N / TILE_WIDTH,N / TILE_WIDTH);
+//        dim3 blockDim_llmc_3(256);
+//        std::cout << "Running llmc kernel 3" << std::endl;
+//        mm_llmc_3<<<gridDim_llmc_3, blockDim_llmc_3>>>(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()),
+//                               thrust::raw_pointer_cast(dC.data()), N);
+//
+//        hC = dC;
+//
+//    }
 
     #endif
 
