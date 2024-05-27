@@ -59,7 +59,7 @@ void mm_llmc_2(float* A, float* B, float* C, float* bias, int N){
     // shared memory double buffering
     __shared__ float sA[2][BLOCK_WIDTH * TILE_WIDTH];
     __shared__ float sB[2][BLOCK_WIDTH * TILE_WIDTH];
-    __shared__ float shared_bias[BLOCK_WIDTH];
+    __shared__ float shared_bias[TILE_WIDTH];
 
     int pointer = 0;
 
