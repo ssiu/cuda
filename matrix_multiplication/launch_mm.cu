@@ -8,24 +8,23 @@
 #include "mm.cuh"
 #include "utils.cuh"
 
-
-__global__ void add_bias(float* out, const float* bias, int N) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int i = idx; i < N * N ; i += N) {
-        out[i] += bias[idx];
-    }
-}
-
-#define GELU_SCALING_FACTOR sqrtf(2.0f / M_PI)
-__global__ void gelu(float* out, const float* inp, int N) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int i = idx; i < N * N ; i += N) {
-        float xi = inp[i];
-        float cube = 0.044715f * xi * xi * xi;
-        out[i] = 0.5f * xi * (1.0f + tanhf(GELU_SCALING_FACTOR * (xi + cube)));
-    }
-
-}
+//
+//__global__ void add_bias(float* out, const float* bias, int N) {
+//    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+//    for (int i = idx; i < N * N ; i += N) {
+//        out[i] += bias[idx];
+//    }
+//}
+//
+//#define GELU_SCALING_FACTOR sqrtf(2.0f / M_PI)
+//__global__ void gelu(float* out, const float* inp, int N) {
+//    int i = blockIdx.x * blockDim.x + threadIdx.x;
+//    for (int i = idx; i < N * N ; i += N) {
+//        float xi = inp[i];
+//        float cube = 0.044715f * xi * xi * xi;
+//        out[i] = 0.5f * xi * (1.0f + tanhf(GELU_SCALING_FACTOR * (xi + cube)));
+//    }
+//}
 
 int main(){
     int N = 4096;
