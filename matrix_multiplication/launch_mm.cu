@@ -16,6 +16,16 @@ __global__ void add_bias(float* out, const float* bias, int N) {
     }
 }
 
+#define GELU_SCALING_FACTOR sqrtf(2.0f / M_PI)
+__global__ void gelu(float* out, const float* inp, int N) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int i = idx; i < N * N ; i += N) {
+        float xi = inp[i];
+        float cube = 0.044715f * xi * xi * xi;
+        out[i] = 0.5f * xi * (1.0f + tanhf(GELU_SCALING_FACTOR * (xi + cube)));
+    }
+
+}
 
 int main(){
     int N = 4096;
@@ -230,7 +240,7 @@ int main(){
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //        for (int i=128;i<256; i++){
 //                printf("%d %f\n", i, hA[i]);
@@ -306,7 +316,7 @@ int main(){
 
 
 
-    #if 0
+    #if 1
     {
         //
         // cublas row major
@@ -372,7 +382,7 @@ int main(){
     #endif
 
 
-    #if 1
+    #if 0
     {
         int TILE_WIDTH = 128;
         dim3 gridDim_llmc_2(N / TILE_WIDTH,N / TILE_WIDTH);
@@ -400,7 +410,7 @@ int main(){
 //
 //    #endif
 
-    #if 1
+    #if 0
     {
         // A row major
         // B column major

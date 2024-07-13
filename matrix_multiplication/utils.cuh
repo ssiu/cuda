@@ -8,7 +8,7 @@
 #include <cmath> // For std::fabs
 
 // todo: investigate the correct epsilon
-bool areFloatsEqual(float a, float b, float epsilon = 1e-2) {
+bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
     return std::fabs(a - b) < epsilon;
 }
 
