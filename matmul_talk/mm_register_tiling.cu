@@ -63,7 +63,7 @@ __global__ void mm_register_tiling_kernel(float* A, float* B, float* C, int N){
 //        printf("SUM[1] is %f\n", sum[1]);
 //    }
     for (int i=0;i<4;i++){
-        C[gRow_C * N / 4 + gCol_C + i ] = sum[i]
+        C[gRow_C * N / 4 + gCol_C + i ] = sum[i];
     }
     //reinterpret_cast<float4*>(C)[gRow_C * N / 4 + gCol_C] = reinterpret_cast<float4*>(sum)[0];
 
