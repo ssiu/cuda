@@ -15,6 +15,9 @@ matmul_talk/launch_mm.o: matmul_talk/launch_mm.cu
 	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_70 $< \
 	matmul_talk/mm_*.cu -lcublas
 
+profile: matmul_talk/launch_mm.o
+	sudo ncu -f --target-processes all --set full -o $@ ./$<
+
 matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
 	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_70 $< \
 	matrix_multiplication/mm_*.cu matrix_multiplication/yz_mm_*.cu -lcublas
