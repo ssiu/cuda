@@ -5,7 +5,8 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <random>
-#include "nn_naive.cu"
+#include "mm_naive.cu"
+#include "mm_cublas.cu"
 #include "utils.cuh"
 
 
