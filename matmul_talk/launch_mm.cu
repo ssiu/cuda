@@ -11,7 +11,7 @@
 
 
 int main(){
-    int N = 4096;
+    int N = 8196;
     thrust::host_vector<float> hA = generateRandomMatrices(N);
     thrust::host_vector<float> hB = generateRandomMatrices(N);
     thrust::host_vector<float> hC(N*N);
@@ -26,8 +26,9 @@ int main(){
 
     //mm_naive(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
     mm_global_memory_coalescing(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
-    mm_cublas(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
     mm_double_buffering(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+    mm_cublas(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+
 
 
     #if 1
