@@ -8,8 +8,6 @@ void mm_cublas(float* A, float* B, float* C, int N) {
     cublasCreate(&handle);
     cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, &alpha, B, N, A, N, &beta, C, N);
 
-    hC_cublas = dC_cublas;
-
     cublasDestroy(handle);
 }
 

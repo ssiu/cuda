@@ -4,10 +4,10 @@
 void mm_naive(float* A, float* B, float* C, int N) {
     dim3 dimGrid(N / 32, N / 32);
     dim3 dimBlock(32, 32);
-    mm_0<<<dimGrid, dimBlock>>>(A, B, C, N);
+    mm_naive_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
 
-__global__ void mm_naive(float* A, float* B, float* C, int N){
+__global__ void mm_naive_kernel(float* A, float* B, float* C, int N){
     //int threadId = threadIdx.x + blockDim.x * threadIdx.y
     int row = threadIdx.x + blockDim.x * blockIdx.x;
     int col = threadIdx.y + blockDim.y * blockIdx.y;
