@@ -32,7 +32,7 @@
 //#define warp_row (warp_id / 2) * 32
 //#define warp_col (warp_id % 2) * 64
 #define thread_row (thread_id / 16) * 8
-#define thread_col (thread % 16) * 8
+#define thread_col (thread_id % 16) * 8
 
 
 #define gC_row TILE_WIDTH * blockIdx.y
