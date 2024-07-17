@@ -4,7 +4,7 @@
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
 __global__ __launch_bounds__(256,2)
-void mm_vectorized_memory_access_kernel(float* A, float* B, float* C, int N){
+void mm_warp_tiling_kernel(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
     int thread_id = threadIdx.x;
@@ -130,7 +130,7 @@ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C, int N){
     }
 }
 
-void mm_vectorized_memory_access(float* A, float* B, float* C, int N) {
+void mm_warp_tiling(float* A, float* B, float* C, int N) {
 
     dim3 dimGrid(N / TILE_WIDTH,N / TILE_WIDTH);
     dim3 dimBlock(256);
