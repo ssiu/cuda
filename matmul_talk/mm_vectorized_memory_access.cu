@@ -3,7 +3,7 @@
 #define BLOCK_WIDTH 8
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
 
-__global__ __launch_bounds__(256)
+__global__ __launch_bounds__(256,2)
 void mm_vectorized_memory_access_kernel(float* A, float* B, float* C, int N){
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
@@ -123,5 +123,5 @@ void mm_vectorized_memory_access(float* A, float* B, float* C, int N) {
 
     dim3 gridDim(N / TILE_WIDTH,N / TILE_WIDTH);
     dim3 blockDim(256);
-    mm_vectorized_memory_access_kernel<<<dimGrid3, dimBlock3>>>(A, B, C, N);
+    mm_vectorized_memory_access_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
