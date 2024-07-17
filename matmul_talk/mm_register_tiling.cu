@@ -136,9 +136,9 @@ __global__ void mm_register_tiling_kernel(float* A, float* B, float* C, int N){
     }
     // non-vectorized
     #pragma unroll
-    for (int x=0; x<4; x+=1){
+    for (int x=0; x<8; x+=1){
         #pragma unroll
-        for (int y=0; y<4; y+=1){
+        for (int y=0; y<8; y+=1){
             C[(gC_row + thread_row + x ) * N + gC_col + thread_col + y ] = accum[x * 8 + y];
         }
     }
