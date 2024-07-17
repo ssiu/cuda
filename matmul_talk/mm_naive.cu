@@ -1,11 +1,6 @@
 // naive matrix multiplication
 #include <iostream>
 
-void mm_naive(float* A, float* B, float* C, int N) {
-    dim3 dimGrid(N / 32, N / 32);
-    dim3 dimBlock(32, 32);
-    mm_naive_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
-}
 
 __global__ void mm_naive_kernel(float* A, float* B, float* C, int N){
     //int threadId = threadIdx.x + blockDim.x * threadIdx.y
@@ -19,4 +14,10 @@ __global__ void mm_naive_kernel(float* A, float* B, float* C, int N){
 //        }
     }
     C[row*N + col] = sum;
+}
+
+void mm_naive(float* A, float* B, float* C, int N) {
+    dim3 dimGrid(N / 32, N / 32);
+    dim3 dimBlock(32, 32);
+    mm_naive_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
