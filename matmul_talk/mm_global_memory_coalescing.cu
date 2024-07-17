@@ -19,5 +19,5 @@ __global__ void mm_global_memory_coalescing_kernel(float* A, float* B, float* C,
 void mm_global_memory_coalescing(float* A, float* B, float* C, int N) {
     dim3 dimGrid(N / 32, N / 32);
     dim3 dimBlock(32, 32);
-    mm_naive_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
+    mm_global_memory_coalescing_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
