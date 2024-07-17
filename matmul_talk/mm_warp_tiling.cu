@@ -134,5 +134,5 @@ void mm_warp_tiling(float* A, float* B, float* C, int N) {
 
     dim3 dimGrid(N / TILE_WIDTH,N / TILE_WIDTH);
     dim3 dimBlock(256);
-    mm_vectorized_memory_access_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
+    mm_warp_tiling_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
