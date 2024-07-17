@@ -65,6 +65,6 @@ __global__ void mm_register_tiling_kernel(float* A, float* B, float* C, int N){
 void mm_register_tiling(float* A, float* B, float* C, int N) {
     dim3 dimGrid3( N / TILE_WIDTH , N / TILE_WIDTH);
     dim3 dimBlock3(8, 32);
-    mm_register_tiling_kernel<<<dimGrid3, dimBlock3>>>(A, B, C N);
+    mm_register_tiling_kernel<<<dimGrid3, dimBlock3>>>(A, B, C, N);
 
 }
