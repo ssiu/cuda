@@ -8,6 +8,7 @@ void mm_shared_memory_tiling(float* A, float* B, float* C, int N);
 void mm_register_tiling(float* A, float* B, float* C, int N);
 void mm_warp_tiling(float* A, float* B, float* C, int N);
 void mm_vectorized_memory_access(float* A, float* B, float* C, int N);
+void mm_shared_memory_bank_conflicts(float* A, float* B, float* C, int N);
 void mm_double_buffering(float* A, float* B, float* C, int N);
 
 #endif

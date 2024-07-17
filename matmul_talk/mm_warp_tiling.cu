@@ -1,133 +1,158 @@
+// matrix multiplication for 8192 x 8192
+
+// global memory coalescing
+// shared memory blocking
+// register blocking
+// vectorized memory load
+
+
+// https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
+
+// thread-tiling: each thread loads 8+8 = 16 floats and computes 8x8 = 64 results
+// warp-tiling: each warp computes 64x32 = 2048 results
+// block-tiling: each thread block has 2x4 = 8 warps = 256 threads computing 128x128 = 16384 results
+
+// shared memory:
+// 128 * 8 * 4 * 2 = 8KB
+// registers:
+// each thread needs at least 64 * 4 = 256B
+// so a threadblock needs at least 256 * 256 = 64 KB
+
+// dim3 dimGrid(16, 16);
+// dim3 dimBlock(256, 1);
+
 #include <iostream>
-#define TILE_WIDTH 128
 #define BLOCK_WIDTH 8
+#define TILE_WIDTH 128
+#define thread_id threadIdx.x
+#define warp_id threadIdx.x / 32
+#define lane_id threadIdx.x % 32
 #define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
-
-__global__ __launch_bounds__(256,2)
-void mm_warp_tiling_kernel(float* A, float* B, float* C, int N){
-    int block_idx = blockIdx.x;
-    int block_idy = blockIdx.y;
-    int thread_id = threadIdx.x;
-    int warp_id = threadIdx.x >> 5;
-    int lane_id = threadIdx.x & 31;
-    int g_row = block_idx * TILE_WIDTH;
-    int g_col = block_idy * TILE_WIDTH;
-
-    int sA_row = thread_id >> 1; // 16
-    int sA_col = (thread_id & 1) << 2; // 0
-
-    int sB_row = thread_id >> 5; // 1
-    int sB_col = (thread_id & 31) << 2; // 0
-
-    int sA_gOffset = sA_row * N + sA_col;
-    int sB_gOffset = sB_row * N + sB_col;
-    // need to transpose A tile
-    //int sA_sOffset = sA_row * BLOCK_WIDTH + sA_col;
-    int sA_sOffset = sA_col * TILE_WIDTH + sA_row;
-    int sB_sOffset = sB_row * TILE_WIDTH + sB_col;
-
-    int warp_row = (warp_id >> 1) << 5; // 0
-    int warp_col = (warp_id & 1) << 6; // 64
-    int thread_row = (lane_id >> 3) << 2; // 0
-    int thread_col = (lane_id & 7) << 2; // 0
+// warp tiling
+#define warp_row (warp_id / 2) * 32
+#define warp_col (warp_id % 2) * 64
+#define thread_row (lane_id / 8) * 4
+#define thread_col (lane_id % 8) * 4
 
 
-    int sA_rOffset = warp_row + thread_row; // 0
-    int sB_rOffset = warp_col + thread_col; // 64
-    int C_gOffset = (warp_row + thread_row) * N + (warp_col + thread_col); // 64
+#define gC_row TILE_WIDTH * blockIdx.y
+#define gC_col TILE_WIDTH * blockIdx.x
 
-    A = &A[g_row*N];
-    B = &B[g_col];
-    C = &C[g_row*N + g_col];
+// shared memory offsets
+#define sA_row thread_id / 2
+#define sA_col (thread_id % 2) * 4
+#define sB_row threadIdx.x / 32
+#define sB_col (threadIdx.x % 32) * 4
+//
+//#define gA_row gC_row + sA_row
+//#define gA_col kBlock * BLOCK_WIDTH + sA_col
+//#define gB_row kBlock * BLOCK_WIDTH + sB_row
+//#define gB_col gC_col + sB_col
 
-    __shared__ float sA[BLOCK_WIDTH * TILE_WIDTH];
-    __shared__ float sB[BLOCK_WIDTH * TILE_WIDTH];
 
-    float rA[4];
-    float rB[4];
+__global__ void mm_warp_tiling_kernel(float* A, float* B, float* C, int N){
+//    int thread_id = threadIdx.x;
+//    int warp_id = threadIdx.x / 32;
+//    int lane_id = threadIdx.x % 32;
+//
+//    int warp_row = (warp_id / 2) * 32;
+//    int warp_col = (warp_id % 2) * 64;
+//    int thread_row = lane_id / 8;
+//    int thread_col = (lane_id % 8) * 4;
 
-    float fA[8] = {};
-    float fB[8] = {};
+    // offset for output matrix C
+//    int gC_row =  TILE_WIDTH * blockIdx.y;
+//    int gC_col =  TILE_WIDTH * blockIdx.x;
+
+//    int sA_row;
+//    int sA_col;
+//    int sB_row;
+//    int sB_col;
+    int gA_row;
+    int gA_col;
+    int gB_row;
+    int gB_col;
+
+    __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
+    __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
+
+    // fragments
+    float fragment_A[8] = {};
+    float fragment_B[8] = {};
     float accum[64] = {};
 
-    for (int kBlock=0; kBlock<N/BLOCK_WIDTH; kBlock++){
-//        sA[sPos] = A[gPos];
-//        sB[sPos] = B[gPos];
+    for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
+//        sA_row = thread_id / 2;
+//        sA_col = (thread_id % 2) * 4;
+//        sB_row = threadIdx.x / 32;
+//        sB_col = (threadIdx.x % 32) * 4;
 
-        //load from gmem A, B
-        FLOAT_4(rA) = FLOAT_4(A[sA_gOffset]);
-        FLOAT_4(rB) = FLOAT_4(B[sB_gOffset]);
+        gA_row = gC_row + sA_row;
+        gA_col = kBlock * BLOCK_WIDTH + sA_col;
+        gB_row = kBlock * BLOCK_WIDTH + sB_row;
+        gB_col = gC_col + sB_col;
 
+        // global memory load -> shared memory store
+//        #pragma unroll
+//
+//        for (int i=0; i<4; i+=1) {
+//            // load shared memory A
+//            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
+//            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
+//        }
+        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
 
-        // store to smem sA, sB
-        //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
-        for (int i=0; i<4;i++){
-            sA[sA_sOffset + i*TILE_WIDTH] = rA[i];
-        }
-
-        FLOAT_4(sB[sB_sOffset]) = FLOAT_4(rB);
-
-
-        //shift A,B pointers
         __syncthreads();
 
-        A += BLOCK_WIDTH;
-        B += BLOCK_WIDTH * N;
 
-        for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
-
-//            loadFromSmemA_5(sA, fA, sA_rOffset + kFragment);
-//            loadFromSmemB_5(sB, fB, sB_rOffset + kFragment * TILE_WIDTH);
+        //load a fragment from shared memory to register
+        for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
 
-            // load from smem A, B
-//            for (int i=0; i<4; i++) {
-//                fA[i] = sA[sA_rOffset + kFragment * TILE_WIDTH + i];
-//                fA[i+4] = sA[sA_rOffset + kFragment * TILE_WIDTH + (i + 16)];
-//                fB[i] = sB[sB_rOffset + kFragment * TILE_WIDTH + i];
-//                fB[i+4] = sB[sB_rOffset + kFragment * TILE_WIDTH + i + 32];
-//            }
-            FLOAT_4(fA[0]) = FLOAT_4(sA[sA_rOffset + kFragment * TILE_WIDTH]);
-            FLOAT_4(fA[4]) = FLOAT_4(sA[sA_rOffset + kFragment * TILE_WIDTH + 16]);
-            FLOAT_4(fB[0]) = FLOAT_4(sB[sB_rOffset + kFragment * TILE_WIDTH]);
-            FLOAT_4(fB[4]) = FLOAT_4(sB[sB_rOffset + kFragment * TILE_WIDTH + 32]);
+            #pragma unroll
+            for (int i=0; i<4; i++){
+                // Load A fragment, 8 floats
+                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
-            // compute outer product
-            for (int i=0; i<8;i++){
-                for (int j=0; j<8; j++) {
-                    accum[i*8+j] += fA[i] * fB[j];
+                // Load B fragment, 8 floats
+                fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
+                fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
+              }
+
+
+            // Compute accumulator, 64 floats
+            #pragma unroll
+            for (int x=0; x<8; x++){
+                #pragma unroll
+                for (int y=0; y<8; y++){
+                    accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
-             }
+            }
 
         }
         __syncthreads();
-
+    }
+    // non-vectorized
+//    for (int x=0; x<4; x+=1){
+//        for (int y=0; y<4; y+=1){
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
+//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 32] = accum[x * 8 + y + 4];
+//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
+//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y + 32] = accum[(x + 4) * 8 + y + 4];
+//        }
+//    }
+    #pragma unroll
+    for (int x=0; x<4; x+=1){
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8) /4];
+        reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
     }
 
-//    storeToGmem_5(accum, C, N, C_gOffset);
 
-    // store to gmem C
-    for (int i=0;i<4;i++) {
-        for (int j=0;j<4;j++){
-            C[C_gOffset + i * N + j] = accum[i * 8 + j];
-            C[C_gOffset + i * N + 32 + j] = accum[i * 8 + 4 + j];
-            C[C_gOffset + (i + 16) * N + j] = accum[(i+4) * 8 + j];
-            C[C_gOffset + (i + 16) * N + 32 + j] = accum[(i+4) * 8 + 4 + j];
 
-//            FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
-//            FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
-//            FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
-//            FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
-        }
-//        FLOAT_4(C[C_gOffset + i * N]) = FLOAT_4(accum[i * 8]);
-//        FLOAT_4(C[C_gOffset + i * N + 32]) = FLOAT_4(accum[i * 8 + 4]);
-//        FLOAT_4(C[C_gOffset + (i + 16) * N ]) = FLOAT_4(accum[(i+4) * 8]);
-//        FLOAT_4(C[C_gOffset + (i + 16) * N + 32]) = FLOAT_4(accum[(i+4) * 8 + 4]);
-//        reinterpret_cast<float4*>(&C[offset + i * N])[0] = reinterpret_cast<float4*>(&accum[i * 8])[0];
-//        reinterpret_cast<float4*>(&C[offset + i * N + 32])[0] = reinterpret_cast<float4*>(&accum[i * 8 + 4])[0];
-//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N ])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8])[0];
-//        reinterpret_cast<float4*>(&C[offset + (i + 16) * N + 32])[0] = reinterpret_cast<float4*>(&accum[(i+4) * 8 + 4])[0];
-    }
 }
 
 void mm_warp_tiling(float* A, float* B, float* C, int N) {

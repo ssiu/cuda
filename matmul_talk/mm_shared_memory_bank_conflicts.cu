@@ -4,7 +4,7 @@
 // shared memory blocking
 // register blocking
 // vectorized memory load
-
+// shared memory bank conflict
 
 // https://developer.nvidia.com/blog/cutlass-linear-algebra-cuda/
 
@@ -27,7 +27,7 @@
 #define thread_id threadIdx.x
 #define warp_id threadIdx.x / 32
 #define lane_id threadIdx.x % 32
-#define FLOAT_4(pointer) reinterpret_cast<float4*>(&(pointer))[0]
+
 // warp tiling
 #define warp_row (warp_id / 2) * 32
 #define warp_col (warp_id % 2) * 64
@@ -35,73 +35,49 @@
 #define thread_col (lane_id % 8) * 4
 
 
-#define gC_row TILE_WIDTH * blockIdx.y
-#define gC_col TILE_WIDTH * blockIdx.x
+#define gC_row (TILE_WIDTH * blockIdx.y)
+#define gC_col (TILE_WIDTH * blockIdx.x)
 
 // shared memory offsets
-#define sA_row thread_id / 2
+#define sA_row (thread_id / 2)
 #define sA_col (thread_id % 2) * 4
-#define sB_row threadIdx.x / 32
+#define sB_row (threadIdx.x / 32)
 #define sB_col (threadIdx.x % 32) * 4
 //
-//#define gA_row gC_row + sA_row
-//#define gA_col kBlock * BLOCK_WIDTH + sA_col
-//#define gB_row kBlock * BLOCK_WIDTH + sB_row
-//#define gB_col gC_col + sB_col
+#define gA_row (gC_row + sA_row)
+#define gA_col (kBlock * BLOCK_WIDTH + sA_col)
+#define gB_row (kBlock * BLOCK_WIDTH + sB_row)
+#define gB_col (gC_col + sB_col)
 
 
-__global__ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C, int N){
-//    int thread_id = threadIdx.x;
-//    int warp_id = threadIdx.x / 32;
-//    int lane_id = threadIdx.x % 32;
-//
-//    int warp_row = (warp_id / 2) * 32;
-//    int warp_col = (warp_id % 2) * 64;
-//    int thread_row = lane_id / 8;
-//    int thread_col = (lane_id % 8) * 4;
+__global__ void mm_shared_memory_bank_conflicts_kernel(float* A, float* B, float* C, int N){
 
-    // offset for output matrix C
-//    int gC_row =  TILE_WIDTH * blockIdx.y;
-//    int gC_col =  TILE_WIDTH * blockIdx.x;
-
-//    int sA_row;
-//    int sA_col;
-//    int sB_row;
-//    int sB_col;
-    int gA_row;
-    int gA_col;
-    int gB_row;
-    int gB_col;
 
     __shared__ float sA[TILE_WIDTH * BLOCK_WIDTH];
     __shared__ float sB[TILE_WIDTH * BLOCK_WIDTH];
 
+    float tmp_original[4];
+    float tmp_permuted[4];
     // fragments
     float fragment_A[8] = {};
     float fragment_B[8] = {};
     float accum[64] = {};
 
     for (int kBlock = 0; kBlock < N / BLOCK_WIDTH; kBlock++){
-//        sA_row = thread_id / 2;
-//        sA_col = (thread_id % 2) * 4;
-//        sB_row = threadIdx.x / 32;
-//        sB_col = (threadIdx.x % 32) * 4;
 
-        gA_row = gC_row + sA_row;
-        gA_col = kBlock * BLOCK_WIDTH + sA_col;
-        gB_row = kBlock * BLOCK_WIDTH + sB_row;
-        gB_col = gC_col + sB_col;
-
-        // global memory load -> shared memory store
-//        #pragma unroll
-//
-//        for (int i=0; i<4; i+=1) {
-//            // load shared memory A
-//            sA[sA_row * BLOCK_WIDTH + sA_col + i] = A[gA_row * N + gA_col + i];
-//            sB[sB_row * TILE_WIDTH + sB_col + i] = B[gB_row * N + gB_col + i];
-//        }
-        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        //reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        // no bank conflict for B
         reinterpret_cast<float4*>(sB)[(sB_row * TILE_WIDTH + sB_col) / 4] = reinterpret_cast<float4*>(B)[(gB_row * N + gB_col) / 4];
+
+        // bank conflict for A, first load it to a tmp register then permute the data
+        reinterpret_cast<float4*>(tmp_original)[0] = reinterpret_cast<float4*>(A)[(gA_row * N + gA_col) / 4];
+        //#pragma unroll
+        for (int i=0;i<4;i++) {
+            tmp_permuted[(i + lane_id / 8) % 4] = tmp_original[i];
+        }
+        reinterpret_cast<float4*>(sA)[(sA_row * BLOCK_WIDTH + sA_col) / 4] = reinterpret_cast<float4*>(tmp_permuted)[0];
+
+
 
         __syncthreads();
 
@@ -109,13 +85,18 @@ __global__ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C,
         //load a fragment from shared memory to register
         for (int kFragment = 0; kFragment < BLOCK_WIDTH; kFragment++){
 
-
-            #pragma unroll
+            //#pragma unroll
             for (int i=0; i<4; i++){
                 // Load A fragment, 8 floats
-                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
-                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
+//                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + kFragment];
+//                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + kFragment];
 
+                // bank conflict free load
+                // column shift resets every 16 rows
+                // thread_row / 4 gives us the permutation status
+                //
+                fragment_A[i] = sA[(warp_row + thread_row + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
+                fragment_A[i+4] = sA[(warp_row + thread_row + 16 + i) * BLOCK_WIDTH + (thread_row / 4 + kFragment % 4) % 4 + (kFragment / 4) * 4];
                 // Load B fragment, 8 floats
                 fragment_B[i] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + i];
                 fragment_B[i+4] = sB[kFragment * TILE_WIDTH + warp_col + thread_col + 32 + i];
@@ -123,9 +104,9 @@ __global__ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C,
 
 
             // Compute accumulator, 64 floats
-            #pragma unroll
+            //#pragma unroll
             for (int x=0; x<8; x++){
-                #pragma unroll
+                //#pragma unroll
                 for (int y=0; y<8; y++){
                     accum[x * 8 + y] += fragment_A[x] * fragment_B[y];
                 }
@@ -134,16 +115,7 @@ __global__ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C,
         }
         __syncthreads();
     }
-    // non-vectorized
-//    for (int x=0; x<4; x+=1){
-//        for (int y=0; y<4; y+=1){
-//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y] = accum[x*8 + y];
-//            C[(gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + y + 32] = accum[x * 8 + y + 4];
-//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y] = accum[(x + 4)* 8 + y];
-//            C[(gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + y + 32] = accum[(x + 4) * 8 + y + 4];
-//        }
-//    }
-    #pragma unroll
+    //#pragma unroll
     for (int x=0; x<4; x+=1){
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col) / 4] = reinterpret_cast<float4*>(accum)[(x * 8) /4];
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x ) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[(x * 8 + 4) /4];
@@ -151,13 +123,11 @@ __global__ void mm_vectorized_memory_access_kernel(float* A, float* B, float* C,
         reinterpret_cast<float4*>(C)[((gC_row + warp_row + thread_row + x + 16) * N + gC_col + warp_col + thread_col + 32) / 4] = reinterpret_cast<float4*>(accum)[((x + 4) * 8 + 4) /4];
     }
 
-
-
 }
 
-void mm_vectorized_memory_access(float* A, float* B, float* C, int N) {
+void mm_shared_memory_bank_conflicts(float* A, float* B, float* C, int N) {
 
     dim3 dimGrid(N / TILE_WIDTH,N / TILE_WIDTH);
     dim3 dimBlock(256);
-    mm_vectorized_memory_access_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
+    mm_shared_memory_bank_conflicts_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
