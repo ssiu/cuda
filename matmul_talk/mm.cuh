@@ -4,6 +4,6 @@
 void mm_naive(float* A, float* B, float* C, int N);
 void mm_cublas(float* A, float* B, float* C, int N);
 void mm_global_memory_coalescing(float* A, float* B, float* C, int N);
-
+void mm_double_buffering(float* A, float* B, float* C, int N);
 
 #endif

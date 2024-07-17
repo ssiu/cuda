@@ -24,9 +24,10 @@ int main(){
     thrust::device_vector<float> dC_cublas(N*N);
     thrust::device_vector<float> dbias = bias;
 
-    mm_naive(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+    //mm_naive(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
     mm_global_memory_coalescing(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
     mm_cublas(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+    mm_double_buffering(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 
 
     #if 1
