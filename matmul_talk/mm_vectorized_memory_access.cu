@@ -123,5 +123,5 @@ void mm_vectorized_memory_access(float* A, float* B, float* C, int N) {
 
     dim3 gridDim(N / TILE_WIDTH,N / TILE_WIDTH);
     dim3 blockDim(256);
-    mm_vectorized_memory_access_kernel(A, B, C, N);
+    mm_vectorized_memory_access_kernel<<<dimGrid3, dimBlock3>>>(A, B, C, N);
 }
