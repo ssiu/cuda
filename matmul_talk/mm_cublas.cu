@@ -1,3 +1,5 @@
+#include <cublas_v2.h>
+
 void mm_cublas(float* A, float* B, float* C, int N) {
     float alpha = 1.0f;
     float beta = 1.0f;
