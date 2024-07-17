@@ -39,8 +39,12 @@ __global__ void mm_register_tiling_kernel(float* A, float* B, float* C, int N){
         gCol_A = kTile*TILE_WIDTH / 4 + threadIdx.x;
         gRow_B = kTile*TILE_WIDTH + threadIdx.y;
         // bank conflict free G->S
-        reinterpret_cast<float4*>(sA)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(A)[gRow_A * N / 4 + gCol_A];
-        reinterpret_cast<float4*>(sB)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(B)[gRow_B * N / 4 + gCol_B];
+        for (int i=0;i<4;i++){
+            sA[sRow * TILE_WIDTH / 4 + sCol + i] = A[gRow_A * N / 4 + gCol_A + i];
+            sB[sRow * TILE_WIDTH / 4 + sCol + i] = B[gRow_B * N / 4 + gCol_B + i];
+        }
+//        reinterpret_cast<float4*>(sA)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(A)[gRow_A * N / 4 + gCol_A];
+//        reinterpret_cast<float4*>(sB)[sRow * TILE_WIDTH / 4 + sCol] = reinterpret_cast<float4*>(B)[gRow_B * N / 4 + gCol_B];
 
         __syncthreads();
 
