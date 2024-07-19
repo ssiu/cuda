@@ -16,13 +16,12 @@ int main(){
     thrust::host_vector<float> hB = generateRandomMatrices(N);
     thrust::host_vector<float> hC(N*N);
     thrust::host_vector<float> hC_cublas(N*N);
-    thrust::host_vector<float> bias(N);
 
     thrust::device_vector<float> dA = hA;
     thrust::device_vector<float> dB = hB;
     thrust::device_vector<float> dC = hC;
     thrust::device_vector<float> dC_cublas(N*N);
-    thrust::device_vector<float> dbias = bias;
+
 
 //    mm_naive(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 //    mm_global_memory_coalescing(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
