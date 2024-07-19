@@ -66,10 +66,10 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
         #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
-            FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, kFragment, C_row));
-            FLOAT_4(fA[4]) = FLOAT_4(sA(shared_pointer, kFragment, C_row + 16));
-            FLOAT_4(fB[0]) = FLOAT_4(sB(shared_pointer, kFragment, C_col));
-            FLOAT_4(fB[4]) = FLOAT_4(sB(shared_pointer, kFragment, C_col + 32));
+            FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, C_row));
+            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row + 16));
+            FLOAT_4(fB[0]) = FLOAT_4(sB(kFragment, C_col));
+            FLOAT_4(fB[4]) = FLOAT_4(sB(kFragment, C_col + 32));
             // compute outer product
             #pragma unroll
             for (int i=0; i<8;i++){
