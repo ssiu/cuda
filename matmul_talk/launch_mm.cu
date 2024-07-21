@@ -36,6 +36,9 @@ int main(){
 //    mm_double_buffering(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
     mm_cublas(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 
+    hC = dC;
+    hC_cublas = dC_cublas;
+
 
 
     #if 1
