@@ -28,7 +28,7 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
 //    int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
 //    int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
 //    int permuted_sA_row = permuted_thread_id >> 1;
-    int permuted_sA_row = (((threadIdx.x >> 5) ^ (thread_id & 1)) << 5 + (threadIdx.x & 31)) >> 1
+    int permuted_sA_row = (((threadIdx.x >> 5) ^ (thread_id & 1)) << 5 + (threadIdx.x & 31)) >> 1;
 
     int sB_row = thread_id >> 5;
     int sB_col = (thread_id & 31) << 2;
