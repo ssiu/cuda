@@ -78,7 +78,7 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
                 for (int j = 0; j < 8; j++) {
                     printf("%d ", sA(j,i));
                 }
-                printf("\n")
+                printf("\n");
             }
 
         }
