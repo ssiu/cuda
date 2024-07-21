@@ -63,6 +63,17 @@ void mm_shared_memory_bank_conflicts_kernel(float* A, float* B, float* C, int N)
 
         __syncthreads();
 
+        if (block_idx == 0 and block_idy == 0 and thread_id == 0 and kBlock == 0) {
+            for (int i = 0; i < 32; i++) {
+                for (int j = 0; j < 8; j++) {
+                    printf("%f ", sA(j,i));
+                }
+                printf("\n");
+            }
+
+        }
+        printf("\n\n\n");
+
         #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
