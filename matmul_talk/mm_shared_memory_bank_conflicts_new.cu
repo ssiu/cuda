@@ -80,9 +80,10 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
                 }
                 printf("\n");
             }
-
+            printf("\n\n\n");
         }
-        printf("\n\n\n");
+
+
         // no shared memory permutation
         #pragma unroll
         for (int kFragment=0; kFragment<4; kFragment++) {

@@ -70,9 +70,9 @@ void mm_shared_memory_bank_conflicts_kernel(float* A, float* B, float* C, int N)
                 }
                 printf("\n");
             }
-
+            printf("\n\n\n");
         }
-        printf("\n\n\n");
+
 
         #pragma unroll
         for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
