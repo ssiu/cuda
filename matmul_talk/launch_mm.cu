@@ -43,7 +43,7 @@ int main(){
 
 
 
-    #if 1
+    #if 0
         if (isSameMatrices(hC.data(), hC_cublas.data(), N)==0){
 //        for (int i=0;i<N;i += 128){
 //            for (int j=0;j<N; j+=128){
