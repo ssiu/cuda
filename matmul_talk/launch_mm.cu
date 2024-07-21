@@ -27,8 +27,8 @@ int main(){
 //    mm_global_memory_coalescing(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 //
 //    mm_shared_memory_tiling(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
-    mm_register_tiling(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
-//    mm_warp_tiling(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+//    mm_register_tiling(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
+    mm_warp_tiling(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 //
 //    mm_vectorized_memory_access(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
 //    mm_shared_memory_bank_conflicts(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dB.data()), thrust::raw_pointer_cast(dC.data()), N);
