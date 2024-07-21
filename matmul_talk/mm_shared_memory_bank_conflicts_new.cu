@@ -55,16 +55,27 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
         FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
         // load from gmem A, B for next block
 
+
+//        int thread_id = i;
+//        int lane_id = i & 31;
+//        int warp_id = i >> 5;
+//        int is_odd_thread = (thread_id & 1);
+//        int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
+//        int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
         for (int i=0; i<4;i++){
-            sA(sA_col + i, sA_row) = rA[i];
+            //sA(sA_col + i, sA_row) = rA[i];
+            int is_odd_thread = (thread_id & 1);
+            int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
+            int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
+            sA(sA_col + i, permuted_thread_id);
         }
 
         FLOAT_4(sB(sB_row, sB_col)) = FLOAT_4(rB);
 
         __syncthreads();
-
+        // no shared memory permutation
         #pragma unroll
-        for (int kFragment=0; kFragment<BLOCK_WIDTH; kFragment++) {
+        for (int kFragment=0; kFragment<4; kFragment++) {
             // load from smem A, B
             FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, C_row));
             FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row + 16));
@@ -80,6 +91,26 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
              }
 
         }
+        // shared memory permutation
+        #pragma unroll
+        for (int kFragment=4; kFragment<BLOCK_WIDTH; kFragment++) {
+            // load from smem A, B
+            FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, C_row + 16));
+            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row ));
+            FLOAT_4(fB[0]) = FLOAT_4(sB(kFragment, C_col));
+            FLOAT_4(fB[4]) = FLOAT_4(sB(kFragment, C_col + 32));
+            // compute outer product
+            #pragma unroll
+            for (int i=0; i<8;i++){
+                #pragma unroll
+                for (int j=0; j<8; j++) {
+                    accum[i*8+j] += fA[i] * fB[j];
+                }
+             }
+
+        }
+
+
         __syncthreads();
 
         A += BLOCK_WIDTH;
