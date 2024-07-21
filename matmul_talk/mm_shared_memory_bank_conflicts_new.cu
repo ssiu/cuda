@@ -75,7 +75,13 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
         __syncthreads();
         if (block_idx == 0 and block_idy == 0 and thread_id == 0 and kBlock == 0) {
             for (int i = 0; i < 32; i++) {
+                if (i & 15 == 0) {
+                    printf("\n");
+                }
                 for (int j = 0; j < 8; j++) {
+                    if (j  & 3 ==0) {
+                        printd("  ");
+                    }
                     printf("%f ", sA(j,i));
                 }
                 printf("\n");
