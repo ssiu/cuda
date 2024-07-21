@@ -70,7 +70,7 @@ void mm_shared_memory_bank_conflicts_kernel(float* A, float* B, float* C, int N)
                 }
                 for (int j = 0; j < 8; j++) {
                     if (j  & 3 ==0) {
-                        printd("  ");
+                        printf("  ");
                     }
                     printf("%f ", sA(j,i));
                 }
