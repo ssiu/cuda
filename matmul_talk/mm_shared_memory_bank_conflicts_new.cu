@@ -77,8 +77,7 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
         for (int kFragment=0; kFragment<4; kFragment++) {
             // load from smem A, B
             FLOAT_4(fA[0]) = FLOAT_4(sA(kFragment, C_row));
-            //FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row + 16));
-            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row + 32));
+            FLOAT_4(fA[4]) = FLOAT_4(sA(kFragment, C_row + 16));
             FLOAT_4(fB[0]) = FLOAT_4(sB(kFragment, C_col));
             FLOAT_4(fB[4]) = FLOAT_4(sB(kFragment, C_col + 32));
             // compute outer product
