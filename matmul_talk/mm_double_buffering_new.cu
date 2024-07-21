@@ -151,5 +151,5 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
 void mm_double_buffering_new(float* A, float* B, float* C, int N) {
     dim3 dimGrid(N / TILE_WIDTH, N / TILE_WIDTH);
     dim3 dimBlock(256);
-    mm_double_buffering_kernel_new<<<dimGrid, dimBlock>>>(A, B, C, N);
+    mm_double_buffering_new_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
 }
