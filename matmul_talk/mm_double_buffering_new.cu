@@ -58,6 +58,9 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
     // load first block
     FLOAT_4(rA) = FLOAT_4(A(sA_row, sA_col));
     FLOAT_4(rB) = FLOAT_4(B(sB_row, sB_col));
+
+    int permuted_sA_row = ((((thread_id >> 5) ^ (thread_id & 1)) << 5) + (threadIdx.x & 31)) >> 1;
+
     #pragma unroll
     for (int i=0; i<4;i++){
         sA(shared_pointer, sA_col + i, permuted_sA_row) = rA[i];
