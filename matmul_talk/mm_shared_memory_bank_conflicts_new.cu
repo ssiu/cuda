@@ -62,16 +62,27 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
 //        int is_odd_thread = (thread_id & 1);
 //        int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
 //        int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
+        int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
+        int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
         for (int i=0; i<4;i++){
             //sA(sA_col + i, sA_row) = rA[i];
-            int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
-            int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
+
             sA(sA_col + i, permuted_thread_id) = rA[i];
         }
 
         FLOAT_4(sB(sB_row, sB_col)) = FLOAT_4(rB);
 
         __syncthreads();
+        if (block_idx == 0 and block_idy == 0 and thread_id == 0 ) {
+            for (int i = 0; i < 128; i++) {
+                for (int j = 0; j < 8; j++) {
+                    printf("%d ", sA(j,i));
+                }
+                printf("\n")
+            }
+
+        }
+
         // no shared memory permutation
         #pragma unroll
         for (int kFragment=0; kFragment<4; kFragment++) {
