@@ -64,10 +64,9 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
 //        int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
         for (int i=0; i<4;i++){
             //sA(sA_col + i, sA_row) = rA[i];
-            int is_odd_thread = (thread_id & 1);
             int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
             int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
-            sA(sA_col + i, permuted_thread_id);
+            sA(sA_col + i, permuted_thread_id) = rA[i];
         }
 
         FLOAT_4(sB(sB_row, sB_col)) = FLOAT_4(rB);
