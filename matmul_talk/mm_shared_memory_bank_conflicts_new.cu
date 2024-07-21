@@ -69,7 +69,7 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
 
             sA(sA_col + i, permuted_thread_id) = rA[i];
             if (block_idx == 0 and block_idy == 0 and thread_id == 1 and kBlock == 0) {
-                printf("%d %d %d %d", sA_col + i, permuted_thread_id, permuted_warp_id);
+                printf("sA_col + i = %d, permuted_thread_id = %d, permuted_warp_id = %d \n", sA_col + i, permuted_thread_id, permuted_warp_id);
             }
 
         }
