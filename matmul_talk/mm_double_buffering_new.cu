@@ -28,10 +28,10 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
     int sB_row = thread_id >> 5;
     int sB_col = (thread_id & 31) << 2;
 
+
     int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
     int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
     int permuted_sA_row = permuted_thread_id >> 1;
-
 
     int C_row = warp_row + thread_row;
     int C_col = warp_col + thread_col;
@@ -94,6 +94,7 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
 
         }
 
+        #pragma unroll
         for (int kFragment=4; kFragment<BLOCK_WIDTH; kFragment++) {
             // load from smem A, B
             FLOAT_4(fA[0]) = FLOAT_4(sA(shared_pointer, kFragment, C_row + 16));
