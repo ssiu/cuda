@@ -32,7 +32,7 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
 //    int permuted_warp_id = (warp_id ) ^ (thread_id & 1);
 //    int permuted_thread_id = (permuted_warp_id << 5) + lane_id;
 //    int permuted_sA_row = permuted_thread_id >> 1;
-    int permuted_sA_row = ((((thread_id >> 5) ^ (thread_id & 1)) << 5) + (threadIdx.x & 31)) >> 1;
+//    int permuted_sA_row = ((((thread_id >> 5) ^ (thread_id & 1)) << 5) + (threadIdx.x & 31)) >> 1;
 
     int C_row = warp_row + thread_row;
     int C_col = warp_col + thread_col;
@@ -115,6 +115,7 @@ void mm_double_buffering_new_kernel(float* A, float* B, float* C, int N){
         // store to smem sA, sB for next block
         if (kBlock < N/BLOCK_WIDTH - 1) {
 
+            int permuted_sA_row = ((((thread_id >> 5) ^ (thread_id & 1)) << 5) + (threadIdx.x & 31)) >> 1;
 
             //FLOAT_4(sA[sA_sOffset]) = FLOAT_4(rA);
             #pragma unroll
