@@ -78,21 +78,21 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
         FLOAT_4(sB(sB_row, sB_col)) = FLOAT_4(rB);
 
         __syncthreads();
-        if (block_idx == 0 and block_idy == 0 and thread_id == 0 and kBlock == 0) {
-            for (int i = 0; i < 32; i++) {
-                if (i == 16) {
-                    printf("\n");
-                }
-                for (int j = 0; j < 8; j++) {
-                    if (j  == 4) {
-                        printf("  ");
-                    }
-                    printf("%f ", sA(j,i));
-                }
-                printf("\n");
-            }
-            printf("\n\n\n");
-        }
+//        if (block_idx == 0 and block_idy == 0 and thread_id == 0 and kBlock == 0) {
+//            for (int i = 0; i < 32; i++) {
+//                if (i == 16) {
+//                    printf("\n");
+//                }
+//                for (int j = 0; j < 8; j++) {
+//                    if (j  == 4) {
+//                        printf("  ");
+//                    }
+//                    printf("%f ", sA(j,i));
+//                }
+//                printf("\n");
+//            }
+//            printf("\n\n\n");
+//        }
 
 
         // no shared memory permutation
