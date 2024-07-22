@@ -10,7 +10,7 @@
 
 
 __global__ __launch_bounds__(256,2)
-void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, int N){
+void mm_shared_memory_bank_conflicts_kernel(float* A, float* B, float* C, int N){
     int thread_id = threadIdx.x;
     int block_idx = blockIdx.x;
     int block_idy = blockIdx.y;
@@ -154,7 +154,7 @@ void mm_shared_memory_bank_conflicts_new_kernel(float* A, float* B, float* C, in
 }
 
 
-void mm_shared_memory_bank_conflicts_new(float* A, float* B, float* C, int N) {
+void mm_shared_memory_bank_conflicts(float* A, float* B, float* C, int N) {
     dim3 dimGrid(N / TILE_WIDTH, N / TILE_WIDTH);
     dim3 dimBlock(256);
     mm_shared_memory_bank_conflicts_new_kernel<<<dimGrid, dimBlock>>>(A, B, C, N);
