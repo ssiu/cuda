@@ -11,7 +11,7 @@
 
 
 int main(){
-    int N = 4096;
+    int N = 8196;
     thrust::host_vector<float> hA = generateRandomMatrices(N);
     thrust::host_vector<float> hB = generateRandomMatrices(N);
     thrust::host_vector<float> hC(N*N);
