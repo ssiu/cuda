@@ -5,6 +5,13 @@ say_hello:
 
 mm: clean_mm matrix_multiplication/launch_mm.o
 
+sum: sum/launch_sum.o
+
+sum/launch_sum.o: sum/launch_sum.cu
+	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_70 $< \
+	sum/sum_*.cu -lcudart
+
+
 matmul_talk: matmul_talk/launch_mm.o
 
 # matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
