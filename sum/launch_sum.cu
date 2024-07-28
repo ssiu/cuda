@@ -23,7 +23,7 @@ int main(){
     thrust::device_vector<float> d_out(1);
     thrust::device_vector<float> d_out_cub(1);
 
-    sum_cub(thrust::raw_pointer_cast(dA.data()), thrust::raw_pointer_cast(dA.data(d_out_cub[0])), N);
+    sum_cub(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out_cub.data(d_out_cub[0])), N);
 
 
     h_out_cub[0] = d_out_cub[0];
