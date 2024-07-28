@@ -12,7 +12,7 @@
 
 
 int main(){
-    int N = static_cast<int>(10);
+    int N = static_cast<int>(1e6);
 
     thrust::host_vector<float> h_in = generateRandomArray(N);
     thrust::host_vector<float> h_out(1);
@@ -27,9 +27,9 @@ int main(){
 
 
     h_out_cub[0] = d_out_cub[0];
-    for (int i=0;i<N;i++) {
-        std::cout << h_in[i] << " " << std::endl;
-    }
+//    for (int i=0;i<N;i++) {
+//        std::cout << h_in[i] << " " << std::endl;
+//    }
 
     std::cout << h_out_cub[0] << std::endl;
 
