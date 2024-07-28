@@ -27,6 +27,10 @@ int main(){
 
 
     h_out_cub[0] = d_out_cub[0];
+    for (int i=0;i<N;i++) {
+        std::cout << h_in[i] << " " << std::endl;
+    }
+
     std::cout << h_out_cub[0] << std::endl;
 
     #if 0
