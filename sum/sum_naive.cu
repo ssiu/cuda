@@ -37,11 +37,11 @@ __global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
         }
         __syncthreads();
     }
-    d_out = accum[0];
+    d_out[0] = accum[0];
 }
 
 void sum_naive(float* d_in, float* d_out, int N) {
     dim3 dimGrid(1);
     dim3 dimBlock(1024);
-    mm_naive_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
+    sum_naive_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
 }
