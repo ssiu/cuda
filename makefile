@@ -1,7 +1,7 @@
 say_hello:
 	echo "Hello World!"
 
-.PHONY: matmul_talk matmul_talk/launch_mm.o
+.PHONY: matmul_talk matmul_talk/launch_mm.o sum sum/launch_sum.o
 
 mm: clean_mm matrix_multiplication/launch_mm.o
 
