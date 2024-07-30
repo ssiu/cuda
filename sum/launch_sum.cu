@@ -24,7 +24,7 @@ int main(){
     thrust::device_vector<float> d_out_cub(1);
 
 
-    sum_naive(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out_cub.data()), N);
+    sum_naive(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
     h_out[0] = d_out[0];
     std::cout << h_out[0] << std::endl;
 
