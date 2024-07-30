@@ -31,7 +31,7 @@ __global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
     // step  8:    4 leaves,   2 threads, threads mod  512, stride 256
     // step  9:    2 leaves,   1 threads, threads mod 1024, stride 512
     // step 10:    1   leaf,       done!
-    for (int stride = 1; stride < 1024; stride<<1) {
+    for (int stride = 1; stride < 1024; stride<<=1) {
         if (thread_id % (stride * 2) == 0) {
             accum[thread_id] += accum[thread_id + stride];
         }
