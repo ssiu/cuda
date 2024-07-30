@@ -16,7 +16,11 @@ __global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
     for (int i = thread_id; i < N; i+=1024){
         sum += d_in[i];
     }
+    if (thread_id ==0) {
+        printf("%f", sum);
+    }
     accum[thread_id] = sum;
+
     __syncthreads();
     // now there are 1024 values that we need to add up
     // reduction tree
@@ -36,6 +40,9 @@ __global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
             accum[thread_id] += accum[thread_id + stride];
         }
         __syncthreads();
+    }
+    if (thread_id ==0) {
+        printf("%f", accum[0]);
     }
     d_out[0] = accum[0];
 }
