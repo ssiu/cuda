@@ -52,7 +52,9 @@ __global__ void sum_vectorized_kernel(float* d_in, float* d_out, int N){
 //    if (thread_id ==0) {
 //        printf("%f\n", accum[0]);
 //    }
-    d_out[0] = accum[0];
+    if (thread_id == 0){
+        d_out[0] = accum[0];
+    }
 }
 
 void sum_vectorized(float* d_in, float* d_out, int N) {

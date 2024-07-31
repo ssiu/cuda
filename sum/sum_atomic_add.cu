@@ -1,25 +1,20 @@
-// one single threadblock in a grid
-// we launch 1024 threads, each thread add a number with stride 1024
+// we launch N / 1024 blocks, with each block having 1024 threads
+// each block computes a partial sum of a 1024 subarray
 
 
 // naive matrix multiplication
 #include <iostream>
 
-
-__global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
-    //int threadId = threadIdx.x + blockDim.x * threadIdx.y
+__global__ void sum_atomic_add_kernel(float* d_in, float* d_out, int N){
+    int offset = blockDim.x * blockIdx.x + threadIdx.x;
     int thread_id = threadIdx.x;
 
-    float sum = 0;
     __shared__ float accum[1024];
-    // loop through the array and add values with a stride of 1024
-    for (int i = thread_id; i < N; i+=1024){
-        sum += d_in[i];
-    }
+
 //    if (thread_id ==0) {
 //        printf("%f\n", sum);
 //    }
-    accum[thread_id] = sum;
+    accum[thread_id] = d_in[offset];
 
     __syncthreads();
     // now there are 1024 values that we need to add up
@@ -44,14 +39,13 @@ __global__ void sum_naive_kernel(float* d_in, float* d_out, int N){
 //    if (thread_id ==0) {
 //        printf("%f\n", accum[0]);
 //    }
-    if (thread_id == 0 ){
-        d_out[0] = accum[0];
+    if (thread_id == 0) {
+        atomicAdd(d_out, accum[0]);
     }
-
 }
 
-void sum_naive(float* d_in, float* d_out, int N) {
-    dim3 dimGrid(1);
+void sum_atomic_add(float* d_in, float* d_out, int N) {
+    dim3 dimGrid(N / 1024);
     dim3 dimBlock(1024);
-    sum_naive_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
+    sum_atomic_add_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
 }
