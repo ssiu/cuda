@@ -12,7 +12,7 @@
 
 
 int main(){
-    int N = static_cast<int>(1<<20);
+    int N = static_cast<int>(1<<10);
 
     thrust::host_vector<float> h_in = generateRandomArray(N);
     thrust::host_vector<float> h_out(1);
@@ -24,13 +24,13 @@ int main(){
     thrust::device_vector<float> d_out_cub(1);
 
 
-    sum_naive(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
-    h_out[0] = d_out[0];
-    std::cout << h_out[0] << std::endl;
-
-    sum_vectorized(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
-    h_out[0] = d_out[0];
-    std::cout << h_out[0] << std::endl;
+//    sum_naive(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
+//    h_out[0] = d_out[0];
+//    std::cout << h_out[0] << std::endl;
+//
+//    sum_vectorized(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
+//    h_out[0] = d_out[0];
+//    std::cout << h_out[0] << std::endl;
 
     sum_atomic_add(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
     h_out[0] = d_out[0];
