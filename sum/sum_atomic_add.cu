@@ -40,7 +40,7 @@ __global__ void sum_atomic_add_kernel(float* d_in, float* d_out, int N){
         printf("%f\n", accum[0]);
     }
     if (thread_id == 0) {
-        atomicAdd(&d_out[0], accum[0]);
+        atomicAdd(d_out[0], accum[0]);
     }
 }
 
