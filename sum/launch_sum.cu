@@ -12,7 +12,7 @@
 
 
 int main(){
-    int N = static_cast<int>(1<<10);
+    int N = static_cast<int>(1<<11);
 
     thrust::host_vector<float> h_in = generateRandomArray(N);
     thrust::host_vector<float> h_out(1);
