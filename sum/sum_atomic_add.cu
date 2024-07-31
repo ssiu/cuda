@@ -46,7 +46,6 @@ __global__ void sum_atomic_add_kernel(float* d_in, float* d_out, int N){
 
 void sum_atomic_add(float* d_in, float* d_out, int N) {
     dim3 dimGrid(N / 1024);
-    std::cout << N / 1024 << std::endl;
     dim3 dimBlock(1024);
     sum_atomic_add_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
 }
