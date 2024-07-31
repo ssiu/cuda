@@ -15,8 +15,8 @@ __global__ void sum_vectorized_kernel(float* d_in, float* d_out, int N){
     float reg[4];
     __shared__ float accum[1024];
     // loop through the array and add values with a stride of 4*1024
-    for (int i = thread_id; i < N; i+=1024){
-        FLOAT_4(reg[0]) = FLOAT_4(d_in[i*4]);
+    for (int i = thread_id; i < N; i+=4*1024){
+        FLOAT_4(reg[0]) = FLOAT_4(d_in[i + thread_id*4]);
 
         #pragma unroll
         for (int j=0;j<4;j++){
