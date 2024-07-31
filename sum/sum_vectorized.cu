@@ -58,5 +58,5 @@ __global__ void sum_vectorized_kernel(float* d_in, float* d_out, int N){
 void sum_vectorized(float* d_in, float* d_out, int N) {
     dim3 dimGrid(1);
     dim3 dimBlock(1024);
-    sum_naive_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
+    sum_vectorized_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
 }
