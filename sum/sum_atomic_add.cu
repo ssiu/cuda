@@ -11,9 +11,9 @@ __global__ void sum_atomic_add_kernel(float* d_in, float* d_out, int N){
 
     __shared__ float accum[1024];
 
-//    if (thread_id ==0) {
-//        printf("%f\n", sum);
-//    }
+    if (thread_id ==0 and blockIdx.x ==0) {
+        printf("%f\n", sum);
+    }
     accum[thread_id] = d_in[offset];
 
     __syncthreads();
@@ -36,11 +36,11 @@ __global__ void sum_atomic_add_kernel(float* d_in, float* d_out, int N){
         }
         __syncthreads();
     }
-//    if (thread_id ==0) {
-//        printf("%f\n", accum[0]);
-//    }
+    if (thread_id ==0 and blockIdx.x ==0) {
+        printf("%f\n", accum[0]);
+    }
     if (thread_id == 0) {
-        atomicAdd(d_out, accum[0]);
+        atomicAdd(&d_out[0], accum[0]);
     }
 }
 
