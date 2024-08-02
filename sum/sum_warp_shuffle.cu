@@ -13,6 +13,7 @@ __global__ void sum_warp_shuffle_kernel(float* d_in, float* d_out, int N){
     int thread_id = threadIdx.x;
     int warp_id = threadIdx.x / 32;
     int lane_id = threadIdx.x % 32;
+    float value;
     __shared__ float accum[32];
 
 //    if (thread_id ==0 and blockIdx.x ==0) {
