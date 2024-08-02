@@ -37,6 +37,11 @@ int main(){
     h_out[0] = d_out[0];
     std::cout << h_out[0] << std::endl;
 
+    d_out[0] = 0;
+    sum_warp_shuffle(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out.data()), N);
+    h_out[0] = d_out[0];
+    std::cout << h_out[0] << std::endl;
+
     sum_cub(thrust::raw_pointer_cast(d_in.data()), thrust::raw_pointer_cast(d_out_cub.data()), N);
     h_out_cub[0] = d_out_cub[0];
     std::cout << h_out_cub[0] << std::endl;
