@@ -56,7 +56,7 @@ __global__ void sum_warp_shuffle_kernel(float* d_in, float* d_out, int N){
 
 }
 
-void sum_warp_shuffle_add(float* d_in, float* d_out, int N) {
+void sum_warp_shuffle(float* d_in, float* d_out, int N) {
     dim3 dimGrid(N / 1024);
     dim3 dimBlock(1024);
     sum_warp_shuffle_kernel<<<dimGrid, dimBlock>>>(d_in, d_out, N);
