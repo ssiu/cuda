@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
   for (int j = 0; j < m*k; ++j) {
       h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
-      printf("%f\n", __half2float(h_A[j]));
+      printf("%f\n", static_cast<float>(h_A[j]));
   }
   for (int j = 0; j < n*k; ++j) h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
   for (int j = 0; j < m*n; ++j) h_C[j] = static_cast<TC>(-1);
