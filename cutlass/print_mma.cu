@@ -3,6 +3,15 @@
 using namespace cute;
 
 int main() {
+    #if 1
+    {
+        auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
+                    Layout<Shape<_1, _1, _1>>{},  // 4x1x1 or 8x1x1 thread group
+                    Layout<Shape<_1, _1, _1>>{}); // 1x2x1 or 1x2x2 value group for 16x16x16 MMA and LDSM
+        print_latex(tiled_mma);
+    }
+    #endif
+
     #if 0
     {
         auto tiled_mma = make_tiled_mma(SM80_16x8x16_F32F16F16F32_TN{},
@@ -31,7 +40,7 @@ int main() {
     }
     #endif
     // basic fma
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(UniversalFMA<float,float,float,float>{},
                                            Layout<Shape<_2, _1, _1>>{},
