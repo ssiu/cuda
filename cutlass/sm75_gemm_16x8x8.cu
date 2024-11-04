@@ -21,9 +21,9 @@ int main(int argc, char** argv)
   int n = 8;
   int k = 8;
 
-  using TA = half_t;
-  using TB = half_t;
-  using TC = half_t;
+  using TA = cute::half_t;
+  using TB = cute::half_t;
+  using TC = cute::half_t;
 
   cute::device_init(0);
 
