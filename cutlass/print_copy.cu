@@ -9,7 +9,7 @@ int main()
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
-   auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, cutlass::half_t>{},
+   auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                      Layout<Shape<_16,_4>, Stride<_4,_1>>{},
                                      Layout<Shape< _1,_2>>{});
 //    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
