@@ -14,14 +14,70 @@
 
 using namespace cute;
 
-__global__ void mm_kernel(half_t* A, half_t* B, float* C){
-    if (threadIdx.x ==0) {
-        printf("%f\n", static_cast<float>(A[0]));
-    }
+template <class ASmemLayout, class TiledCopyA,
+          class BSmemLayout, class TiledCopyB,
+          class CSmemLayout, class TiledMma>
+__global__ void mm_kernel(,
+           half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
+           half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
+           float*  C, CSmemLayout sC_layout, TiledMma      mma)
+{
+
+    Tensor gA = make_tensor(make_gmem_ptr(A), sA_layout);
+    Tensor gB = make_tensor(make_gmem_ptr(B), sB_layout);
+    Tensor gC = make_tensor(make_gmem_ptr(C), sC_layout);
+
+    __shared__ half_t smemA[cosize_v<ASmemLayout>];
+    __shared__ half_t smemB[cosize_v<BSmemLayout>];
+
+    Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
+    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+
+    ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
+    Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
+    Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+
+    ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
+    Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
+    Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
+
+
+    ThrMMA thr_mma = mma.get_slice(threadIdx.x);
+    Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
+    Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
+    Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+
+    // Allocate the accumulators -- same size as the projected data
+    Tensor tCrC = thr_mma.make_fragment_C(tCgC);
+
+    copy(copy_a, tAgA, tAsA);
+    copy(copy_b, tBgB, tBsB);
+
+    __syncthreads();
+
+    gemm(mma, tCsA, tCsB, tCrC);
+
+    axpby(1.0f, tCrC, 0.0f, tCgC);
 }
 
 
 void mm(half_t* A, half_t* B, float* C) {
+
+    auto sA = make_layout(make_shape (Int<16>{}, Int<8>{}),
+                        make_stride(Int<1>{}, Int<16>{}));
+    auto sB = make_layout(make_shape (Int<8>{}, Int<8>{}),
+                        make_stride(Int<1>{}, Int<8>{}));
+    auto sC = make_layout(make_shape (Int<16>{}, Int<8>{}),
+                        make_stride(Int<1>{}, Int<16>{}));
+
+    TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+                                     Layout<Shape<_4,_8>, Stride<_1,_4>>{},
+                                     Layout<Shape< _4,_1>>{});
+    TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+                                     Layout<Shape<_4,_8>, Stride<_1,_4>>{},
+                                     Layout<Shape< _2,_1>>{});
+
+    TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
