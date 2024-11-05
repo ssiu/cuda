@@ -63,11 +63,11 @@ __global__ void mm_kernel(,
 
 void mm(half_t* A, half_t* B, float* C) {
 
-    auto sA = make_layout(make_shape (Int<16>{}, Int<8>{}),
+    auto sA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
-    auto sB = make_layout(make_shape (Int<8>{}, Int<8>{}),
+    auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<8>{}));
-    auto sC = make_layout(make_shape (Int<16>{}, Int<8>{}),
+    auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
 
     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
@@ -81,7 +81,9 @@ void mm(half_t* A, half_t* B, float* C) {
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
-    mm_kernel<<<dimGrid, dimBlock>>>(A, B, C);
+    mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, copyA,
+                                     B, sB_layout, copyB,
+                                     C, sC_layout, mmaC);
 }
 
 int main(int argc, char** argv)
