@@ -11,7 +11,7 @@ int main()
 
    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, cutlass::half_t>{},
                                      Layout<Shape<_16,_8>, Stride<_4,_1>>{},
-                                     Layout<Shape< _1,_2>>{}); //  1x4 values
+                                     Layout<Shape< _1,_2>>{});
 //     auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
 //                                       Layout<Shape<_32,_8>>{},  // 32x1 threads
 //                                       Layout<Shape< _1,_8>>{}); //  1x4 values
