@@ -17,7 +17,7 @@ using namespace cute;
 template <class ASmemLayout, class TiledCopyA,
           class BSmemLayout, class TiledCopyB,
           class CSmemLayout, class TiledMma>
-__global__ void mm_kernel(,
+__global__ void mm_kernel(
            half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
            half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
            float*  C, CSmemLayout sC_layout, TiledMma      mma)
