@@ -149,9 +149,9 @@ void mm_cublas(half_t* A, half_t* B, float* C) {
 
 
 void mm_cpu(half_t* A, half_t* B, float* C) {
-    for (k = 0; k < 8; k ++) {
-        for (i=0; i< 16; i++) {
-            for (j=0; j< 8; j++) {
+    for (int k = 0; k < 8; k ++) {
+        for (int i=0; i< 16; i++) {
+            for (int j=0; j < 8; j++) {
                 C[i + 16 * j] = static_cast<float>(A[i + 8 * k]) * static_cast<float>(B[k + 8 * j]);
             }
         }
