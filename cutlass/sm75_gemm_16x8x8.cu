@@ -115,7 +115,7 @@ __global__ void mm_kernel(
 
     gemm(mma, tCsA, tCsB, tCrC);
     #if 1
-        if(thread0()) {
+        if(thread(1)) {
                 printf("tCrC[0]: %f\n", tCrC[0]);
                 printf("tCrC[1]: %f\n", tCrC[1]);
                 printf("tCrC[2]: %f\n", tCrC[2]);
