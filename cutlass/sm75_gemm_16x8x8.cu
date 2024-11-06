@@ -102,6 +102,11 @@ __global__ void mm_kernel(
         }
     #endif
 
+    #if 1
+        printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, static_cast<float>(tCsB[0]));
+        printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, static_cast<float>(tCsB[1]));
+    #endif
+
     #if 0
         if(thread0()) {
             for (int i=0; i<128; i++){
@@ -115,10 +120,7 @@ __global__ void mm_kernel(
 
     gemm(mma, tCsA, tCsB, tCrC);
 
-    #if 1
-        printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, tCsB[0]);
-        printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, tCsB[1]);
-    #endif
+
 
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
