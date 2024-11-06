@@ -129,6 +129,7 @@ void mm(half_t* A, half_t* B, float* C) {
 }
 
 
+
 void mm_cublas(half_t* A, half_t* B, float* C) {
     float alpha = 1.0f;
     float beta = 0.0f;
@@ -147,6 +148,16 @@ void mm_cublas(half_t* A, half_t* B, float* C) {
 }
 
 
+void mm_cpu(half_t* A, half_t* B, float* C) {
+    for (k = 0; k < 8; k ++) {
+        for (i=0; i< 16; i++) {
+            for (j=0; j< 8; j++) {
+                C[i + 16 * j] = static_cast<float>(A[i + 8 * k]) * static_cast<float>(B[k + 8 * j]);
+            }
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     int m = 16;
@@ -163,6 +174,7 @@ int main(int argc, char** argv)
     thrust::host_vector<TB> h_B(n*k);
     thrust::host_vector<TC> h_C(m*n);
     thrust::host_vector<TC> h_C_cublas(m*n);
+    thrust::host_vector<TC> h_C_cpu(m*n);
 
     for (int j = 0; j < m*k; ++j) {
         h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
@@ -178,6 +190,7 @@ int main(int argc, char** argv)
 
     mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
     mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
+    mm_cpu(h_A.data().get(), h_B.data().get(), h_C_cpu.data().get())
 
     thrust::host_vector<TC> h_C_result = d_C;
     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
