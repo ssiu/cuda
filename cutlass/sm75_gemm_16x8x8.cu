@@ -102,7 +102,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 0
+    #if 1
         if(thread0()) {
             for (int i=0; i<128; i++){
                 printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
