@@ -41,7 +41,7 @@ __global__ void mm_kernel(
 
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
-    Tensor tBsB = thr_copy_b.retile_D(sB);                            // (CPY,CPY_N,CPY_K)
+    Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
 
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
