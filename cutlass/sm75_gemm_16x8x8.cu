@@ -55,9 +55,39 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    gemm(mma, tCsA, tCsB, tCrC);
+    #if 0
+        if(thread0()) {
+        print("  gA : "); print(  gA); print("\n");
+        print("  sA : "); print(  sA); print("\n");
+        print("tAgA : "); print(tAgA); print("\n");
+        print("tAsA : "); print(tAsA); print("\n");
+        print("tArA : "); print(tArA); print("\n");
+        }
+    #endif
 
-    axpby(1.0f, tCrC, 0.0f, tCgC);
+    #if 0
+        if(thread0()) {
+        print("  gB : "); print(  gB); print("\n");
+        print("  sB : "); print(  sB); print("\n");
+        print("tBgB : "); print(tBgB); print("\n");
+        print("tBsB : "); print(tBsB); print("\n");
+        print("tArA : "); print(tArA); print("\n");
+        }
+    #endif
+
+    #if 0
+        if(thread0()) {
+        print("  gC : "); print(  gC); print("\n");
+        print("tCsA : "); print(tCsA); print("\n");
+        print("tCsB : "); print(tCsB); print("\n");
+        print("tCgC : "); print(tCgC); print("\n");
+        print("tCrC : "); print(tCrC); print("\n");
+        }
+    #endif
+
+    //gemm(mma, tCsA, tCsB, tCrC);
+
+    //axpby(1.0f, tCrC, 0.0f, tCgC);
 }
 
 
