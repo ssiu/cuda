@@ -100,7 +100,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread0()) {
             for (int i=0; i<128; i++){
                 printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
@@ -112,7 +112,7 @@ __global__ void mm_kernel(
     #endif
 
     gemm(mma, tCsA, tCsB, tCrC);
-    #if 0
+    #if 1
         if(thread0()) {
                 printf("tCrC[0]: %f\n", tCrC[0]);
                 printf("tCrC[1]: %f\n", tCrC[1]);
@@ -236,8 +236,9 @@ int main(int argc, char** argv)
         }
     #endif
 
-    #if 0
+    #if 1
         for (int i=0; i<128; i++){
+        //for (int i=0; i<32; i++){
             printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
         }
     #endif
