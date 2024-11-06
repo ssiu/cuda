@@ -126,6 +126,21 @@ void mm(half_t* A, half_t* B, float* C) {
                                      C, sC_layout, mmaC);
 }
 
+
+void mm_cublas(half_t* A, half_t* B, float* C) {
+    float alpha = 1.0f;
+    float beta = 0.0f;
+
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
+    cublasCreate(&handle);
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
+
+    cublasDestroy(handle);
+}
+
+
 int main(int argc, char** argv)
 {
     int m = 16;
@@ -141,6 +156,7 @@ int main(int argc, char** argv)
     thrust::host_vector<TA> h_A(m*k);
     thrust::host_vector<TB> h_B(n*k);
     thrust::host_vector<TC> h_C(m*n);
+    thrust::host_vector<TC> h_C_cublas(m*n);
 
     for (int j = 0; j < m*k; ++j) {
         h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
@@ -152,11 +168,13 @@ int main(int argc, char** argv)
     thrust::device_vector<TA> d_A = h_A;
     thrust::device_vector<TB> d_B = h_B;
     thrust::device_vector<TC> d_C = h_C;
-
+    thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
     mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
+    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
 
     thrust::host_vector<TC> h_C_result = d_C;
+    thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
 
     for (int i=0;i< 16; i++) {
         for (int j=0;j<8;j++) {
