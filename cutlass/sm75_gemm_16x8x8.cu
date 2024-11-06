@@ -89,7 +89,7 @@ __global__ void mm_kernel(
 
     axpby(1.0f, tCrC, 0.0f, tCgC);
 
-    //C[0] = 0.0f;
+    C[0] = 0.0f;
 }
 
 
