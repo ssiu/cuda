@@ -137,8 +137,11 @@ void mm_cublas(half_t* A, half_t* B, float* C) {
     cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
-    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
-
+    //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
+    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha,
+                            A, CUDA_R_16F, 16,
+                            B, CUDA_R_16F, 8, &beta,
+                            C, CUDA_R_32F, 16, CUDA_R_32F);
     cublasDestroy(handle);
 }
 
