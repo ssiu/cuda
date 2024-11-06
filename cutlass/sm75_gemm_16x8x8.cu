@@ -82,9 +82,9 @@ __global__ void mm_kernel(
         print("tCgC : "); print(tCgC); print("\n");
         print("tCrC : "); print(tCrC); print("\n");
         printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tAgA[0]),static_cast<float>(sA[0]));
-        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tAgA[1]),static_cast<float>(sA[16]));
-        printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tAgA[2]),static_cast<float>(sA[8]));
-        printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tAgA[3]),static_cast<float>(sA[24]));
+        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tAgA[1]),static_cast<float>(sA[1]));
+        printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tAgA[2]),static_cast<float>(sA[64]));
+        printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tAgA[3]),static_cast<float>(sA[65]));
         for (int i=0;i< 16; i++) {
             for (int j=0;j<8;j++) {
                 printf("%f ", static_cast<float>(sA[i * 8 + j]));
