@@ -190,7 +190,7 @@ int main(int argc, char** argv)
 
     mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
     mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
-    mm_cpu(h_A.data().get(), h_B.data().get(), h_C_cpu.data().get())
+    mm_cpu(h_A.data().get(), h_B.data().get(), h_C_cpu.data().get());
 
     thrust::host_vector<TC> h_C_result = d_C;
     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
