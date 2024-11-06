@@ -81,13 +81,13 @@ __global__ void mm_kernel(
         print("tCsB : "); print(tCsB); print("\n");
         print("tCgC : "); print(tCgC); print("\n");
         print("tCrC : "); print(tCrC); print("\n");
-        printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tAgA[0]),static_cast<float>(sA[0]));
-        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tAgA[1]),static_cast<float>(sA[1]));
-        printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tAgA[2]),static_cast<float>(sA[64]));
-        printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tAgA[3]),static_cast<float>(sA[65]));
+        printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tCsA[0]),static_cast<float>(sA[0]));
+        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tCsA[1]),static_cast<float>(sA[16]));
+        printf("tCsA[2], sA[64]: %f %f\n", static_cast<float>(tCsA[2]),static_cast<float>(sA[8]));
+        printf("tCsA[3], sA[65]: %f %f\n", static_cast<float>(tCsA[3]),static_cast<float>(sA[24]));
         for (int i=0;i< 16; i++) {
             for (int j=0;j<8;j++) {
-                printf("%f ", static_cast<float>(sA[i * 8 + j]));
+                printf("%f ", static_cast<float>(sA[i  + 16 * j]));
             }
             printf("\n");
         }
@@ -107,9 +107,9 @@ __global__ void mm_kernel(
 void mm(half_t* A, half_t* B, float* C) {
 
     auto sA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{}));
+                        make_stride(Int<1>{}, Int<16>{}));
     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{}));
+                        make_stride(Int<1>{}, Int<8>{}));
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
 
