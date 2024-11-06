@@ -182,11 +182,15 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C_result = d_C;
     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
 
-    for (int i=0;i< 16; i++) {
-        for (int j=0;j<8;j++) {
-            printf("%f ", h_C_result[i + 16 * j]);
-        }
-        printf("\n");
+//     for (int i=0;i< 16; i++) {
+//         for (int j=0;j<8;j++) {
+//             printf("%f ", h_C_result[i + 16 * j]);
+//         }
+//         printf("\n");
+//     }
+
+    for (int i=0; i<128; i++){
+        printf("cutlass = %f, cublas = %f\n", h_C_result[i], h_C_cublas_result[i]);
     }
 
     return 0;
