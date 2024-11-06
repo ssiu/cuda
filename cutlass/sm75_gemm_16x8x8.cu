@@ -61,6 +61,7 @@ __global__ void mm_kernel(
         print("  sA : "); print(  sA); print("\n");
         print("tAgA : "); print(tAgA); print("\n");
         print("tAsA : "); print(tAsA); print("\n");
+        printf("%f\n", static_cast<float>(tAgA[0]));
         }
     #endif
 
@@ -84,6 +85,7 @@ __global__ void mm_kernel(
     #endif
 
     //gemm(mma, tCsA, tCsB, tCrC);
+
 
     axpby(1.0f, tCrC, 0.0f, tCgC);
 
