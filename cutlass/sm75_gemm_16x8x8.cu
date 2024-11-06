@@ -80,7 +80,7 @@ __global__ void mm_kernel(
     #endif
 
     #if 1
-        if(thread0()) {
+        if(thread(1)) {
             print("  gC : "); print(  gC); print("\n");
             print("tCsA : "); print(tCsA); print("\n");
             print("tCsB : "); print(tCsB); print("\n");
