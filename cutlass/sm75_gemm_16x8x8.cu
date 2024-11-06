@@ -107,9 +107,9 @@ __global__ void mm_kernel(
 void mm(half_t* A, half_t* B, float* C) {
 
     auto sA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<16>{}));
+                        make_stride(Int<16>{}, Int<1>{}));
     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<8>{}));
+                        make_stride(Int<8>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
 
