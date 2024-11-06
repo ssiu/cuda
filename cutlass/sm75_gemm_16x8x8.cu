@@ -52,7 +52,7 @@ __global__ void mm_kernel(
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
 
-    printf("tCrC: %f\n", tCrC[0]);
+    //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
 
     copy(copy_a, tAgA, tAsA);
@@ -101,6 +101,14 @@ __global__ void mm_kernel(
     #endif
 
     gemm(mma, tCsA, tCsB, tCrC);
+    #if 1
+        if(thread0()) {
+                printf("tCrC[0]: %f\n", tCrC[0]);
+                printf("tCrC[1]: %f\n", tCrC[1]);
+                printf("tCrC[2]: %f\n", tCrC[2]);
+                printf("tCrC[3]: %f\n", tCrC[3]);
+        }
+    #endif
 
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
