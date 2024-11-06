@@ -152,7 +152,7 @@ void mm_cpu(float* A, float* B, float* C) {
     for (int k = 0; k < 8; k ++) {
         for (int i=0; i< 16; i++) {
             for (int j=0; j < 8; j++) {
-                C[i + 16 * j] = A[i + 16 * k] * B[k + 8 * j];
+                C[i + 16 * j] += A[i + 16 * k] * B[k + 8 * j];
             }
         }
     }
@@ -187,7 +187,11 @@ int main(int argc, char** argv)
         h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
         h_B_cpu[j] = static_cast<float>(h_B[j]);
     }
-    for (int j = 0; j < m*n; ++j) h_C[j] = static_cast<TC>(-1);
+    for (int j = 0; j < m*n; ++j) {
+        h_C[j] = static_cast<TC>(0);
+        h_C_cublas[j] = static_cast<TC>(0);
+        h_C_cpu[j] = static_cast<TC>(0);
+    }
 
     thrust::device_vector<TA> d_A = h_A;
     thrust::device_vector<TB> d_B = h_B;
