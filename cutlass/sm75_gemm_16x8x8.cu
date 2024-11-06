@@ -102,7 +102,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread0()) {
             for (int i=0; i<128; i++){
                 printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
@@ -114,13 +114,10 @@ __global__ void mm_kernel(
     #endif
 
     gemm(mma, tCsA, tCsB, tCrC);
+
     #if 1
-        if(thread(1)) {
-                printf("tCrC[0]: %f\n", tCrC[0]);
-                printf("tCrC[1]: %f\n", tCrC[1]);
-                printf("tCrC[2]: %f\n", tCrC[2]);
-                printf("tCrC[3]: %f\n", tCrC[3]);
-        }
+        printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, tCsB[0]);
+        printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, tCsB[1]);
     #endif
 
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
