@@ -209,7 +209,7 @@ int main(int argc, char** argv)
 //     }
 
     for (int i=0; i<128; i++){
-        printf("cutlass = %f, cublas = %f\n", h_C_result[i], h_C_cublas_result[i]);
+        printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
     }
 
     return 0;
