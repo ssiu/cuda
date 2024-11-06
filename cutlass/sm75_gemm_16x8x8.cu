@@ -95,12 +95,9 @@ __global__ void mm_kernel(
         }
     #endif
 
-    //gemm(mma, tCsA, tCsB, tCrC);
-
+    gemm(mma, tCsA, tCsB, tCrC);
 
     axpby(1.0f, tCrC, 0.0f, tCgC);
-
-    C[0] = 0.0f;
 }
 
 
