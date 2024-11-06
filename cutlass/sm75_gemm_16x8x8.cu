@@ -61,7 +61,6 @@ __global__ void mm_kernel(
         print("  sA : "); print(  sA); print("\n");
         print("tAgA : "); print(tAgA); print("\n");
         print("tAsA : "); print(tAsA); print("\n");
-        print("tArA : "); print(tArA); print("\n");
         }
     #endif
 
@@ -71,7 +70,6 @@ __global__ void mm_kernel(
         print("  sB : "); print(  sB); print("\n");
         print("tBgB : "); print(tBgB); print("\n");
         print("tBsB : "); print(tBsB); print("\n");
-        print("tArA : "); print(tArA); print("\n");
         }
     #endif
 
