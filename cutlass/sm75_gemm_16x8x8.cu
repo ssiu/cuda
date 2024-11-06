@@ -87,7 +87,7 @@ __global__ void mm_kernel(
         printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tAgA[3]),static_cast<float>(sA[24]));
         for (int i=0;i< 16; i++) {
             for (int j=0;j<8;j++) {
-                printf("%f ", static_cast<float>(sA[i + 16 * j]));
+                printf("%f ", static_cast<float>(sA[i * 8 + j]));
             }
             printf("\n");
         }
@@ -107,7 +107,7 @@ __global__ void mm_kernel(
 void mm(half_t* A, half_t* B, float* C) {
 
     auto sA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
-                        make_stride(Int<16>{}, Int<1>{}));
+                        make_stride(Int<8>{}, Int<1>{}));
     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
