@@ -61,7 +61,7 @@ __global__ void mm_kernel(
         print("  sA : "); print(  sA); print("\n");
         print("tAgA : "); print(tAgA); print("\n");
         print("tAsA : "); print(tAsA); print("\n");
-        printf("%f\n", static_cast<float>(tAgA[0]));
+
         }
     #endif
 
@@ -81,6 +81,10 @@ __global__ void mm_kernel(
         print("tCsB : "); print(tCsB); print("\n");
         print("tCgC : "); print(tCgC); print("\n");
         print("tCrC : "); print(tCrC); print("\n");
+        printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tAgA[0]),static_cast<float>(sA[0]));
+        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tAgA[1]),static_cast<float>(sA[16]));
+        printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tAgA[2]),static_cast<float>(sA[8]));
+        printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tAgA[3]),static_cast<float>(sA[24]));
         }
     #endif
 
