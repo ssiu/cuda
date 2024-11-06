@@ -105,6 +105,9 @@ __global__ void mm_kernel(
             for (int i=0; i<128; i++){
                 printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
             }
+            for (int i=0; i<64; i++){
+                printf("i = %d, gB = %f, sB = %f,\n", i, static_cast<float>(gB[i]), static_cast<float>(sB[i]));
+            }
         }
     #endif
 
