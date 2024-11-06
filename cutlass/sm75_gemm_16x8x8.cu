@@ -81,27 +81,35 @@ __global__ void mm_kernel(
 
     #if 0
         if(thread0()) {
-        print("  gC : "); print(  gC); print("\n");
-        print("tCsA : "); print(tCsA); print("\n");
-        print("tCsB : "); print(tCsB); print("\n");
-        print("tCgC : "); print(tCgC); print("\n");
-        print("tCrC : "); print(tCrC); print("\n");
-        printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tCsA[0]),static_cast<float>(sA[0]));
-        printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tCsA[1]),static_cast<float>(sA[16]));
-        printf("tCsA[2], sA[64]: %f %f\n", static_cast<float>(tCsA[2]),static_cast<float>(sA[8]));
-        printf("tCsA[3], sA[65]: %f %f\n", static_cast<float>(tCsA[3]),static_cast<float>(sA[24]));
-        for (int i=0;i< 16; i++) {
-            for (int j=0;j<8;j++) {
-                printf("%f ", static_cast<float>(sA[i  + 16 * j]));
+            print("  gC : "); print(  gC); print("\n");
+            print("tCsA : "); print(tCsA); print("\n");
+            print("tCsB : "); print(tCsB); print("\n");
+            print("tCgC : "); print(tCgC); print("\n");
+            print("tCrC : "); print(tCrC); print("\n");
+            printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tCsA[0]),static_cast<float>(sA[0]));
+            printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tCsA[1]),static_cast<float>(sA[16]));
+            printf("tCsA[2], sA[64]: %f %f\n", static_cast<float>(tCsA[2]),static_cast<float>(sA[8]));
+            printf("tCsA[3], sA[65]: %f %f\n", static_cast<float>(tCsA[3]),static_cast<float>(sA[24]));
+            for (int i=0;i< 16; i++) {
+                for (int j=0;j<8;j++) {
+                    printf("%f ", static_cast<float>(sA[i  + 16 * j]));
+                }
+                printf("\n");
             }
-            printf("\n");
-        }
 
         }
     #endif
 
-    gemm(mma, tCsA, tCsB, tCrC);
     #if 1
+        if(thread0()) {
+            for (int i=0; i<128; i++){
+                printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
+            }
+        }
+    #endif
+
+    gemm(mma, tCsA, tCsB, tCrC);
+    #if 0
         if(thread0()) {
                 printf("tCrC[0]: %f\n", tCrC[0]);
                 printf("tCrC[1]: %f\n", tCrC[1]);
@@ -216,16 +224,21 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C_result = d_C;
     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
 
-//     for (int i=0;i< 16; i++) {
-//         for (int j=0;j<8;j++) {
-//             printf("%f ", h_C_result[i + 16 * j]);
-//         }
-//         printf("\n");
-//     }
+    #if 0
+        for (int i=0;i< 16; i++) {
+            for (int j=0;j<8;j++) {
+                printf("%f ", h_C_result[i + 16 * j]);
+            }
+            printf("\n");
+        }
+    #endif
 
-    for (int i=0; i<128; i++){
-        printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
-    }
+    #if 0
+        for (int i=0; i<128; i++){
+            printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
+        }
+    #endif
+
 
     return 0;
 }
