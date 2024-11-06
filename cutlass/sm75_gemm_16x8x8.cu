@@ -152,7 +152,7 @@ void mm_cpu(float* A, float* B, float* C) {
     for (int k = 0; k < 8; k ++) {
         for (int i=0; i< 16; i++) {
             for (int j=0; j < 8; j++) {
-                C[i + 16 * j] = A[i + 8 * k] * B[k + 8 * j];
+                C[i + 16 * j] = A[i + 16 * k] * B[k + 8 * j];
             }
         }
     }
