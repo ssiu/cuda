@@ -141,7 +141,8 @@ void mm_cublas(half_t* A, half_t* B, float* C) {
     cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha,
                             A, CUDA_R_16F, 16,
                             B, CUDA_R_16F, 8, &beta,
-                            C, CUDA_R_32F, 16, CUDA_R_32F);
+                            C, CUDA_R_32F, 16,
+                            CUBLAS_COMPUTE_32F);
     cublasDestroy(handle);
 }
 
