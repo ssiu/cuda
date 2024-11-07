@@ -205,8 +205,8 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C_cpu(m*n);
 
     for (int j = 0; j < m*k; ++j) {
-        h_A[j] = static_cast<TA>(j);
-        //h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
+        //h_A[j] = static_cast<TA>(j);
+        h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
 //         if (j==16) {
 //             h_A[j] = static_cast<TA>(1);
 //         } else {
@@ -215,13 +215,13 @@ int main(int argc, char** argv)
         h_A_cpu[j] = static_cast<float>(h_A[j]);
     }
     for (int j = 0; j < n*k; ++j) {
-        h_B[j] = static_cast<TB>(j);
+        //h_B[j] = static_cast<TB>(j);
 //         if (j==1) {
 //             h_B[j] = static_cast<TB>(1);
 //         } else {
 //             h_B[j] = static_cast<TB>(0);
 //         }
-        //h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
+        h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
         h_B_cpu[j] = static_cast<float>(h_B[j]);
     }
     for (int j = 0; j < m*n; ++j) {
