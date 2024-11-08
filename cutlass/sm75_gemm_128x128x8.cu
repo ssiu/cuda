@@ -274,9 +274,9 @@ int main(int argc, char** argv)
 
 
     if (isSameMatrices(h_C, h_C_cpu) && isSameMatrices(h_C, h_C_cublas)) {
-        printf("Correct answer\n")
+        printf("Correct answer\n");
     } else {
-        printf("Wrong answer\n")
+        printf("Wrong answer\n");
     }
 
     #if 0
