@@ -3,9 +3,18 @@
 using namespace cute;
 
 int main() {
-    #if 1
+    #if 0
     {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
+        print_latex(tiled_mma);
+    }
+    #endif
+
+    #if 1
+    {
+        auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
+                            Layout<Shape<_1, _2, _1>>{}
+                            );
         print_latex(tiled_mma);
     }
     #endif
