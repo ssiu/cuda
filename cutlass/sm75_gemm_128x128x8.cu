@@ -10,6 +10,7 @@
 #include "cutlass/util/print_error.hpp"
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
+#include "utils.cuh"
 
 using namespace cute;
 
@@ -266,8 +267,17 @@ int main(int argc, char** argv)
     mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
     mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data(), m, n, k);
 
-    thrust::host_vector<TC> h_C_result = d_C;
-    thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
+//     thrust::host_vector<TC> h_C_result = d_C;
+//     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
+    h_C = d_C;
+    h_C_cublas = d_C_cublas;
+
+
+    if (isSameMatrices(h_C, h_C_cpu) && isSameMatrices(h_C, h_C_cublas)) {
+        printf("Correct answer\n")
+    } else {
+        printf("Wrong answer\n")
+    }
 
     #if 0
         for (int i=0;i< 16; i++) {
@@ -278,7 +288,7 @@ int main(int argc, char** argv)
         }
     #endif
 
-    #if 1
+    #if 0
         for (int i=0; i<128; i++){
         //for (int i=0; i<32; i++){
             printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
