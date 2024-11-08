@@ -260,8 +260,8 @@ int main(int argc, char** argv)
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
     mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
-    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
-    mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data());
+    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+    mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data(), m, n, k);
 
     thrust::host_vector<TC> h_C_result = d_C;
     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
