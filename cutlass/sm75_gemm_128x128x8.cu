@@ -273,7 +273,7 @@ int main(int argc, char** argv)
     h_C_cublas = d_C_cublas;
 
 
-    if (isSameMatrices(h_C.data(), h_C_cpu.data()) && isSameMatrices(h_C.data(), h_C_cublas.data())) {
+    if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
         printf("Correct answer\n");
     } else {
         printf("Wrong answer\n");
