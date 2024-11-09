@@ -10,10 +10,11 @@ int main() {
     }
     #endif
 
-    #if 0
+    #if 1
     {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                            Layout<Shape<_1, _2, _1>>{}
+                            Layout<Shape<_1, _2, _1>>{},
+                            Tile<_32,_32,_8>{}
                             );
         print_latex(tiled_mma);
     }
@@ -29,7 +30,7 @@ int main() {
     }
     #endif
 
-    #if 1
+    #if 0
     {
         auto mmaC = make_tiled_mma(SM80_16x8x16_F16F16F16F16_TN{},
                                         Layout<Shape<_2,_4>>{},    // 2x4x1 MMA Atoms
