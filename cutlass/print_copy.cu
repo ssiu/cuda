@@ -4,7 +4,7 @@ using namespace cute;
 
 int main()
 {
-#if 0
+#if 1
   {
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
