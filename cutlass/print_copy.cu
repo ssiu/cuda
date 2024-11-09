@@ -4,7 +4,29 @@ using namespace cute;
 
 int main()
 {
-#if 1
+#if 0
+  {
+
+//    Copy_Atom<UniversalCopy<double>, double> copy_atom;
+
+    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+                                         Layout<Shape<_32,_8>, Stride<_1,_32>>{},
+                                         Layout<Shape< _4,_1>>{});
+//    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                      Layout<Shape<_128,_2>, Stride<_2,_1>>{},
+//                                      Layout<Shape< _1,_4>>{});
+//    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                      Layout<Shape<_16,_8>>{},
+//                                      Layout<Shape< _1,_2>>{});
+//     auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
+//                                       Layout<Shape<_32,_8>>{},  // 32x1 threads
+//                                       Layout<Shape< _1,_8>>{}); //  1x4 values
+
+    print_latex(tiled_copy);
+  }
+#endif
+
+#if 0
   {
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
