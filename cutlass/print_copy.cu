@@ -9,12 +9,12 @@ int main()
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
-    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                                         Layout<Shape<_32,_8>, Stride<_1,_32>>{},
-                                         Layout<Shape< _4,_1>>{});
-//    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-//                                      Layout<Shape<_128,_2>, Stride<_2,_1>>{},
-//                                      Layout<Shape< _1,_4>>{});
+//     auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                          Layout<Shape<_32,_8>, Stride<_1,_32>>{},
+//                                          Layout<Shape< _4,_1>>{});
+   auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+                                     Layout<Shape<_128,_2>, Stride<_2,_1>>{},
+                                     Layout<Shape< _1,_4>>{});
 //    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
 //                                      Layout<Shape<_16,_8>>{},
 //                                      Layout<Shape< _1,_2>>{});
