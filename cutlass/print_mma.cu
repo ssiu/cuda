@@ -34,6 +34,7 @@ int main() {
         auto mmaC = make_tiled_mma(SM80_16x8x16_F16F16F16F16_TN{},
                                         Layout<Shape<_2,_4>>{},    // 2x4x1 MMA Atoms
                                          Tile<_32,_64,_16>{});      // 32x64x16 Tiled MMA for LDSM
+        print_latex(mmaC);
     }
     #endif
 
