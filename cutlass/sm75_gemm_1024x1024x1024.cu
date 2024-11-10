@@ -26,7 +26,7 @@ __global__ void mm_kernel(
 {
 
     Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), make_stride(Int<1>{}, Int<1024>{})); // (M,K)
-    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), make_stride(Int<16>{}, Int<1>{})); // (N,K)
+    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), make_stride(Int<1024>{}, Int<1>{})); // (N,K)
     Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), make_stride(Int<1>{}, Int<1024>{})); // (M,N)
 
     // Get the appropriate blocks for this thread block
@@ -163,7 +163,7 @@ void mm(half_t* A, half_t* B, float* C) {
 
     auto M = Int<1024>{};
     auto N = Int<1024>{};
-    auto K = Int<16>{};
+    auto K = Int<1024>{};
     auto prob_shape = make_shape(M, N, K);
 
     auto bM = Int<128>{};
@@ -235,7 +235,7 @@ int main(int argc, char** argv)
 {
     int m = 1024;
     int n = 1024;
-    int k = 16;
+    int k = 1024;
 
     using TA = half_t;
     using TB = half_t;
