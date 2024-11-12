@@ -17,9 +17,11 @@ int main()
     //using S2RCopyAtomB = s2r_copy_atom;
 
     auto s2r_tiled_copy_a = make_tiled_copy_A(S2RCopyAtomA{}, tiled_mma);
-    print_latex(tiled_copy);
+    print_latex(s2r_tiled_copy_a);
 
 #endif
+
+
 
 
 #if 0
