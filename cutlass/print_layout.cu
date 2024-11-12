@@ -4,6 +4,8 @@ using namespace cute;
 
 
 int main() {
+
+
     #if 0
     {
         Layout layout = make_layout(make_shape (_8{}, _64{}),
@@ -17,8 +19,8 @@ int main() {
 //        print_layout(smem_atom);
         auto layout = composition(Swizzle<3, 3, 3>{},
                     // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
-                    Layout<Shape<_8, _64>,
-                           Stride<_64, _1>>{});
+                    Layout<Shape<_8, _32>,
+                           Stride<_32, _1>>{});
         print_latex(layout);
     }
     #endif
