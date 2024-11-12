@@ -4,7 +4,25 @@ using namespace cute;
 
 int main()
 {
+
+
 #if 1
+
+    auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
+
+    using s2r_copy_op = SM75_U32x4_LDSM_N;
+    using s2r_copy_traits = Copy_Traits<s2r_copy_op>;
+    using s2r_copy_atom = Copy_Atom<s2r_copy_traits, half_t>;
+    using S2RCopyAtomA = s2r_copy_atom;
+    //using S2RCopyAtomB = s2r_copy_atom;
+
+    auto s2r_tiled_copy_a = make_tiled_copy_A(S2RCopyAtomA{}, tiled_mma);
+    print_latex(tiled_copy);
+
+#endif
+
+
+#if 0
   {
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
