@@ -78,9 +78,11 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    copy(smem_tiled_copy_A, tCsA, tCrA_copy_view);
-    copy(smem_tiled_copy_B, tCsB, tCrB_copy_view);
+//     copy(smem_tiled_copy_A, tCsA, tCrA_copy_view);
+//     copy(smem_tiled_copy_B, tCsB, tCrB_copy_view);
 
+    copy(smem_tiled_copy_A, tCsA, tCrA);
+    copy(smem_tiled_copy_B, tCsB, tCrB);
     gemm(mma, tCrA, tCrB, tCrC);
 
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
