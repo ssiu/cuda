@@ -54,7 +54,7 @@ __global__ void mm_kernel(
     Tensor tCrA_copy_view  = smem_thr_copy_A.retile_D(tCrA);                   // (CPY,CPY_M,CPY_K)
 
 
-    auto smem_tiled_copy_B = make_tiled_copy_B(Copy_Atom<DefaultCopy, half_t>{}, tiled_mma);
+    auto smem_tiled_copy_B = make_tiled_copy_B(Copy_Atom<DefaultCopy, half_t>{}, mma);
     auto smem_thr_copy_B   = smem_tiled_copy_B.get_thread_slice(threadIdx.x);
     Tensor tCsB            = smem_thr_copy_B.partition_S(sB);                  // (CPY,CPY_N,CPY_K,PIPE)
     Tensor tCrB_copy_view  = smem_thr_copy_B.retile_D(tCrB);                   // (CPY,CPY_N,CPY_K)
