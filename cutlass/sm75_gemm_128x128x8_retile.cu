@@ -43,7 +43,6 @@ __global__ void mm_kernel(
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
 
-
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCrA = thr_mma.partition_fragment_A(sA);
     Tensor tCrB = thr_mma.partition_fragment_B(sB);
@@ -58,10 +57,6 @@ __global__ void mm_kernel(
     auto smem_thr_copy_B   = smem_tiled_copy_B.get_thread_slice(threadIdx.x);
     Tensor tCsB            = smem_thr_copy_B.partition_S(sB);                  // (CPY,CPY_N,CPY_K,PIPE)
     Tensor tCrB_copy_view  = smem_thr_copy_B.retile_D(tCrB);                   // (CPY,CPY_N,CPY_K)
-
-
-
-
 
 //     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
 //     Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
