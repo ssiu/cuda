@@ -9,4 +9,4 @@ clean:
 	rm -rf *.o
 
 %.o: %.cu
-	nvcc $(OUTPUT) $(NVCC_FLAGS) $(NVCC_LDFLAGS) $(NVCC_INCLUDES)  $(INPUT)
+	nvcc $(NVCC_FLAGS) $(NVCC_LDFLAGS) $(NVCC_INCLUDES) $(OUTPUT) $(INPUT)
