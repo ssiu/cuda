@@ -65,7 +65,7 @@ __global__ void mm_kernel(
 
 //     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
 //     Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
-//     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+    Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
