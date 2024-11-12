@@ -8,7 +8,25 @@ int main()
 
 #if 1
 
-    auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
+    using mma_op = SM80_16x8x16_F16F16F16F16_TN;
+    using mma_traits = MMA_Traits<mma_op>;
+    using mma_atom = MMA_Atom<mma_traits>;
+    static constexpr int kMmaEURepeatM = 2;
+    static constexpr int kMmaEURepeatN = 2;
+    static constexpr int kMmaEURepeatK = 1;
+
+    using mma_atom_shape = mma_traits::Shape_MNK;
+    static constexpr int kMmaPM = 1 * kMmaEURepeatM * get<0>(mma_atom_shape{});
+    static constexpr int kMmaPN = 2 * kMmaEURepeatN * get<1>(mma_atom_shape{});
+    static constexpr int kMmaPK = 2 * kMmaEURepeatK * get<2>(mma_atom_shape{});
+    using MMA_EU_RepeatT = decltype(make_layout(make_shape(
+        Int<kMmaEURepeatM>{}, Int<kMmaEURepeatN>{}, Int<kMmaEURepeatK>{})));
+    using MMA_P_T = Tile<Int<kMmaPM>, Int<kMmaPN>, Int<kMmaPK>>;
+    using MMA = decltype(make_tiled_mma(mma_atom{}, MMA_EU_RepeatT{}, MMA_P_T{}));
+
+    MMA tiled_mma;
+
+    //auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
 
     using s2r_copy_op = SM75_U32x4_LDSM_N;
     using s2r_copy_traits = Copy_Traits<s2r_copy_op>;
