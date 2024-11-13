@@ -46,7 +46,8 @@ int main()
   {
 
    //auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
-   auto tiled_copy = Copy_Atom<SM75_U32x1_LDSM_N, half_t>{};
+
+   auto tiled_copy = Copy_Atom<Copy_Traits<SM75_U32x1_LDSM_N>, half_t>{};
    print_latex(tiled_copy);
   }
 #endif
