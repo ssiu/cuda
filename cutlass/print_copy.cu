@@ -46,7 +46,7 @@ int main()
   {
         auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
 
-        auto copy_atom = Copy_Atom<SM75_U16x4_LDSM_T, half_t>;
+        auto copy_atom = Copy_Atom<SM75_U32x2_LDSM_N, half_t>;
 
         auto tiled_copy = make_tiled_copy_A(copy_atom, tiled_mma );
 
