@@ -43,7 +43,7 @@ int main()
 
 
 // https://github.com/andylolu2/simpleGEMM/blob/master/gemm_config_sm75.cuh
-#if 0
+#if 1
 {
     static constexpr int64_t BLK_M = 128;
     static constexpr int64_t BLK_N = 128;
