@@ -6,7 +6,9 @@ int main()
 {
 
 
-#if 1
+
+
+#if 0
 
     using mma_op = SM80_16x8x16_F16F16F16F16_TN;
     using mma_traits = MMA_Traits<mma_op>;
@@ -40,7 +42,14 @@ int main()
 #endif
 
 
+#if 0
+  {
 
+   auto tiled_copy = make_tiled_copy(SM75_U32x1_LDSM_N);
+   print(tiled_copy);
+   //print_layout(tiled_copy);
+  }
+#endif
 
 #if 0
   {
