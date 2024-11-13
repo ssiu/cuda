@@ -42,7 +42,7 @@ int main()
 #endif
 
 
-#if 0
+#if 1
   {
 
    auto tiled_copy = make_tiled_copy(SM75_U32x1_LDSM_N);
