@@ -116,7 +116,7 @@ int main()
     //print_latex(smem_copy_a);
     //print_latex(smem_copy_a);
 }
-
+#endif
 
 
 
