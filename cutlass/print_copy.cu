@@ -41,8 +41,30 @@ int main()
 
 #endif
 
-
 #if 1
+  {
+        using SmemCopyAtom = Copy_Atom<SM75_U32x2_LDSM_N, half_t>;
+        // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
+        using MmaAtom = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
+        // We have 128 threads, so we use 4 warps laid out in 2x2x1.
+        using MmaAtomLayout = Layout<Shape<Int<1>, Int<1>, Int<1>>>;
+        // We want to use the `ldmatrix.x4.m8n8` instruction which loads 4 8x8 matrices for maximum efficiency.
+        // To make the operands A and B divisible into 4 8x8 matrices, we expand the problem size for each warp to 16x16x16.
+        // Accounting for the fact that we use 4 warps laid out in 2x2x1, the full tile size is 32x32x16.
+        using MmaTiledShape = Tile<Int<16>, Int<8>, Int<8>>;
+
+        using TiledMMA = TiledMMA<MmaAtom, MmaAtomLayout, MmaTiledShape>;
+        // Tiled copy of A from smem -> rmem
+        using SmemCopyA = decltype(make_tiled_copy_A(SmemCopyAtom{}, TiledMMA{}));
+
+        SmemCopyA smem_copy_a;
+
+        print_latex(smem_copy_a);
+
+  }
+#endif
+
+#if 0
   {
         using SmemCopyAtom = Copy_Atom<SM75_U32x4_LDSM_N, half_t>;
         // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
