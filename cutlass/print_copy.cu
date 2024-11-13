@@ -47,9 +47,7 @@ int main()
 
    //auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
    auto tiled_copy = Copy_Atom<SM75_U32x1_LDSM_N, half_t>{};
-   print(tiled_copy);
-
-   //print_layout(tiled_copy);
+   print_layout(tiled_copy);
   }
 #endif
 
