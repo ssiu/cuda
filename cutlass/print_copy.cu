@@ -42,7 +42,7 @@ int main()
 #endif
 
 
-#if 0
+#if 1
   {
 
    auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
@@ -51,7 +51,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   {
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
