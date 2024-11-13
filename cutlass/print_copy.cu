@@ -41,7 +41,89 @@ int main()
 
 #endif
 
-#if 1
+
+// https://github.com/andylolu2/simpleGEMM/blob/master/gemm_config_sm75.cuh
+#if 0
+{
+    static constexpr int64_t BLK_M = 128;
+    static constexpr int64_t BLK_N = 128;
+    static constexpr int64_t BLK_K = 64;
+    static constexpr int64_t NumThreads = 128;  // 4 warps
+  
+    static constexpr int AccessSizeBits = 128;
+    static constexpr int ElemsPerLoad = AccessSizeBits / sizeof_bits_v<half_t>;
+    static constexpr int SmemAtomInner = 64;
+    static constexpr int SmemAtomOuter = ElemsPerLoad;
+    static constexpr int ThreadsPerRow = SmemAtomInner / ElemsPerLoad;
+    
+    using BlockShapeA = Shape<Int<BLK_M>, Int<BLK_K>>;
+    using BlockShapeB = Shape<Int<BLK_N>, Int<BLK_K>>;
+    
+    using SmemLayoutAtom = decltype(composition(Swizzle<3, 3, 3>{},
+                                                    Layout<
+                                                        Shape<Int<SmemAtomOuter>, Int<SmemAtomInner>>,
+                                                        Stride<Int<SmemAtomInner>, Int<1>>>{}));
+
+   
+    // Layout of each block of A/B in shared memory
+    using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtom{}, BlockShapeA{}));
+    using SmemLayoutB = decltype(tile_to_shape(SmemLayoutAtom{}, BlockShapeB{}));
+
+   
+    // The copy atom for gmem -> smem (read A/B) or rmem -> gmem (store C).
+    using GmemCopyAtom = Copy_Atom<
+        AutoVectorizingCopyWithAssumedAlignment<AccessSizeBits>, half_t>;
+    // The thread layout for one tile of the gmem -> smem copy.
+    using GmemCopyThreadLayoutA = Layout<Shape<Int<NumThreads / ThreadsPerRow>, Int<ThreadsPerRow>>,
+                                             Stride<Int<ThreadsPerRow>, Int<1>>>;
+    // The value layout for each thread in the gmem -> smem copy.
+    using GmemCopyValLayoutA = Layout<Shape<Int<1>, Int<ElemsPerLoad>>>;
+
+   
+    // Tiled copy of A/B from gmem -> smem
+    using GmemCopyA = decltype(make_tiled_copy(GmemCopyAtom{},
+                                                   GmemCopyThreadLayoutA{},
+                                                   GmemCopyValLayoutA{}));
+    using GmemCopyB = GmemCopyA;
+
+   
+    // The atom of the smem -> rmem copy for A/B. Loads 4 8x8 matrices (distributed across threads) at a time.
+    using SmemCopyAtom = Copy_Atom<SM75_U32x4_LDSM_N, half_t>;
+    // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
+    using MmaAtom = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
+    // We have 128 threads, so we use 4 warps laid out in 2x2x1.
+    using MmaAtomLayout = Layout<Shape<Int<2>, Int<2>, Int<1>>>;
+    // We want to use the `ldmatrix.x4.m8n8` instruction which loads 4 8x8 matrices for maximum efficiency.
+    // To make the operands A and B divisible into 4 8x8 matrices, we expand the problem size for each warp to 16x16x16.
+    // Accounting for the fact that we use 4 warps laid out in 2x2x1, the full tile size is 32x32x16.
+    using MmaTiledShape = Tile<Int<32>, Int<32>, Int<16>>;
+   
+    // Tiled mma operation
+    using TiledMMA = TiledMMA<MmaAtom, MmaAtomLayout, MmaTiledShape>;
+    // Tiled copy of A from smem -> rmem
+    using SmemCopyA = decltype(make_tiled_copy_A(SmemCopyAtom{}, TiledMMA{}));
+    // Tiled copy of B from smem -> rmem
+    using SmemCopyB = decltype(make_tiled_copy_B(SmemCopyAtom{}, TiledMMA{}));
+
+
+    GmemCopyA gmem_copy_a;
+    SmemCopyA smem_copy_a;
+    SmemCopyB smem_copy_b;
+    SmemLayoutA smem_layout_a;
+
+    //print_latex(smem_layout_a);
+    print_latex(gmem_copy_a);
+    //print_latex(smem_copy_a);
+    //print_latex(smem_copy_a);
+}
+
+
+
+
+
+
+
+#if 0
   {
         using SmemCopyAtom = Copy_Atom<SM75_U32x4_LDSM_N, half_t>;
         // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
