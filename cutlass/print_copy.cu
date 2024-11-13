@@ -43,7 +43,7 @@ int main()
 
 #if 1
   {
-        using SmemCopyAtom = Copy_Atom<SM75_U16x2_LDSM_N, half_t>;
+        using SmemCopyAtom = Copy_Atom<SM75_U16x2_LDSM_T, half_t>;
         // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
         using MmaAtom = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
         // We have 128 threads, so we use 4 warps laid out in 2x2x1.
