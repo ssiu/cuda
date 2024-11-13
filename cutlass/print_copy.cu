@@ -44,11 +44,13 @@ int main()
 
 #if 1
   {
+        auto tiled_mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
 
-   //auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
+        auto copy_atom = Copy_Atom<SM75_U16x4_LDSM_T, half_t>;
 
-   auto tiled_copy = Copy_Atom<Copy_Traits<SM75_U32x1_LDSM_N>, half_t>{};
-   print_latex(tiled_copy);
+        auto tiled_copy = make_tiled_copy_A(copy_atom, tiled_mma );
+
+        print_latex(tiled_copy);
   }
 #endif
 
