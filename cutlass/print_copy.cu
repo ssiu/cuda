@@ -1,5 +1,4 @@
 #include <cute/tensor.hpp>
-
 using namespace cute;
 
 int main()
@@ -115,6 +114,8 @@ int main()
     print_latex(gmem_copy_a);
     //print_latex(smem_copy_a);
     //print_latex(smem_copy_a);
+
+
 }
 #endif
 
