@@ -50,18 +50,20 @@ int main()
     static constexpr int64_t NumThreads = 128;  // 4 warps
   
     static constexpr int AccessSizeBits = 128;
-    static constexpr int ElemsPerLoad = AccessSizeBits / sizeof_bits_v<half_t>;
+    static constexpr int ElemsPerLoad = AccessSizeBits / sizeof_bits_v<half_t>; // 8
     static constexpr int SmemAtomInner = 64;
-    static constexpr int SmemAtomOuter = ElemsPerLoad;
-    static constexpr int ThreadsPerRow = SmemAtomInner / ElemsPerLoad;
+    static constexpr int SmemAtomOuter = ElemsPerLoad; // 8
+    static constexpr int ThreadsPerRow = SmemAtomInner / ElemsPerLoad; // 8
     
-    using BlockShapeA = Shape<Int<BLK_M>, Int<BLK_K>>;
-    using BlockShapeB = Shape<Int<BLK_N>, Int<BLK_K>>;
-    
+//     using BlockShapeA = Shape<Int<BLK_M>, Int<BLK_K>>;
+//     using BlockShapeB = Shape<Int<BLK_N>, Int<BLK_K>>;
+    using BlockShapeA = Shape<Int<8>, Int<BLK_K>>;
+    using BlockShapeB = Shape<Int<8>, Int<BLK_K>>;
+
     using SmemLayoutAtom = decltype(composition(Swizzle<3, 3, 3>{},
                                                     Layout<
                                                         Shape<Int<SmemAtomOuter>, Int<SmemAtomInner>>,
-                                                        Stride<Int<SmemAtomInner>, Int<1>>>{}));
+                                                        Stride<Int<SmemAtomInner>, Int<1>>>{})); // (8,64)
 
    
     // Layout of each block of A/B in shared memory
@@ -109,11 +111,13 @@ int main()
     SmemCopyA smem_copy_a;
     SmemCopyB smem_copy_b;
     SmemLayoutA smem_layout_a;
+    SmemLayoutAtom smem_layout_atom;
+    print_latex(smem_layout_atom);
 
     //print_latex(smem_layout_a);
     //print_latex(gmem_copy_a);
     //print_latex(smem_copy_a);
-    print_latex(smem_copy_b);
+    //print_latex(smem_copy_b);
 
 
 }
