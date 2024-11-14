@@ -113,7 +113,7 @@ int main()
     print_latex(smem_layout_a);
     //print_latex(gmem_copy_a);
     //print_latex(smem_copy_a);
-    //print_latex(smem_copy_a);
+    //print_latex(smem_copy_b);
 
 
 }
