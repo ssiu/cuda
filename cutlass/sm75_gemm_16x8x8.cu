@@ -15,7 +15,7 @@
 using namespace cute;
 
 template <class AgmemLayout, class ASmemLayout, class TiledCopyA,
-          class BgmemLayout, class BSmemLayout, class TiledCopyB,
+          class BgmemLayout, typename BSmemLayout, class TiledCopyB,
           class CgmemLayout, class CSmemLayout, class TiledMma>
 __global__ void mm_kernel(
            half_t* A, AgmemLayout gA_layout, ASmemLayout sA_layout, TiledCopyA copy_a,
@@ -31,7 +31,7 @@ __global__ void mm_kernel(
     __shared__ half_t smemB[cosize_v<BSmemLayout>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
-    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout{});
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
@@ -131,12 +131,12 @@ void mm(half_t* A, half_t* B, float* C) {
     auto gB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
 
-    auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<8>{}));
+//     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
+//                         make_stride(Int<1>{}, Int<8>{}));
 
-//     auto sB_layout = composition(Swizzle<1, 1, 1>{},
-//                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                                  make_stride(Int<1>{}, Int<8>{})));
+    using sB_layout = decltype(composition(Swizzle<1, 1, 1>{},
+                                 make_layout(make_shape (Int<8>{}, Int<8>{}),
+                                 make_stride(Int<1>{}, Int<8>{}))));
 
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
