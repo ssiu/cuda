@@ -157,10 +157,10 @@ void mm(half_t* A, half_t* B, float* C) {
     using sC_layout = decltype(make_layout(make_shape (Int<16>{}, Int<8>{}),
                                make_stride(Int<1>{}, Int<16>{})));
 
-    using copyA = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
+    using copyA = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<8>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _4,_1>>{}));
-    using copyB = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
+    using copyB = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<8>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{}));
 
