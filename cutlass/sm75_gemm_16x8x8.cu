@@ -10,6 +10,7 @@
 #include "cutlass/util/print_error.hpp"
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
+#include "utils.cuh"
 
 using namespace cute;
 
@@ -202,22 +203,10 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C_cpu(m*n);
 
     for (int j = 0; j < m*k; ++j) {
-        //h_A[j] = static_cast<TA>(j);
         h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
-//         if (j==16) {
-//             h_A[j] = static_cast<TA>(1);
-//         } else {
-//             h_A[j] = static_cast<TA>(0);
-//         }
         h_A_cpu[j] = static_cast<float>(h_A[j]);
     }
     for (int j = 0; j < n*k; ++j) {
-        //h_B[j] = static_cast<TB>(j);
-//         if (j==1) {
-//             h_B[j] = static_cast<TB>(1);
-//         } else {
-//             h_B[j] = static_cast<TB>(0);
-//         }
         h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
         h_B_cpu[j] = static_cast<float>(h_B[j]);
     }
@@ -236,24 +225,16 @@ int main(int argc, char** argv)
     mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
     mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data());
 
-    thrust::host_vector<TC> h_C_result = d_C;
-    thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
+    h_C = d_C;
+    h_C_cublas = d_C_cublas;
 
-    #if 0
-        for (int i=0;i< 16; i++) {
-            for (int j=0;j<8;j++) {
-                printf("%f ", h_C_result[i + 16 * j]);
-            }
-            printf("\n");
-        }
-    #endif
 
-    #if 1
-        for (int i=0; i<128; i++){
-        //for (int i=0; i<32; i++){
-            printf("i = %d, cutlass = %f, cublas = %f, cpu = %f\n", i, h_C_result[i], h_C_cublas_result[i], h_C_cpu[i]);
-        }
-    #endif
+    if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
+        printf("Correct answer\n");
+    } else {
+        printf("Wrong answer\n");
+    }
+
 
 
     return 0;
