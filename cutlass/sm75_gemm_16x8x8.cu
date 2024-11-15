@@ -77,7 +77,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread(1)) {
             print("  gC : "); print(  gC); print("\n");
             print("tCsA : "); print(tCsA); print("\n");
