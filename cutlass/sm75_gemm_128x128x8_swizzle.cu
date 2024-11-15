@@ -166,6 +166,9 @@ void mm(half_t* A, half_t* B, float* C) {
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
+    cudaFuncSetAttribute(mm_kernel<gA_layout, sA_layout, copyA,
+                                   gB_layout, sB_layout, copyB,
+                                   sC_layout, mmaC>);
     mm_kernel<gA_layout, sA_layout, copyA,
               gB_layout, sB_layout, copyB,
               sC_layout, mmaC>
