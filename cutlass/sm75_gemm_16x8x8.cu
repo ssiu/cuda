@@ -141,10 +141,10 @@ void mm(half_t* A, half_t* B, float* C) {
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
 
-    TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _4,_1>>{});
-    TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{});
 
