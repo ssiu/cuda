@@ -131,12 +131,12 @@ void mm(half_t* A, half_t* B, float* C) {
     auto gB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
 
-    auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<8>{}));
+//     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
+//                         make_stride(Int<1>{}, Int<8>{}));
 
-//     auto sB_layout = composition(Swizzle<1, 1, 1>{},
-//                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                                  make_stride(Int<1>{}, Int<8>{})));
+    auto sB_layout = composition(Swizzle<1, 1, 1>{},
+                                 make_layout(make_shape (Int<8>{}, Int<8>{}),
+                                 make_stride(Int<1>{}, Int<8>{})));
 
     auto sC_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<16>{}));
