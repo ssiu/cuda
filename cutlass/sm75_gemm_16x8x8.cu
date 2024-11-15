@@ -58,7 +58,7 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    #if 1
+    #if 0
         if(thread0()) {
         print("  gA : "); print(  gA); print("\n");
         print("  sA : "); print(  sA); print("\n");
@@ -68,7 +68,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread0()) {
         print("  gB : "); print(  gB); print("\n");
         print("  sB : "); print(  sB); print("\n");
@@ -120,7 +120,7 @@ __global__ void mm_kernel(
 
 
 
-    //axpby(1.0f, tCrC, 0.0f, tCgC); //test
+    axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
 
 
