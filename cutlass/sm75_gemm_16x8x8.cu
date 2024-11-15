@@ -120,7 +120,7 @@ __global__ void mm_kernel(
 
 
 
-    axpby(1.0f, tCrC, 0.0f, tCgC); //test
+    //axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
 
 
