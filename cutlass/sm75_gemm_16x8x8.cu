@@ -149,7 +149,7 @@ void mm(half_t* A, half_t* B, float* C) {
     dim3 dimGrid(1);
     dim3 dimBlock(32);
     mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, sA_layout, copyA,
-                                     B, sB_layout, sB_layout, copyB,
+                                     B, gB_layout, sB_layout, copyB,
                                      C, sC_layout, sC_layout, mmaC);
 }
 
