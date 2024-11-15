@@ -29,8 +29,8 @@ __global__ void mm_kernel(half_t* A, half_t* B, float*  C)
     Tensor gB = make_tensor(make_gmem_ptr(B), gmemLayoutB{});
     Tensor gC = make_tensor(make_gmem_ptr(C), gmemLayoutC{});
 
-    __shared__ half_t smemA[cosize_v<ASmemLayout>];
-    __shared__ half_t smemB[cosize_v<BSmemLayout>];
+    __shared__ half_t smemA[cosize_v<smemLayoutA{}>];
+    __shared__ half_t smemB[cosize_v<smemLayoutB{}>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), smemLayoutA{});
     Tensor sB = make_tensor(make_smem_ptr(smemB), smemLayoutB{});
