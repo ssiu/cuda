@@ -14,13 +14,13 @@
 
 using namespace cute;
 
-template <class ASmemLayout, class TiledCopyA,
-          class BSmemLayout, class TiledCopyB,
-          class CSmemLayout, class TiledMma>
+template <class AgmemLayout, class ASmemLayout, class TiledCopyA,
+          class BgmemLayout, class BSmemLayout, class TiledCopyB,
+          class CgmemLayout, class CSmemLayout, class TiledMma>
 __global__ void mm_kernel(
-           half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
-           half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
-           float*  C, CSmemLayout sC_layout, TiledMma      mma)
+           half_t* A, AgmemLayout gA_layout, ASmemLayout sA_layout, TiledCopyA copy_a,
+           half_t* B, BgmemLayout gB_layout, BSmemLayout sB_layout, TiledCopyB copy_b,
+           float*  C, CgmemLayout gC_layout, CSmemLayout sC_layout, TiledMma      mma)
 {
 
     Tensor gA = make_tensor(make_gmem_ptr(A), sA_layout);
@@ -148,9 +148,9 @@ void mm(half_t* A, half_t* B, float* C) {
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
-    mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, copyA,
-                                     B, sB_layout, copyB,
-                                     C, sC_layout, mmaC);
+    mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, sA_layout, copyA,
+                                     B, sB_layout, sB_layout, copyB,
+                                     C, sC_layout, sC_layout, mmaC);
 }
 
 
