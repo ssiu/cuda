@@ -100,7 +100,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, static_cast<float>(tCsB[0]));
         printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, static_cast<float>(tCsB[1]));
     #endif
