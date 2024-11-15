@@ -18,9 +18,8 @@ int main() {
 //        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
 //        print_layout(smem_atom);
         auto layout = composition(Swizzle<1, 1, 1>{},
-                    // This has to be kBlockKSmem, using kHeadDim gives wrong results for d=128
-                    Layout<Shape<_8, _8>,
-                           Stride<_1, _8>>{});
+                                    Layout<Shape<_8, _8>,
+                                    Stride<_1, _8>>{});
         print_latex(layout);
     }
     #endif

@@ -134,26 +134,26 @@ void mm(half_t* A, half_t* B, float* C) {
 
 
     using gA_layout = decltype(make_layout(make_shape (Int<16>{}, Int<8>{}),
-                            make_stride(Int<1>{}, Int<16>{})));
+                               make_stride(Int<1>{}, Int<16>{})));
 
 
     using gB_layout = decltype(make_layout(make_shape (Int<8>{}, Int<8>{}),
-                            make_stride(Int<8>{}, Int<1>{})));
+                               make_stride(Int<8>{}, Int<1>{})));
 
 
     using sA_layout = decltype(make_layout(make_shape (Int<16>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<16>{})));
+                               make_stride(Int<1>{}, Int<16>{})));
 
 
     using sB_layout = decltype(make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{})));
+                               make_stride(Int<8>{}, Int<1>{})));
 
 //     using sB_layout = decltype(composition(Swizzle<1, 1, 1>{},
 //                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
 //                                  make_stride(Int<1>{}, Int<8>{}))));
 
     using sC_layout = decltype(make_layout(make_shape (Int<16>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<16>{})));
+                               make_stride(Int<1>{}, Int<16>{})));
 
     using copyA = decltype(make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
@@ -166,9 +166,6 @@ void mm(half_t* A, half_t* B, float* C) {
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
-    cudaFuncSetAttribute(mm_kernel<gA_layout, sA_layout, copyA,
-                                   gB_layout, sB_layout, copyB,
-                                   sC_layout, mmaC>);
     mm_kernel<gA_layout, sA_layout, copyA,
               gB_layout, sB_layout, copyB,
               sC_layout, mmaC>
