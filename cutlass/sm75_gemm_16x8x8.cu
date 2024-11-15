@@ -31,7 +31,7 @@ __global__ void mm_kernel(
     __shared__ half_t smemB[cosize_v<BSmemLayout>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
-    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout{});
+    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
