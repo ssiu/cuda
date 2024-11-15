@@ -29,8 +29,8 @@ __global__ void mm_kernel(half_t* A, half_t* B, float*  C)
     Tensor gB = make_tensor(make_gmem_ptr(B), gmemLayoutB{});
     Tensor gC = make_tensor(make_gmem_ptr(C), gmemLayoutC{});
 
-    __shared__ half_t smemA[cute::cosize_v<smemLayoutA>];
-    __shared__ half_t smemB[cute::cosize_v<smemLayoutB>];
+    __shared__ half_t smemA[cosize_v<smemLayoutA>];
+    __shared__ half_t smemB[cosize_v<smemLayoutB>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), smemLayoutA{});
     Tensor sB = make_tensor(make_smem_ptr(smemB), smemLayoutB{});
@@ -145,22 +145,22 @@ void mm(half_t* A, half_t* B, float* C) {
                                make_stride(Int<1>{}, Int<16>{})));
 
 
-//     using sB_layout = decltype(make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                                make_stride(Int<8>{}, Int<1>{})));
+    using sB_layout = decltype(make_layout(make_shape (Int<8>{}, Int<8>{}),
+                               make_stride(Int<8>{}, Int<1>{})));
 
 //     using sB_layout = decltype(make_layout(make_shape (Int<8>{}, Int<8>{}),
 //                                make_stride(Int<1>{}, Int<8>{})));
-    using sB_layout = decltype(composition(Swizzle<1, 1, 1>{},
-                                 make_layout(make_shape (Int<8>{}, Int<8>{}),
-                                 make_stride(Int<1>{}, Int<8>{}))));
+//     using sB_layout = decltype(composition(Swizzle<1, 1, 1>{},
+//                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
+//                                  make_stride(Int<1>{}, Int<8>{}))));
 
     using sC_layout = decltype(make_layout(make_shape (Int<16>{}, Int<8>{}),
                                make_stride(Int<1>{}, Int<16>{})));
 
-    using copyA = decltype(make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    using copyA = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _4,_1>>{}));
-    using copyB = decltype(make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    using copyB = decltype(make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{}));
 
