@@ -43,8 +43,8 @@ __global__ void mm_kernel(
 
         }
     #endif
-    g_out[0] = 1.0f;
-    //copy(tiled_copy, tg_in, ts_out);
+
+    copy(tiled_copy, tg_in, ts_out);
 
 
 }
