@@ -24,12 +24,6 @@ __global__ void mm_kernel(
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
     Tensor g_out = make_tensor(make_gmem_ptr(out), layout_out);
 
-    //__shared__ half_t smem[cosize_v<LayoutOut>];
-
-
-    //Tensor s_mid = make_tensor(make_smem_ptr(smem), layout_smem);
-
-
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
     Tensor tg_in = thr_copy.partition_S(g_in);                            // (CPY,CPY_M,CPY_K,k)
     Tensor ts_out = thr_copy.partition_D(g_out);                            // (CPY,CPY_M,CPY_K)
@@ -55,12 +49,12 @@ void mm(T* in, T* out) {
     auto in_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
 
-//     auto out_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                         make_stride(Int<1>{}, Int<8>{}));
+    auto out_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
+                        make_stride(Int<8>{}, Int<1>{}));
 
-    auto out_layout = composition(Swizzle<2, 2, 2>,
-                                 make_layout(make_shape (Int<8>{}, Int<8>{}),
-                                 make_stride(Int<1>{}, Int<8>{})));
+//     auto out_layout = composition(Swizzle<2, 2, 2>{},
+//                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
+//                                  make_stride(Int<1>{}, Int<8>{})));
 
     print_layout(out_layout);
 
