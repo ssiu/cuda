@@ -55,7 +55,7 @@ void mm(half_t* in, half_t* out) {
 //                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
 //                                  make_stride(Int<1>{}, Int<8>{}))));
 
-    TiledCopy tiled_copy = make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
+    TiledCopy tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{});
 
