@@ -10,7 +10,7 @@ int main()
                                          Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                          Layout<Shape<_2,_1>>{});
 
-    print(tiled_copy);
+    print_latex(tiled_copy);
 #endif
 
 
