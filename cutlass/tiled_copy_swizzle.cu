@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < 8; i++){
         for (int j=0;j<8;j++){
-            printf("%f ", h_in[i*8+j]);
+            printf("%.1f ", h_in[i*8+j]);
         }
         printf("\n");
     }
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < 8; i++){
         for (int j=0;j<8;j++){
-            printf("%f ", h_out[i*8+j]);
+            printf("%.1f ", h_out[i*8+j]);
         }
         printf("\n");
     }
