@@ -201,7 +201,7 @@ int main()
 //                                       Layout<Shape<_32,_8>>{},  // 32x1 threads
 //                                       Layout<Shape< _1,_8>>{}); //  1x4 values
 
-    print_latex(tiled_copy);
+    //print_latex(tiled_copy);
   }
 #endif
 
