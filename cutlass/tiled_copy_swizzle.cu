@@ -18,7 +18,7 @@ template <class LayoutIn, class LayoutOut, class TiledCopy>
 __global__ void mm_kernel(
            half_t* in, LayoutIn layout_in,
            half_t* out, LayoutOut layout_out,
-           LayoutSmem layout_smem, TiledCopy tiled_copy
+           LayoutSmem layout_smem, TiledCopy tiled_copy)
 {
 
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     thrust::device_vector<T> d_in = h_in;
     thrust::device_vector<T> d_out;
 
-    mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
+    mm(d_in.data().get(), d_out.data().get());
 
     h_out = d_out;
 
