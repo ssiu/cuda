@@ -24,10 +24,10 @@ __global__ void mm_kernel(
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
     Tensor g_out = make_tensor(make_gmem_ptr(out), layout_out);
 
-    __shared__ half_t smem[cosize_v<LayoutOut>];
+    //__shared__ half_t smem[cosize_v<LayoutOut>];
 
 
-    Tensor s_mid = make_tensor(make_smem_ptr(smem), layout_smem);
+    //Tensor s_mid = make_tensor(make_smem_ptr(smem), layout_smem);
 
 
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
@@ -59,11 +59,12 @@ void mm(T* in, T* out) {
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{});
 
-    dim3 dimGrid(1);
-    dim3 dimBlock(32);
-    mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
-                                     out, out_layout,
-                                     smem_layout, tiled_copy);
+    print_latex(tiled_copy);
+//     dim3 dimGrid(1);
+//     dim3 dimBlock(32);
+//     mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
+//                                      out, out_layout,
+//                                      smem_layout, tiled_copy);
 }
 
 
