@@ -43,7 +43,7 @@ __global__ void mm_kernel(
 
         }
     #endif
-    g_out[0] = 1.0f;
+    //g_out[0] = 1.0f;
     //copy(tiled_copy, tg_in, ts_out);
 
 
@@ -108,3 +108,5 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+// nvcc -lineinfo -std=c++17 -arch=sm_70 -O3 -lcublas -I./cutlass/include -I./cutlass/tools/util/include -o tiled_copy_swizzle.o tiled_copy_swizzle.cu
