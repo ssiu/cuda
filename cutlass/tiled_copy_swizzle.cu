@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 
     mm(d_in.data().get(), d_out.data().get());
 
-    h_out = d_out;
+    //h_out = d_out;
 
 
 
