@@ -34,8 +34,17 @@ __global__ void mm_kernel(
     Tensor tg_in = thr_copy.partition_S(g_in);                            // (CPY,CPY_M,CPY_K,k)
     Tensor ts_out = thr_copy.partition_D(g_out);                            // (CPY,CPY_M,CPY_K)
 
+    #if 1
+        if(thread0()) {
+        print("  g_in : "); print(  g_in); print("\n");
+        print(" g_out : "); print( g_out); print("\n");
+        print(" tg_in : "); print( tg_in); print("\n");
+        print("ts_out : "); print(ts_out); print("\n");
 
-    copy(tiled_copy, tg_in, ts_out);
+        }
+    #endif
+
+    //copy(tiled_copy, tg_in, ts_out);
 
 
 }
@@ -59,12 +68,12 @@ void mm(T* in, T* out) {
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{});
 
-    print_latex(tiled_copy);
-//     dim3 dimGrid(1);
-//     dim3 dimBlock(32);
-//     mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
-//                                      out, out_layout,
-//                                      smem_layout, tiled_copy);
+    //print_latex(tiled_copy);
+    dim3 dimGrid(1);
+    dim3 dimBlock(32);
+    mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
+                                     out, out_layout,
+                                     smem_layout, tiled_copy);
 }
 
 
