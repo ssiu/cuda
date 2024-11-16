@@ -5,6 +5,13 @@ int main()
 {
 
 
+#if 1
+        auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
+                                         Layout<Shape<_4,_8>, Stride<_1,_4>>{},
+                                         Layout<Shape<_2,_1>>{});
+
+    print(tiled_copy);
+#endif
 
 
 #if 0
@@ -42,7 +49,7 @@ int main()
 
 
 // https://github.com/andylolu2/simpleGEMM/blob/master/gemm_config_sm75.cuh
-#if 1
+#if 0
 {
     static constexpr int64_t BLK_M = 128;
     static constexpr int64_t BLK_N = 128;
