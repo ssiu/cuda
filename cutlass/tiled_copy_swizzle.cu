@@ -14,10 +14,10 @@
 
 using namespace cute;
 
-template <class LayoutIn, class LayoutOut, class LayoutSmem, class TiledCopy>
+template <class T, class LayoutIn, class LayoutOut, class LayoutSmem, class TiledCopy>
 __global__ void mm_kernel(
-           half_t* in, LayoutIn layout_in,
-           half_t* out, LayoutOut layout_out,
+           T* in, LayoutIn layout_in,
+           T* out, LayoutOut layout_out,
            LayoutSmem layout_smem, TiledCopy tiled_copy)
 {
 
@@ -40,8 +40,8 @@ __global__ void mm_kernel(
 
 }
 
-
-void mm(half_t* in, half_t* out) {
+template <class T>
+void mm(T* in, T* out) {
 
     auto in_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
