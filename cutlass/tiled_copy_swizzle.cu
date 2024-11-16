@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     mm(d_in.data().get(), d_out.data().get());
 
     h_out = d_out;
-
+    printf("g_in  : \n");
     for (int i = 0; i < 8; i++){
         for (int j=0;j<8;j++){
             printf("%2.0f ", h_in[i*8+j]);
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     }
 
     printf("==========\n");
-
+    printf("g_out : \n");
     for (int i = 0; i < 8; i++){
         for (int j=0;j<8;j++){
             printf("%2.0f ", h_out[i*8+j]);
