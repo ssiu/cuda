@@ -10,7 +10,6 @@
 #include "cutlass/util/print_error.hpp"
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
-#include "utils.cuh"
 
 using namespace cute;
 
@@ -52,7 +51,7 @@ void mm(T* in, T* out) {
     auto out_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<8>{}));
 
-//     auto out_layout = composition(Swizzle<2, 2, 2>{},
+//     auto out_layout = composition(Swizzle<1, 1, 1>{},
 //                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
 //                                  make_stride(Int<1>{}, Int<8>{})));
 
