@@ -58,7 +58,7 @@ void mm(T* in, T* out) {
 //     auto out_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
 //                         make_stride(Int<1>{}, Int<8>{}));
 
-    auto out_layout = composition(Swizzle<2, 2, 2>{},
+    auto out_layout = composition(Swizzle<2, 2, 2>,
                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
                                  make_stride(Int<1>{}, Int<8>{})));
 
