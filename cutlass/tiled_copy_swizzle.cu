@@ -73,8 +73,8 @@ int main(int argc, char** argv)
     int m = 8;
     int n = 8;
 
-    using T = half_t;
-
+    //using T = half_t;
+    using T = float;
     cute::device_init(0);
 
     thrust::host_vector<T> h_in(m*n);
