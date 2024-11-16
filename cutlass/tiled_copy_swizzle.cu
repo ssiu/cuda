@@ -14,7 +14,7 @@
 
 using namespace cute;
 
-template <class LayoutIn, class LayoutOut, class TiledCopy>
+template <class LayoutIn, class LayoutOut, class LayoutSmem, class TiledCopy>
 __global__ void mm_kernel(
            half_t* in, LayoutIn layout_in,
            half_t* out, LayoutOut layout_out,
