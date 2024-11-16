@@ -56,7 +56,7 @@ void mm(T* in, T* out) {
                         make_stride(Int<8>{}, Int<1>{}));
 
     auto out_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{}));
+                        make_stride(Int<1>{}, Int<8>{}));
 
     auto smem_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                                                make_stride(Int<1>{}, Int<8>{}));
