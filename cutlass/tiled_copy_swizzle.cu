@@ -93,6 +93,7 @@ int main(int argc, char** argv)
 
     for (int j = 0; j < m*n; ++j) {
         h_in[j] = static_cast<T>( j );
+        h_out[j] = 0.0f;
     }
 
 
