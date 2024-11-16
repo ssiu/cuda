@@ -185,6 +185,7 @@ int main()
 #if 1
   {
 
+    printf("HELLO???\n")
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
 
 //     auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
