@@ -14,11 +14,11 @@
 
 using namespace cute;
 
-template <class T, class LayoutIn, class LayoutOut, class LayoutSmem, class TiledCopy>
+template <class T, class LayoutIn, class LayoutOut, class TiledCopy>
 __global__ void mm_kernel(
            T* in, LayoutIn layout_in,
            T* out, LayoutOut layout_out,
-           LayoutSmem layout_smem, TiledCopy tiled_copy)
+           TiledCopy tiled_copy)
 {
 
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
@@ -71,7 +71,7 @@ void mm(T* in, T* out) {
     dim3 dimBlock(32);
     mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
                                      out, out_layout,
-                                     smem_layout, tiled_copy);
+                                     tiled_copy);
 }
 
 
