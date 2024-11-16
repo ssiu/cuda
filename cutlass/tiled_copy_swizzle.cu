@@ -62,6 +62,8 @@ void mm(T* in, T* out) {
                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
                                  make_stride(Int<1>{}, Int<8>{})));
 
+    print_layout(out_layout);
+
     TiledCopy tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, T>{},
                                      Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                      Layout<Shape< _2,_1>>{});
