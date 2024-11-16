@@ -108,13 +108,13 @@ int main(int argc, char** argv)
         for (int j=0;j<8;j++){
             printf("%f ", d_in[i*8+j]);
         }
-        printf("\n")
+        printf("\n");
     }
     for (int i = 0; i < 8; i++){
         for (int j=0;j<8;j++){
             printf("%f ", d_out[i*8+j]);
         }
-        printf("\n")
+        printf("\n");
     }
 
 
