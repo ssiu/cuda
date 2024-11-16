@@ -26,7 +26,7 @@ __global__ void mm_kernel(
 
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
     Tensor tg_in = thr_copy.partition_S(g_in);                            // (CPY,CPY_M,CPY_K,k)
-    Tensor ts_out = thr_copy.partition_D(g_out);                            // (CPY,CPY_M,CPY_K)
+    Tensor ts_out = thr_copy.retile_D(g_out);                            // (CPY,CPY_M,CPY_K)
 
     #if 1
         if(thread0()) {
