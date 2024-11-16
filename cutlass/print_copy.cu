@@ -5,7 +5,7 @@ int main()
 {
 
 
-#if 1
+#if 0
         auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
                                          Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                          Layout<Shape<_2,_1>>{});
@@ -182,7 +182,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   {
 
 //    Copy_Atom<UniversalCopy<double>, double> copy_atom;
