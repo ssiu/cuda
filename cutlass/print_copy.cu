@@ -5,7 +5,8 @@ int main()
 {
 
 #if 1
-        auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
+        auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{},
+                                            Layout<Shape<_1,_1>>{});
 
         print_latex(tiled_copy);
 #endif
