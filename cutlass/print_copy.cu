@@ -6,8 +6,8 @@ int main()
 
 #if 1
 
-        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
-        auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U16x7_LDSM_T, half_t>{}, mma);
+        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{}, Tile<Int<32>, Int<32>, Int<8>>);
+        auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U32x1_LDSM_T, half_t>{}, mma);
 
         print_latex(tiled_copy);
 #endif
