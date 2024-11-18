@@ -5,9 +5,9 @@ int main()
 {
 
 #if 1
-        auto tiled_copy = make_tiled_copy(Copy_Atom<Copy_Traits<SM75_U32x1_LDSM_N>, half_t>{},
-                                            Layout<Shape<_1,_1>>{},
-                                            Layout<Shape<_1,_1>>{});
+
+        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
+        auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U32x2_LDSM_N, half_t>{}, mma);
 
         print_latex(tiled_copy);
 #endif
