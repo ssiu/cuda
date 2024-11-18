@@ -4,8 +4,14 @@ using namespace cute;
 int main()
 {
 
-
 #if 1
+        auto tiled_copy = make_tiled_copy(Copy_Atom<SM75_U32x1_LDSM_N, half_t>{});
+
+        print_latex(tiled_copy);
+#endif
+
+
+#if 0
         auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
                                          Layout<Shape<_4,_8>, Stride<_1,_4>>{},
                                          Layout<Shape<_2,_1>>{});
