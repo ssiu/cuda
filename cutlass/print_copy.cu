@@ -34,7 +34,7 @@ int main()
 //         using SmemCopyA = decltype(make_tiled_copy_A(SmemCopyAtom{}, TiledMMA{}));
     auto copy_atom = Copy_Atom<DefaultCopy, float>{};
     auto copy_TV_layout = Layout<Shape<<_4,_8>,_4>, Stride<<_32,_1>,_8>>{};
-    auto copy_tile = Tile<_32,_8>{}
+    auto copy_tile = Tile<_32,_8>{};
 
     auto tiled_copy = make_tiled_copy(copy_atom, copy_TV_layout, copy_tile);
     print_latex(tiled_copy);
