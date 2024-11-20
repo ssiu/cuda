@@ -17,7 +17,7 @@ int main()
 #if 1
 //((_4,_8),_4):((_32,_1),_8)
         auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
-                                         Layout<Shape<<_4,_8>,_4>, Stride<<_32_1>,_8>>{},
+                                         Layout<Shape<<_4,_8>,_4>, Stride<<_32,_1>,_8>>{},
                                          Tile<_32,_8>{});
 
         print_latex(tiled_copy);
