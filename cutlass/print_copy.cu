@@ -19,10 +19,25 @@ int main()
 //         auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
 //                                          Layout<Shape<<_4,_8>,_4>, Stride<<_32,_1>,_8>>{},
 //                                          Tile<_32,_8>{});
-        auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
-                                         Layout<Shape<<_4,_8>,_4>>{},
-                                         Tile<_32,_8>{});
-        print_latex(tiled_copy);
+// using SmemCopyAtom = Copy_Atom<SM75_U32x4_LDSM_N, half_t>;
+//         // The atom for the MMA operation. Each atom is a warp-wise instruction that computes a 16x8x8 mma (with tensor cores).
+//         using MmaAtom = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
+//         // We have 128 threads, so we use 4 warps laid out in 2x2x1.
+//         using MmaAtomLayout = Layout<Shape<Int<1>, Int<1>, Int<1>>>;
+//         // We want to use the `ldmatrix.x4.m8n8` instruction which loads 4 8x8 matrices for maximum efficiency.
+//         // To make the operands A and B divisible into 4 8x8 matrices, we expand the problem size for each warp to 16x16x16.
+//         // Accounting for the fact that we use 4 warps laid out in 2x2x1, the full tile size is 32x32x16.
+//         using MmaTiledShape = Tile<Int<32>, Int<8>, Int<8>>;
+//
+//         using TiledMMA = TiledMMA<MmaAtom, MmaAtomLayout, MmaTiledShape>;
+//         // Tiled copy of A from smem -> rmem
+//         using SmemCopyA = decltype(make_tiled_copy_A(SmemCopyAtom{}, TiledMMA{}));
+    auto copy_atom = Copy_Atom<DefaultCopy, float>{};
+    auto copy_TV_layout = Layout<Shape<<_4,_8>,_4>, Stride<<_32,_1>,_8>>{};
+    auto copy_tile = Tile<_32,_8>{}
+
+    auto tiled_copy = make_tiled_copy(copy_atom, copy_TV_layout, copy_tile);
+    print_latex(tiled_copy);
 #endif
 
 
