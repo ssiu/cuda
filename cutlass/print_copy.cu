@@ -4,9 +4,9 @@ using namespace cute;
 int main()
 {
 
-#if 0
+#if 1
 
-        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{}, Layout<Shape<_1, _1, _1>>{}, Tile<_32,_32,_8>{});
+        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{}, Layout<Shape<_1, _1, _1>>{}, Tile<_32,_32,_32>{});
         auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
 
         print_latex(tiled_copy);
@@ -14,7 +14,7 @@ int main()
 #endif
 
 
-#if 1
+#if 0
    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                      Layout<Shape<_8,_4>, Stride<_1,_8>>{},
                                      Layout<Shape< _4,_2>>{});
