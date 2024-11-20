@@ -4,7 +4,7 @@ using namespace cute;
 int main()
 {
 
-#if 1
+#if 0
 
         auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{}, Layout<Shape<_1, _1, _1>>{}, Tile<_32,_32,_8>{});
         auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
@@ -14,12 +14,13 @@ int main()
 #endif
 
 
-#if 0
-        auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
-                                         Layout<Shape<_4,_8>, Stride<_1,_4>>{},
-                                         Layout<Shape<_2,_1>>{});
+#if 1
 
-    print_latex(tiled_copy);
+        auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
+                                         Layout<Shape<_8,_4>, Stride<_1,_8>>{},
+                                         Layout<Shape<_4,_1>>{});
+
+        print_latex(tiled_copy);
 #endif
 
 
