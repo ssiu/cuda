@@ -50,14 +50,14 @@ __global__ void mm_kernel(
 
 
     auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
-    s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
-    s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
-    tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+    auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
+    auto s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
+    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
 
     auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
-    s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
-    s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
-    tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
+    auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
+    auto s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
+    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
 
 
 
