@@ -142,7 +142,7 @@ void mm(half_t* A, half_t* B, float* C) {
                                 Layout<Shape<_8,_4>, Stride<_1,_8>>{},
                                 Layout<Shape< _4,_2>>{});
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                    Layout<Shape<_2, _4, _1>>{},
+                                    Layout<Shape<_1, _1, _1>>{},
                                     Tile<_32,_32,_8>{});
 
     dim3 dimGrid(1);
