@@ -42,21 +42,49 @@ __global__ void mm_kernel(
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
 
 
-    ThrMMA thr_mma = mma.get_slice(threadIdx.x);
-    Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
-    Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
+
+
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
-    // Allocate the accumulators -- same size as the projected data
-    Tensor tCrC = thr_mma.make_fragment_C(tCgC);
+        // Allocate the accumulators -- same size as the projected data
+
+
+    ThrMMA thr_mma = mma.get_slice(threadIdx.x);
+    Tensor tCrA = thr_mma.partition_fragment_A(sA);                               // (MMA,MMA_M,MMA_K)
+    Tensor tCrB = thr_mma.partition_fragment_B(sB);                               // (MMA,MMA_N,MMA_K)
+    Tensor tCrC = thr_mma.make_fragment_C(tCgC);                            // (MMA,MMA_M,MMA_N)
+
+
+    auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+    s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
+    s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
+    tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+
+    auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+    s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
+    s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
+    tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
+
+
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
+
 
     copy(copy_a, tAgA, tAsA);
     copy(copy_b, tBgB, tBsB);
 
     __syncthreads();
+    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view)
+    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view)
+
+
+    gemm(mma, tCrA, tCrB, tCrC);
+
+
+
+    axpby(1.0f, tCrC, 0.0f, tCgC); //test
+
 
     #if 0
         if(thread0()) {
@@ -116,11 +144,7 @@ __global__ void mm_kernel(
         }
     #endif
 
-    gemm(mma, tCsA, tCsB, tCrC);
 
-
-
-    axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
 
 
