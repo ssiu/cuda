@@ -16,7 +16,7 @@ int main()
 
 #if 1
    auto tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                                     Layout<Shape<_8,_1>, Stride<_1,_8>>{},
+                                     Layout<Shape<_8,_4>, Stride<_1,_8>>{},
                                      Layout<Shape< _4,_2>>{});
 
     print_latex(tiled_copy);
