@@ -256,6 +256,22 @@ int main(int argc, char** argv)
         printf("Wrong answer\n");
     }
 
+    printf("cutlass  : \n");
+    for (int i = 0; i < 16; i++){
+        for (int j=0;j<8;j++){
+            printf("%2.0f ", h_C[i*8+j]);
+        }
+        printf("\n");
+    }
+
+    printf("==========\n");
+    printf("cublas : \n");
+    for (int i = 0; i < 16; i++){
+        for (int j=0;j<8;j++){
+            printf("%2.0f ", h_C_cublas[i*8+j]);
+        }
+        printf("\n");
+    }
 
 
     return 0;
