@@ -54,12 +54,12 @@ __global__ void mm_kernel(
     auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<DefaultCopy, half_t>{}, mma);
     auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
     auto s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
-    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+    //auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
 
     auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<DefaultCopy, half_t>{}, mma);
     auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
     auto s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
-    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
+    //auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
@@ -69,8 +69,10 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
-    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
+    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
+    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB);
+//     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
+//     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
 
     gemm(mma, tCrA, tCrB, tCrC);
 
