@@ -71,6 +71,7 @@ __global__ void mm_kernel(
 
     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB);
+    // retiling also works
 //     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
 //     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
 
