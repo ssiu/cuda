@@ -70,7 +70,7 @@ __global__ void mm_kernel(
     __syncthreads();
 
     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
-    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view));
+    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
 
     gemm(mma, tCrA, tCrB, tCrC);
 
