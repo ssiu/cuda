@@ -43,12 +43,22 @@ __global__ void mm_kernel(
 
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
-    Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
-    Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
+    Tensor tCrA = thr_mma.partition_fragment_A(sA);                               // (MMA,MMA_M,MMA_K)
+    Tensor tCrB = thr_mma.partition_fragment_B(sB);                               // (MMA,MMA_N,MMA_K)
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
+
+
+    auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<DefaultCopy, half_t>{}, mma);
+    auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
+    auto s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
+    //auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+
+    auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<DefaultCopy, half_t>{}, mma);
+    auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
+    auto s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
@@ -58,7 +68,10 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    gemm(mma, tCsA, tCsB, tCrC);
+    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
+    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB);
+
+    gemm(mma, tCrA, tCrB, tCrC);
 
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
 }
