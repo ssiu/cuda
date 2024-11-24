@@ -70,6 +70,12 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
+    if thread0() {
+        print_tensor(sA);
+        print_tensor(sB);
+    }
+
+
 //     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
 //     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
