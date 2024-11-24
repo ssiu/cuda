@@ -14,18 +14,18 @@
 
 using namespace cute;
 
-template <class ASmemLayout, class TiledCopyA,
-          class BSmemLayout, class TiledCopyB,
-          class CSmemLayout, class TiledMma>
+template <class AgmemLayout, class ASmemLayout, class TiledCopyA,
+          class BgmemLayout, class BSmemLayout, class TiledCopyB,
+          class CgmemLayout, class CSmemLayout, class TiledMma>
 __global__ void mm_kernel(
-           half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
-           half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
-           float*  C, CSmemLayout sC_layout, TiledMma      mma)
+           half_t* A, AgmemLayout gA_layout, ASmemLayout sA_layout, TiledCopyA copy_a,
+           half_t* B, BgmemLayout gB_layout, BSmemLayout sB_layout, TiledCopyB copy_b,
+           float*  C, CgmemLayout gC_layout, CSmemLayout sC_layout, TiledMma      mma)
 {
 
-    Tensor gA = make_tensor(make_gmem_ptr(A), sA_layout);
-    Tensor gB = make_tensor(make_gmem_ptr(B), sB_layout);
-    Tensor gC = make_tensor(make_gmem_ptr(C), sC_layout);
+    Tensor gA = make_tensor(make_gmem_ptr(A), gA_layout);
+    Tensor gB = make_tensor(make_gmem_ptr(B), gB_layout);
+    Tensor gC = make_tensor(make_gmem_ptr(C), gC_layout);
 
     __shared__ half_t smemA[cosize_v<ASmemLayout>];
     __shared__ half_t smemB[cosize_v<BSmemLayout>];
@@ -44,41 +44,46 @@ __global__ void mm_kernel(
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCrA = thr_mma.partition_fragment_A(sA);                               // (MMA,MMA_M,MMA_K)
-    Tensor tCrB = thr_mma.partition_fragment_B(sB);                               // (MMA,MMA_N,MMA_K)
-    Tensor tCgC = thr_mma.partition_C(gC);
-    Tensor tCrC = thr_mma.make_fragment_C(tCgC);                            // (MMA,MMA_M,MMA_N)
+    Tensor tCrB = thr_mma.partition_fragment_B(sB);
+    Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+
+    // Allocate the accumulators -- same size as the projected data
+    Tensor tCrC = thr_mma.make_fragment_C(tCgC);
 
 
     auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
     auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
     auto s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
-    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+    //auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
 
     auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
     auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
     auto s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
-    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
-
+    //auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
 
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
 
-
     copy(copy_a, tAgA, tAsA);
     copy(copy_b, tBgB, tBsB);
 
     __syncthreads();
-    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
-    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
 
+    if (thread0()) {
+        print_tensor(sA);
+        print_tensor(sB);
+    }
+
+
+//     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
+//     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
+    copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
+    copy(s2r_tiled_copy_b, s2r_tBsB, tCrB);
 
     gemm(mma, tCrA, tCrB, tCrC);
 
-
-
     axpby(1.0f, tCrC, 0.0f, tCgC); //test
-
 
     #if 0
         if(thread0()) {
@@ -144,12 +149,22 @@ __global__ void mm_kernel(
 
 void mm(half_t* A, half_t* B, float* C) {
 
-    auto sA_layout = make_layout(make_shape (Int<32>{}, Int<8>{}),
+    auto gA_layout = make_layout(make_shape (Int<32>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<32>{}));
-//     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                         make_stride(Int<1>{}, Int<8>{}));
+
+    auto sA_layout = make_layout(make_shape (Int<32>{}, Int<8>{}),
+                        make_stride(Int<8>{}, Int<1>{}));
+
+    auto gB_layout = make_layout(make_shape (Int<32>{}, Int<8>{}),
+                        make_stride(Int<8>{}, Int<1>{}));
+
     auto sB_layout = make_layout(make_shape (Int<32>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
+
+//     using sB_layout = decltype(composition(Swizzle<1, 1, 1>{},
+//                                  make_layout(make_shape (Int<8>{}, Int<8>{}),
+//                                  make_stride(Int<1>{}, Int<8>{}))));
+
     auto sC_layout = make_layout(make_shape (Int<32>{}, Int<32>{}),
                         make_stride(Int<1>{}, Int<32>{}));
 
@@ -159,21 +174,21 @@ void mm(half_t* A, half_t* B, float* C) {
     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_8,_4>, Stride<_1,_8>>{},
                                 Layout<Shape< _4,_2>>{});
+
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                     Layout<Shape<_1, _1, _1>>{},
                                     Tile<_32,_32,_8>{});
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
-    mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, copyA,
-                                     B, sB_layout, copyB,
-                                     C, sC_layout, mmaC);
+    mm_kernel<<<dimGrid, dimBlock>>>(A, gA_layout, sA_layout, copyA,
+                                     B, gB_layout, sB_layout, copyB,
+                                     C, sC_layout, sC_layout, mmaC);
 }
 
 
 
-void mm_cublas(half_t* A, half_t* B, float* C,
-                int M, int N, int K) {
+void mm_cublas(half_t* A, half_t* B, float* C) {
     float alpha = 1.0f;
     float beta = 0.0f;
 
@@ -182,21 +197,20 @@ void mm_cublas(half_t* A, half_t* B, float* C,
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
     //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
-    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
-                            A, CUDA_R_16F, M,
-                            B, CUDA_R_16F, K, &beta,
-                            C, CUDA_R_32F, M,
+    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, 32, 32, 8, &alpha,
+                            A, CUDA_R_16F, 32,
+                            B, CUDA_R_16F, 8, &beta,
+                            C, CUDA_R_32F, 32,
                             CUBLAS_COMPUTE_32F, CUBLAS_GEMM_DEFAULT);
     cublasDestroy(handle);
 }
 
 
-void mm_cpu(float* A, float* B, float* C,
-            int M, int N, int K) {
-    for (int k = 0; k < K; k ++) {
-        for (int i=0; i< M; i++) {
-            for (int j=0; j < N; j++) {
-                C[i + M * j] += A[i + M * k] * B[k + K * j];
+void mm_cpu(float* A, float* B, float* C) {
+    for (int k = 0; k < 8; k ++) {
+        for (int i=0; i< 32; i++) {
+            for (int j=0; j < 32; j++) {
+                C[i + 32 * j] += A[i + 32 * k] * B[k + 8 * j];
             }
         }
     }
@@ -224,23 +238,13 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C_cpu(m*n);
 
     for (int j = 0; j < m*k; ++j) {
-        //h_A[j] = static_cast<TA>(j);
-        h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
-//         if (j==16) {
-//             h_A[j] = static_cast<TA>(1);
-//         } else {
-//             h_A[j] = static_cast<TA>(0);
-//         }
+        //h_A[j] = static_cast<TA>( 2*(rand() / double(RAND_MAX)) - 1 );
+        h_A[j] = static_cast<TA>(j);
         h_A_cpu[j] = static_cast<float>(h_A[j]);
     }
     for (int j = 0; j < n*k; ++j) {
-        //h_B[j] = static_cast<TB>(j);
-//         if (j==1) {
-//             h_B[j] = static_cast<TB>(1);
-//         } else {
-//             h_B[j] = static_cast<TB>(0);
-//         }
-        h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
+        //h_B[j] = static_cast<TB>( 2*(rand() / double(RAND_MAX)) - 1 );
+        h_B[j] = static_cast<TB>(j);
         h_B_cpu[j] = static_cast<float>(h_B[j]);
     }
     for (int j = 0; j < m*n; ++j) {
@@ -255,11 +259,9 @@ int main(int argc, char** argv)
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
     mm(d_A.data().get(), d_B.data().get(), d_C.data().get());
-    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
-    mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data(), m, n, k);
-//
-//     thrust::host_vector<TC> h_C_result = d_C;
-//     thrust::host_vector<TC> h_C_cublas_result = d_C_cublas;
+    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get());
+    mm_cpu(h_A_cpu.data(), h_B_cpu.data(), h_C_cpu.data());
+
     h_C = d_C;
     h_C_cublas = d_C_cublas;
 
@@ -270,7 +272,22 @@ int main(int argc, char** argv)
         printf("Wrong answer\n");
     }
 
+    printf("cutlass  : \n");
+    for (int i = 0; i < 32; i++){
+        for (int j=0;j<32;j++){
+            printf("%2.4f ", h_C[i*32+j]);
+        }
+        printf("\n");
+    }
 
+    printf("==========\n");
+    printf("cublas : \n");
+    for (int i = 0; i < 32; i++){
+        for (int j=0;j<32;j++){
+            printf("%2.4f ", h_C_cublas[i*32+j]);
+        }
+        printf("\n");
+    }
 
 
     return 0;
