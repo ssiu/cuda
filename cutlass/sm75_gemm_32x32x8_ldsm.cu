@@ -71,8 +71,12 @@ __global__ void mm_kernel(
     __syncthreads();
 
     if (thread0()) {
-        print_tensor(sA);
-        print_tensor(sB);
+//         print_tensor(sA);
+//         print_tensor(sB);
+        print("tCrA           : "); print(  tCrA); print("\n");
+        print("tCrA_copy_view : "); print(  tCrA_copy_view); print("\n");
+        print("tCrB           : "); print(tCrB); print("\n");
+        print("tCrB_copy_view : "); print(tCrB_copy_view); print("\n");
     }
 
 
