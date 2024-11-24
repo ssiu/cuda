@@ -56,7 +56,15 @@ __global__ void mm_kernel(
     copy(copy_a, tAgA, tAsA);
     copy(copy_b, tBgB, tBsB);
 
-    __syncthreads();
+
+
+    #if 1
+        if (thread0()) {
+           print_tensor(sA);
+           print_tensor(sB);
+        }
+    #endif
+
 
     #if 0
         if(thread0()) {
