@@ -70,7 +70,7 @@ __global__ void mm_kernel(
 
     __syncthreads();
 
-    if thread0() {
+    if (thread0()) {
         print_tensor(sA);
         print_tensor(sB);
     }
