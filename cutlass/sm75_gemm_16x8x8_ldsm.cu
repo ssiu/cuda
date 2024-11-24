@@ -149,8 +149,12 @@ __global__ void mm_kernel(
 
 void mm(half_t* A, half_t* B, float* C) {
 
+    auto gA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
+                        make_stride(Int<1>{}, Int<16>{}));
+
     auto sA_layout = make_layout(make_shape (Int<16>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
+
     auto gB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
 
@@ -175,7 +179,7 @@ void mm(half_t* A, half_t* B, float* C) {
 
     dim3 dimGrid(1);
     dim3 dimBlock(32);
-    mm_kernel<<<dimGrid, dimBlock>>>(A, sA_layout, sA_layout, copyA,
+    mm_kernel<<<dimGrid, dimBlock>>>(A, gA_layout, sA_layout, copyA,
                                      B, gB_layout, sB_layout, copyB,
                                      C, sC_layout, sC_layout, mmaC);
 }
