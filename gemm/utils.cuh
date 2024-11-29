@@ -29,7 +29,7 @@ thrust::host_vector<T> generateRandomMatrix(int M, int N) {
     thrust::host_vector<T> A(M * N);
 
     for (int i = 0; i < M * N; i++) {
-        h_A[i] = static_cast<T>( 2*(rand() / double(RAND_MAX)) - 1 );
+        A[i] = static_cast<T>( 2*(rand() / double(RAND_MAX)) - 1 );
     }
 
     // Return both matrices
