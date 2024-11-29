@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     thrust::host_vector<TA> h_A(m*k);
     thrust::host_vector<TB> h_B(n*k);
     thrust::host_vector<TC> h_C(m*n);
-    thrust::host_vector<TC> h_C_cublas = generateRandomMatrix(m, n);
+    thrust::host_vector<TC> h_C_cublas = generateRandomMatrix<TC>(m, n);
 
 
 
