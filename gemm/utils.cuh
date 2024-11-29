@@ -13,6 +13,10 @@
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
 
+
+using namespace cute;
+
+
 // todo: investigate the correct epsilon
 bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
     return std::fabs(a - b) < epsilon;
