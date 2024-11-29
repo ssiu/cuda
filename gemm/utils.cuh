@@ -35,10 +35,10 @@ int isSameMatrices(float* A_1, float* A_2, int M, int N){
 }
 
 template <typename T>
-thrust::host_vector<T> generateRandomMatrix(int M, int N) {
-    thrust::host_vector<T> A(M * N);
+thrust::host_vector<T> generateRandomMatrix(int size) {
+    thrust::host_vector<T> A(size);
 
-    for (int i = 0; i < M * N; i++) {
+    for (int i = 0; i < size; i++) {
         A[i] = static_cast<T>( 2*(rand() / double(RAND_MAX)) - 1 );
     }
 

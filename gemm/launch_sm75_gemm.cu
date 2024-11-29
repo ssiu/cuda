@@ -27,10 +27,10 @@ int main(int argc, char** argv)
 
     cute::device_init(0);
 
-    thrust::host_vector<TA> h_A(m*k) = generateRandomMatrix<TA> (m, k);
-    thrust::host_vector<TB> h_B(n*k) = generateRandomMatrix<TB> (n, k);;
+    thrust::host_vector<TA> h_A(m*k) = generateRandomMatrix<TA> (m * k);
+    thrust::host_vector<TB> h_B(n*k) = generateRandomMatrix<TB> (n * k);
     thrust::host_vector<TC> h_C(m*n);
-    thrust::host_vector<TC> h_C_cublas = generateRandomMatrix<TC>(m, n);
+    thrust::host_vector<TC> h_C_cublas = generateRandomMatrix<TC>(m * n);
 
     for (int i=0; i< 10; i++) {
         for (int j=0; j< 10; j++) {
