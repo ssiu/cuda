@@ -15,25 +15,6 @@
 using namespace cute;
 
 
-void mm_cublas(half_t* A, half_t* B, float* C,
-                int M, int N, int K) {
-    float alpha = 1.0f;
-    float beta = 0.0f;
-
-    cudaError_t cudaStat;  // cudaMalloc status
-    cublasStatus_t stat;   // cuBLAS functions status
-    cublasHandle_t handle; // cuBLAS context
-    cublasCreate(&handle);
-    //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
-    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
-                            A, CUDA_R_16F, M,
-                            B, CUDA_R_16F, K, &beta,
-                            C, CUDA_R_32F, M,
-                            CUBLAS_COMPUTE_32F, CUBLAS_GEMM_DEFAULT);
-    cublasDestroy(handle);
-}
-
-
 int main(int argc, char** argv)
 {
     int m = 128;
