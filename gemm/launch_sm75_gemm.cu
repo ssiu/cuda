@@ -51,6 +51,17 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C(m*n);
     thrust::host_vector<TC> h_C_cublas = generateRandomMatrix<TC>(m, n);
 
+    for (int i=0; i< 10; i++) {
+        for (int j=0; j< 10; j++) {
+
+            printf("%f ", h_C_cublas[i*10+j]);
+
+        }
+        printf("\n");
+
+    }
+
+
 
 
 
