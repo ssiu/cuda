@@ -6,6 +6,10 @@
 #include <thrust/device_vector.h>
 #include <random>
 #include <cmath> // For std::fabs
+#include <cute/tensor.hpp>
+#include "cutlass/util/print_error.hpp"
+#include "cutlass/util/GPU_Clock.hpp"
+#include "cutlass/util/helper_cuda.hpp"
 
 // todo: investigate the correct epsilon
 bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
@@ -36,3 +40,20 @@ thrust::host_vector<T> generateRandomMatrix(int M, int N) {
     return A;
 }
 
+void mm_cublas(half_t* A, half_t* B, float* C,
+                int M, int N, int K) {
+    float alpha = 1.0f;
+    float beta = 0.0f;
+
+    cudaError_t cudaStat;  // cudaMalloc status
+    cublasStatus_t stat;   // cuBLAS functions status
+    cublasHandle_t handle; // cuBLAS context
+    cublasCreate(&handle);
+    //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
+    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
+                            A, CUDA_R_16F, M,
+                            B, CUDA_R_16F, K, &beta,
+                            C, CUDA_R_32F, M,
+                            CUBLAS_COMPUTE_32F, CUBLAS_GEMM_DEFAULT);
+    cublasDestroy(handle);
+}
