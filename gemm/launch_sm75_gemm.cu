@@ -11,7 +11,7 @@
 // #include "cutlass/util/GPU_Clock.hpp"
 // #include "cutlass/util/helper_cuda.hpp"
 #include "utils.cuh"
-//#include "sm75_gemm_vectorized.cu"
+#include "sm75_gemm_vectorized.cu"
 
 using namespace cute;
 

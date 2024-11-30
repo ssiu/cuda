@@ -2,10 +2,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cassert>
-#include <cublas_v2.h>
-#include <cuda_runtime.h>
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
+
 #include <cute/tensor.hpp>
 #include "cutlass/util/print_error.hpp"
 #include "cutlass/util/GPU_Clock.hpp"
