@@ -21,7 +21,7 @@ bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
 }
 
 
-int isSameMatrices(float* A_1, float* A_2, int size, const std::string& kernelName ){
+void isSameMatrices(float* A_1, float* A_2, int size, const std::string& kernelName ){
     int results = 1;
     for (int i = 0; i < size; i++){
         if (!(areFloatsEqual(A_1[i], A_2[i]))) {
@@ -34,6 +34,7 @@ int isSameMatrices(float* A_1, float* A_2, int size, const std::string& kernelNa
     } else {
         std::cout << "Wrong answer for " << kernelName << std::endl;
     }
+
 }
 
 template <typename T>
