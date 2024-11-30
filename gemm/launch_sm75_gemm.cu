@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 //
 //
 //     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
-    //isSameMatrices(h_C.data(), h_C_cublas.data(), m, n, "vectorized")
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m, n, "vectorized");
 
 
     return 0;
