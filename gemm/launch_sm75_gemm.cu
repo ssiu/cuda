@@ -44,11 +44,7 @@ int main(int argc, char** argv)
 //
 //
 //     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
-//     if (isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
-//         printf("Correct answer\n");
-//     } else {
-//         printf("Wrong answer\n");
-//     }
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)
 
 
     return 0;

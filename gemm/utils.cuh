@@ -4,14 +4,12 @@
 #include <cassert>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
+#include <string>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <random>
 #include <cmath> // For std::fabs
-#include <cute/tensor.hpp>
-#include "cutlass/util/print_error.hpp"
-#include "cutlass/util/GPU_Clock.hpp"
-#include "cutlass/util/helper_cuda.hpp"
+
 
 
 using namespace cute;
@@ -23,15 +21,19 @@ bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
 }
 
 
-int isSameMatrices(float* A_1, float* A_2, int M, int N){
-
-    for (int i = 0; i < M*N; i++){
+int isSameMatrices(float* A_1, float* A_2, int size, const std::string& kernelName ){
+    int results = 1;
+    for (int i = 0; i < size; i++){
         if (!(areFloatsEqual(A_1[i], A_2[i]))) {
             //std::cout << "Wrong answer:" << A_1[i] << " " << A_2[i] << std::endl;
-            return 0;
+            results = 0;
         }
     }
-    return 1;
+    if (results) {
+        std::cout << "Correct answer for " << kernelName << std::endl;
+    } else {
+        std::cout << "Wrong answer for " << kernelName << std::endl;
+    }
 }
 
 template <typename T>
@@ -51,8 +53,6 @@ void gemm_cublas(half_t* A, half_t* B, float* C,
     float alpha = 1.0f;
     float beta = 0.0f;
 
-    cudaError_t cudaStat;  // cudaMalloc status
-    cublasStatus_t stat;   // cuBLAS functions status
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
     //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
