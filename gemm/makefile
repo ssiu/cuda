@@ -2,7 +2,7 @@ NVCC_FLAGS = -lineinfo -std=c++17 --expt-relaxed-constexpr -arch=sm_75 -O3
 # NVCC_FLAGS = -lineinfo -std=c++17 -arch=sm_70 -O3
 NVCC_LDFLAGS = -lcublas
 NVCC_INCLUDES = -I./cutlass/include -I./cutlass/tools/util/include
-NVCC_GEMM_FILES = *.cu
+NVCC_GEMM_FILES = #*.cu
 
 INPUT = $<
 OUTPUT = -o $@
