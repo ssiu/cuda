@@ -6,10 +6,7 @@
 #include <cuda_runtime.h>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
-// #include <cute/tensor.hpp>
-// #include "cutlass/util/print_error.hpp"
-// #include "cutlass/util/GPU_Clock.hpp"
-// #include "cutlass/util/helper_cuda.hpp"
+
 #include "utils.cuh"
 #include "sm75_gemm_vectorized.cu"
 
@@ -39,7 +36,7 @@ int main(int argc, char** argv)
     thrust::device_vector<TC> d_C = h_C;
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
-    //gemm_vectorized(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+    gemm_vectorized(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
     gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
 //
 //     h_C = d_C;
