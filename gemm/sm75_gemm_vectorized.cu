@@ -160,7 +160,7 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
 
     auto prob_shape = make_shape(M, N, K);
 
-    printf("%d\n", prob_shape(0));
+    printf("%d\n", select<0>(prob_shape));
 //     printf("%d\n", prob_shape[1]);
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
