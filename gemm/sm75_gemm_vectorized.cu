@@ -17,7 +17,7 @@ template <class ProblemShape, class CtaTiler,
           class CSmemLayout, class TiledMma>
 __global__ void gemm_vectorized_kernel(
            ProblemShape shape_MNK, CtaTiler cta_tiler,
-           int m, int m, int k,
+           int m, int n, int k,
            half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
            half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
            float*  C, CSmemLayout sC_layout, TiledMma      mma)
