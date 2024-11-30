@@ -6,10 +6,10 @@
 #include <cuda_runtime.h>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
-#include <cute/tensor.hpp>
-#include "cutlass/util/print_error.hpp"
-#include "cutlass/util/GPU_Clock.hpp"
-#include "cutlass/util/helper_cuda.hpp"
+// #include <cute/tensor.hpp>
+// #include "cutlass/util/print_error.hpp"
+// #include "cutlass/util/GPU_Clock.hpp"
+// #include "cutlass/util/helper_cuda.hpp"
 #include "utils.cuh"
 //#include "sm75_gemm_vectorized.cu"
 
