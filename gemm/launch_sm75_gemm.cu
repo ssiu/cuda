@@ -17,9 +17,9 @@ using namespace cute;
 
 int main(int argc, char** argv)
 {
-    int M = 128;
-    int N = 128;
-    int K = 128;
+    int m = 128;
+    int n = 128;
+    int k = 128;
 
     using TA = half_t;
     using TB = half_t;
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     thrust::device_vector<TC> d_C = h_C;
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
-    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), M, N, K);
+    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
 //
 //     h_C = d_C;
 //     h_C_cublas = d_C_cublas;

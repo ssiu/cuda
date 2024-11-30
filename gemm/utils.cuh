@@ -47,7 +47,7 @@ thrust::host_vector<T> generateRandomMatrix(int size) {
 }
 
 void mm_cublas(half_t* A, half_t* B, float* C,
-                int M, int N, int K) {
+                int m, int n, int k) {
     float alpha = 1.0f;
     float beta = 0.0f;
 
@@ -56,10 +56,10 @@ void mm_cublas(half_t* A, half_t* B, float* C,
     cublasHandle_t handle; // cuBLAS context
     cublasCreate(&handle);
     //cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, 16, 8, 8, &alpha, A, 16, B, 8, &beta, C, 16);
-    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha,
-                            A, CUDA_R_16F, M,
-                            B, CUDA_R_16F, K, &beta,
-                            C, CUDA_R_32F, M,
+    cublasGemmEx(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha,
+                            A, CUDA_R_16F, m,
+                            B, CUDA_R_16F, k, &beta,
+                            C, CUDA_R_32F, m,
                             CUBLAS_COMPUTE_32F, CUBLAS_GEMM_DEFAULT);
     cublasDestroy(handle);
 }
