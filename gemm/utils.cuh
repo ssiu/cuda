@@ -46,7 +46,7 @@ thrust::host_vector<T> generateRandomMatrix(int size) {
     return A;
 }
 
-void mm_cublas(half_t* A, half_t* B, float* C,
+void gemm_cublas(half_t* A, half_t* B, float* C,
                 int m, int n, int k) {
     float alpha = 1.0f;
     float beta = 0.0f;

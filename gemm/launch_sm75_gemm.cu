@@ -11,6 +11,7 @@
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
 #include "utils.cuh"
+#include "sm75_gemm_vectorized.cu"
 
 using namespace cute;
 
@@ -32,26 +33,14 @@ int main(int argc, char** argv)
     thrust::host_vector<TC> h_C(m*n);
     thrust::host_vector<TC> h_C_cublas = generateRandomMatrix<TC>(m * n);
 
-    for (int i=0; i< 10; i++) {
-        for (int j=0; j< 10; j++) {
-
-            printf("%f ", h_C_cublas[i*10+j]);
-
-        }
-        printf("\n");
-
-    }
-
-
-
-
 
     thrust::device_vector<TA> d_A = h_A;
     thrust::device_vector<TB> d_B = h_B;
     thrust::device_vector<TC> d_C = h_C;
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
-    mm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+    gemm_vectorized(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+    gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
 //
 //     h_C = d_C;
 //     h_C_cublas = d_C_cublas;
