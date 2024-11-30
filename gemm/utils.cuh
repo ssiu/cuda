@@ -10,7 +10,10 @@
 #include <random>
 #include <cmath> // For std::fabs
 
-
+#include <cute/tensor.hpp>
+#include "cutlass/util/print_error.hpp"
+#include "cutlass/util/GPU_Clock.hpp"
+#include "cutlass/util/helper_cuda.hpp"
 
 using namespace cute;
 
