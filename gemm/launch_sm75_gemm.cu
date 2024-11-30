@@ -17,9 +17,9 @@ using namespace cute;
 
 int main(int argc, char** argv)
 {
-    int m = 128;
-    int n = 128;
-    int k = 128;
+    int M = 128;
+    int N = 128;
+    int K = 128;
 
     using TA = half_t;
     using TB = half_t;
