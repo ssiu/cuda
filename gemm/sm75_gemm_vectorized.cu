@@ -17,14 +17,15 @@ template <class ProblemShape, class CtaTiler,
           class CSmemLayout, class TiledMma>
 __global__ void gemm_vectorized_kernel(
            ProblemShape shape_MNK, CtaTiler cta_tiler,
+           int m, int m, int k,
            half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
            half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
            float*  C, CSmemLayout sC_layout, TiledMma      mma)
 {
 
-    Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), make_stride(Int<1>{}, Int<1024>{})); // (M,K)
-    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), make_stride(Int<1024>{}, Int<1>{})); // (N,K)
-    Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), make_stride(Int<1>{}, Int<1024>{})); // (M,N)
+    Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), make_stride(Int<1>{}, Int<m>{})); // (M,K)
+    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), make_stride(Int<k>{}, Int<1>{})); // (N,K)
+    Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), make_stride(Int<1>{}, Int<m>{})); // (M,N)
 
     // Get the appropriate blocks for this thread block
     auto cta_coord = make_coord(blockIdx.x, blockIdx.y, _);              // (m,n,k)
@@ -160,7 +161,6 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
 
     auto prob_shape = make_shape(M, N, K);
 
-    printf("%d\n", select<0>(prob_shape));
 //     printf("%d\n", prob_shape[1]);
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
@@ -191,6 +191,7 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
     dim3 dimGrid(size(ceil_div(M, bM)), size(ceil_div(N, bN)));
     dim3 dimBlock(256);
     gemm_vectorized_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+                                     m, n, k,
                                      A, sA_layout, copyA,
                                      B, sB_layout, copyB,
                                      C, sC_layout, mmaC);
