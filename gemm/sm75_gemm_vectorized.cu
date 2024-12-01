@@ -15,10 +15,12 @@ template <class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
-__global__ void gemm_vectorized_kernel(ProblemShape shape_MNK, CtaTiler cta_tiler,
-                                          TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
-                                          TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
-                                          TC      * C, CStride dC, CSmemLayout          , TiledMma mma)
+__global__ void gemm_vectorized_kernel(
+            ProblemShape shape_MNK, CtaTiler cta_tiler,
+            TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
+            TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
+            TC      * C, CStride dC, CSmemLayout          , TiledMma mma
+)
 {
 
     Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), dA); // (M,K)
