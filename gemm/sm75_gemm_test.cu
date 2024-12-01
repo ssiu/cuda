@@ -157,7 +157,7 @@ __global__ void gemm_test_kernel(
 }
 
 
-void gemm_vectorized(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
