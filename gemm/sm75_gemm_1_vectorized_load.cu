@@ -84,8 +84,8 @@ __global__ void gemm_vectorized_kernel(
 
     }
 
-    axpby(1.0f, tCrC, 0.0f, tCgC); //test
-
+    //axpby(1.0f, tCrC, 0.0f, tCgC); //test
+    copy(tCrC, tCgC);
 
     #if 0
         if(thread0()) {
