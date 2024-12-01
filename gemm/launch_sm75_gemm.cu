@@ -8,7 +8,7 @@
 #include <thrust/device_vector.h>
 
 #include "utils.cuh"
-#include "sm75_gemm_vectorized.cu"
+#include "sm75_gemm_vectorized_load.cu"
 
 using namespace cute;
 
