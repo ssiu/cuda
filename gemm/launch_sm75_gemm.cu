@@ -16,8 +16,16 @@ using namespace cute;
 int main(int argc, char** argv)
 {
     int m = 128;
+    if (argc >= 2)
+    sscanf(argv[1], "%d", &m);
+
     int n = 128;
+    if (argc >= 3)
+    sscanf(argv[2], "%d", &n);
+
     int k = 8;
+    if (argc >= 4)
+    sscanf(argv[3], "%d", &k);
 
     using TA = half_t;
     using TB = half_t;
