@@ -12,20 +12,18 @@
 using namespace cute;
 
 template <class ProblemShape, class CtaTiler,
-          class ASmemLayout, class TiledCopyA,
-          class BSmemLayout, class TiledCopyB,
-          class CSmemLayout, class TiledMma>
-__global__ void gemm_vectorized_kernel(
-           ProblemShape shape_MNK, CtaTiler cta_tiler,
-           int m, int n, int k,
-           half_t* A, ASmemLayout sA_layout, TiledCopyA copy_a,
-           half_t* B, BSmemLayout sB_layout, TiledCopyB copy_b,
-           float*  C, CSmemLayout sC_layout, TiledMma      mma)
+          class TA, class AStride, class ASmemLayout, class TiledCopyA,
+          class TB, class BStride, class BSmemLayout, class TiledCopyB,
+          class TC, class CStride, class CSmemLayout, class TiledMma>
+__global__ void gemm_vectorized_kernel(ProblemShape shape_MNK, CtaTiler cta_tiler,
+                                          TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
+                                          TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
+                                          TC      * C, CStride dC, CSmemLayout          , TiledMma mma)
 {
 
-    Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), make_stride(Int<1>{}, Int<m>{})); // (M,K)
-    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), make_stride(Int<k>{}, Int<1>{})); // (N,K)
-    Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), make_stride(Int<1>{}, Int<m>{})); // (M,N)
+    Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), dA); // (M,K)
+    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), dB); // (N,K)
+    Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), dC); // (M,N)
 
     // Get the appropriate blocks for this thread block
     auto cta_coord = make_coord(blockIdx.x, blockIdx.y, _);              // (m,n,k)
@@ -157,10 +155,13 @@ __global__ void gemm_vectorized_kernel(
 }
 
 
-void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
+void gemm_vectorized(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
-    auto prob_shape = make_shape(M, N, K);
+    auto prob_shape = make_shape(m, n, k);
 
+    auto dA = make_stride(Int<1>{}, m);                      // (dM, dK)
+    auto dB = make_stride(k, Int<1>{});                      // (dN, dK)
+    auto dC = make_stride(Int<1>{}, m);                      // (dM, dN)
 //     printf("%d\n", prob_shape[1]);
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
@@ -171,8 +172,6 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
 
     auto sA_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<128>{}));
-//     auto sB_layout = make_layout(make_shape (Int<8>{}, Int<8>{}),
-//                         make_stride(Int<1>{}, Int<8>{}));
     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
@@ -191,9 +190,8 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int M, int N, int K) {
     dim3 dimGrid(size(ceil_div(M, bM)), size(ceil_div(N, bN)));
     dim3 dimBlock(256);
     gemm_vectorized_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
-                                     M, N, K,
-                                     A, sA_layout, copyA,
-                                     B, sB_layout, copyB,
-                                     C, sC_layout, mmaC);
+                                                     A, dA, sA_layout, copyA,
+                                                     B, dB, sB_layout, copyB,
+                                                     C, dC, sC_layout, mmaC);
 }
 
