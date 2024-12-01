@@ -187,7 +187,7 @@ void gemm_vectorized(half_t* A, half_t* B, float* C, int m, int n, int k) {
                                     Layout<Shape<_2, _4, _1>>{},
                                     Tile<_128,_128,_8>{});
 
-    dim3 dimGrid(size(ceil_div(M, bM)), size(ceil_div(N, bN)));
+    dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
     gemm_vectorized_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
