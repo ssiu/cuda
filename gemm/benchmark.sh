@@ -10,7 +10,7 @@ for size in "${sizes[@]}"; do
     echo "Running with size $size..."
     throughput=$(ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed_time \
                      --set full \
-                     --csv ./launch_sm75_gemm.o $size $size\
+                     --csv ./launch_sm75_gemm.o $size $size $size\
                      | grep "sm__throughput.avg.pct_of_peak_sustained_elapsed_time" \
                      | awk -F ',' '{print $2}')
     echo "$size,$throughput" >> $output_csv
