@@ -168,29 +168,29 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
     auto bN = Int<128>{};
-    auto bK = Int< 16>{};
+    auto bK = Int<  8>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
 
-    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<16>{}),
+    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<128>{}));
-    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<16>{}),
-                        make_stride(Int<16>{}, Int<1>{}));
+    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
+                        make_stride(Int<8>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                               Layout<Shape<_32,_8>, Stride<_1,_32>>{},
+                               Layout<Shape<_16,_8>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                               Layout<Shape<_128,_2>, Stride<_2,_1>>{},
+                               Layout<Shape<_128,_1>, Stride<_1,_0>>{},
                                Layout<Shape< _1,_8>>{});
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                    Layout<Shape<_2, _4, _1>>{},
-                                    Tile<_128,_128,_16>{});
+                                    Layout<Shape<_2, _2, _1>>{},
+                                    Tile<_128,_128,_8>{});
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
-    dim3 dimBlock(256);
+    dim3 dimBlock(128);
     gemm_test_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
