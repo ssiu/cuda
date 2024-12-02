@@ -11,3 +11,5 @@ for size in "${sizes[@]}"; do
     echo "Output saved to ${size}.csv"
 
 done
+
+python plot_kernels.py
