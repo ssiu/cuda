@@ -49,15 +49,16 @@ int main(int argc, char** argv)
 
 
     gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
-//
-    h_C = d_C;
     h_C_cublas = d_C_cublas;
 //
 //
 //     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
     gemm_vectorized_load(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load");
+
     gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
 
     return 0;
