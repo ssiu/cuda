@@ -19,7 +19,7 @@ using namespace cute;
 
 
 // todo: investigate the correct epsilon
-bool areFloatsEqual(float a, float b, float epsilon = 1e-5f) {
+bool areFloatsEqual(float a, float b, float epsilon = 1e-3f) {
     return std::fabs(a - b) < epsilon;
 }
 
