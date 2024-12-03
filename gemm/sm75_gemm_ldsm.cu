@@ -117,7 +117,7 @@ void gemm_ldsm(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
 
     auto sA_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
-                        make_stride(Int<1>{}, Int<128>{}));
+                        make_stride(Int<8>{}, Int<1>{}));
     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
                         make_stride(Int<8>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
