@@ -56,9 +56,6 @@ int main(int argc, char** argv)
 //     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized");
 
-    for (int i=0;i<100;i++) {
-        printf("%f %f\n", h_C[i], h_C_cublas[i]);
-    }
 
     return 0;
 }
