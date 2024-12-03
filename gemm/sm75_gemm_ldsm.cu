@@ -15,7 +15,7 @@ template <class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
-__global__ void gemm_vectorized_load_kernel(
+__global__ void gemm_ldsm_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -84,7 +84,7 @@ __global__ void gemm_vectorized_load_kernel(
 
     }
 
-    //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
+    //axpby(1.0f, tCrC, 0.0f, tCgC); //ldsm
     copy(tCrC, tCgC);
 
     #if 0
@@ -157,7 +157,7 @@ __global__ void gemm_vectorized_load_kernel(
 }
 
 
-void gemm_vectorized_load(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_ldsm(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
@@ -179,12 +179,6 @@ void gemm_vectorized_load(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
-//     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-//                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
-//                                Layout<Shape< _8,_1>>{});
-//     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-//                                Layout<Shape<_128,_1>, Stride<_1,_0>>{},
-//                                Layout<Shape< _1,_8>>{});
     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
@@ -198,7 +192,7 @@ void gemm_vectorized_load(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(128);
-    gemm_vectorized_load_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    gemm_ldsm_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);
