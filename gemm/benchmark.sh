@@ -13,3 +13,9 @@ for size in "${sizes[@]}"; do
 done
 
 python plot_kernels.py
+
+rm -rf *.csv
+
+ncu -f --target-processes all --set full \
+--import-source on \
+-o sm75_gemm_test ./launch_sm75_gemm.o 8192 8192 8192
