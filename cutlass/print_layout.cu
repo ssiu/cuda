@@ -19,7 +19,7 @@ int main() {
 //        print_layout(smem_atom);
         auto layout = composition(Swizzle<1, 3, 1>{},
                                     Layout<Shape<_8, _8>,
-                                    Stride<_1, _8>>{});
+                                    Stride<_8, _1>>{});
         print_layout(layout);
     }
     #endif
