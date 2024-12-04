@@ -15,7 +15,7 @@ template <class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
-__global__ void gemm_swizzle_kernel(
+__global__ void gemm_swizzle_test_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -42,71 +42,122 @@ __global__ void gemm_swizzle_kernel(
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
     Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
-    Tensor tArA = make_fragment_like(tAsA);
-
 
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
-    Tensor tBrB = make_fragment_like(tBsB);
+
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
-    Tensor tCrA = thr_mma.partition_fragment_A(sA);                               // (MMA,MMA_M,MMA_K)
-    Tensor tCrB = thr_mma.partition_fragment_B(sB);
+    Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
+    Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
 
-
-    auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
-    auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
-    auto s2r_tAsA = s2r_thr_copy_a.partition_S(sA);
-    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
-
-    auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
-    auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
-    auto s2r_tBsB = s2r_thr_copy_b.partition_S(sB);
-    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
-
-
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
+
+//     copy(copy_a, tAgA(_,_,_,0), tAsA);
+//     copy(copy_b, tBgB(_,_,_,0), tBsB);
+//
+//     __syncthreads();
+//
+//     gemm(mma, tCsA, tCsB, tCrC);
+//
 
     auto K_TILE_MAX = size<3>(tAgA);
 
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
 
-        copy(copy_a, tAgA(_,_,_,k_tile), tArA);
-        copy(copy_b, tBgB(_,_,_,k_tile), tBrB);
-
-        copy(tArA, tAsA);
-        copy(tBrB, tBsB);
+        copy(copy_a, tAgA(_,_,_,k_tile), tAsA);
+        copy(copy_b, tBgB(_,_,_,k_tile), tBsB);
 
         __syncthreads();
 
         // Compute gemm on mma-partitioned smem
-        //gemm(mma, tCsA, tCsB, tCrC);
-
-        copy(s2r_tiled_copy_a, s2r_tAsA, tCrA_copy_view);
-        copy(s2r_tiled_copy_b, s2r_tBsB, tCrB_copy_view);
-    //     copy(s2r_tiled_copy_a, s2r_tAsA, tCrA);
-    //     copy(s2r_tiled_copy_b, s2r_tBsB, tCrB);
-
-        gemm(mma, tCrA, tCrB, tCrC);
+        gemm(mma, tCsA, tCsB, tCrC);
 
         __syncthreads();
 
     }
 
-    //axpby(1.0f, tCrC, 0.0f, tCgC); //ldsm
+    //axpby(1.0f, tCrC, 0.0f, tCgC); //swizzle_test
     copy(tCrC, tCgC);
+
+    #if 0
+        if(thread0()) {
+            print("  mA : "); print(  mA); print("\n");
+            print("  gA : "); print(  gA); print("\n");
+            print("  sA : "); print(  sA); print("\n");
+            print("tAgA : "); print(tAgA); print("\n");
+            print("tAsA : "); print(tAsA); print("\n");
+
+        }
+    #endif
+
+    #if 0
+        if(thread0()) {
+            print("  mB : "); print(  mB); print("\n");
+            print("  gB : "); print(  gB); print("\n");
+            print("  sB : "); print(  sB); print("\n");
+            print("tBgB : "); print(tBgB); print("\n");
+            print("tBsB : "); print(tBsB); print("\n");
+        }
+    #endif
+
+    #if 0
+        if(thread(1)) {
+            print("  mC : "); print(  mC); print("\n");
+            print("  gC : "); print(  gC); print("\n");
+            print("tCsA : "); print(tCsA); print("\n");
+            print("tCsB : "); print(tCsB); print("\n");
+            print("tCgC : "); print(tCgC); print("\n");
+            print("tCrC : "); print(tCrC); print("\n");
+        }
+    #endif
+
+    #if 0
+        if(thread(1)) {
+            printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tCsA[0]),static_cast<float>(sA[0]));
+            printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tCsA[1]),static_cast<float>(sA[16]));
+            printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tCsA[2]),static_cast<float>(sA[8]));
+            printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tCsA[3]),static_cast<float>(sA[24]));
+            printf("tCsB[0], sB[0]: %f %f\n", static_cast<float>(tCsB[0]),static_cast<float>(sB[0]));
+            printf("tCsB[1], sB[1]: %f %f\n", static_cast<float>(tCsB[1]),static_cast<float>(sB[1]));
+            //             for (int i=0;i< 16; i++) {
+            //                 for (int j=0;j<8;j++) {
+            //                     printf("%f ", static_cast<float>(sA[i  + 16 * j]));
+            //                 }
+            //                 printf("\n");
+            //             }
+        }
+    #endif
+
+
+    #if 0
+        printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, static_cast<float>(tCsB[0]));
+        printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, static_cast<float>(tCsB[1]));
+    #endif
+
+    #if 0
+        if(thread0()) {
+            for (int i=0; i<128; i++){
+                printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
+            }
+            for (int i=0; i<64; i++){
+                printf("i = %d, gB = %f, sB = %f,\n", i, static_cast<float>(gB[i]), static_cast<float>(sB[i]));
+            }
+        }
+    #endif
+
 
 }
 
 
-void gemm_swizzle(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_swizzle_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
@@ -120,11 +171,12 @@ void gemm_swizzle(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto bK = Int<  8>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
-
+//
 //     auto sA_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
-//                         make_stride(Int<8>{}, Int<1>{}));
+//                         make_stride(Int<1>{}, Int<128>{}));
 //     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
 //                         make_stride(Int<8>{}, Int<1>{}));
+
     auto sA_layout = composition(Swizzle<2, 3, 3>{},
                                 Layout<Shape<_128, _8>,
                                 Stride<_8, _1>>{});
@@ -135,6 +187,12 @@ void gemm_swizzle(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
+//     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
+//                                Layout<Shape< _8,_1>>{});
+//     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                Layout<Shape<_128,_1>, Stride<_1,_0>>{},
+//                                Layout<Shape< _1,_8>>{});
     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
@@ -148,7 +206,7 @@ void gemm_swizzle(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(128);
-    gemm_swizzle_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    gemm_swizzle_test_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);
