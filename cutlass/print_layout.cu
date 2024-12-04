@@ -20,7 +20,7 @@ int main() {
         auto layout = composition(Swizzle<1, 1, 1>{},
                                     Layout<Shape<_8, _8>,
                                     Stride<_1, _8>>{});
-        print_latex(layout);
+        print_layout(layout);
     }
     #endif
 
