@@ -10,6 +10,15 @@ def clean_kernel_names(kernel_name):
         return "cublas_turing"
 
 
+def count_skip_rows(file_path):
+    marker_line = "==PROF== Disconnected from process"
+    with open(file_path, 'r') as file:
+        for i, line in enumerate(file):
+            if marker_line in line:
+                return i + 1  # Skip the marker line as well
+    return 0  # Default to 0 if the marker is not found
+
+
 def plot_kernels(df):
     kernel_names = df["Kernel Name"].unique()
     # Display the list of unique kernels
@@ -42,9 +51,9 @@ list_of_dfs = []
 for num in NUMS:
     # Path to your CSV file
     csv_file_path = f"{num}.csv"
-
+    skip_rows = count_skip_rows(csv_file_path)
     # Load the CSV file into a DataFrame
-    df = pd.read_csv(csv_file_path, skiprows=4)
+    df = pd.read_csv(csv_file_path, skiprows=skip_rows)
 
     # Display the DataFrame
 

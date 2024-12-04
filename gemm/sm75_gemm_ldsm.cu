@@ -42,11 +42,13 @@ __global__ void gemm_ldsm_kernel(
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
     Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+    Tensor tArA = make_fragment_like(tAsA);
+
 
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
-
+    Tensor tBrB = make_fragment_like(tBsB);
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCrA = thr_mma.partition_fragment_A(sA);                               // (MMA,MMA_M,MMA_K)
@@ -76,8 +78,11 @@ __global__ void gemm_ldsm_kernel(
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
 
-        copy(copy_a, tAgA(_,_,_,k_tile), tAsA);
-        copy(copy_b, tBgB(_,_,_,k_tile), tBsB);
+        copy(copy_a, tAgA(_,_,_,k_tile), tArA);
+        copy(copy_b, tBgB(_,_,_,k_tile), tBrB);
+
+        copy(tArA, tAsA);
+        copy(tBrB, tBsB);
 
         __syncthreads();
 
