@@ -9,9 +9,10 @@
 
 #include "utils.cuh"
 #include "sm75_gemm_vectorized_load.cu"
-#include "sm75_gemm_ldsm.cu"
 #include "sm75_gemm_swizzle.cu"
-#include "sm75_gemm_swizzle_test.cu"
+#include "sm75_gemm_ldsm.cu"
+
+
 //#include "sm75_gemm_test.cu"
 using namespace cute;
 
