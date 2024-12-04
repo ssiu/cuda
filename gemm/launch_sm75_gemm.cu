@@ -10,6 +10,7 @@
 #include "utils.cuh"
 #include "sm75_gemm_vectorized_load.cu"
 #include "sm75_gemm_ldsm.cu"
+#include "sm75_gemm_swizzle.cu"
 //#include "sm75_gemm_test.cu"
 using namespace cute;
 
@@ -60,6 +61,10 @@ int main(int argc, char** argv)
     gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
+
+    gemm_swizzle(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle");
 
     return 0;
 }
