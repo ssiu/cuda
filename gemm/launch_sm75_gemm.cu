@@ -8,6 +8,7 @@
 #include <thrust/device_vector.h>
 
 #include "utils.cuh"
+#include "sm75_gemm_test.cu"
 #include "sm75_gemm_vectorized_load.cu"
 #include "sm75_gemm_swizzle.cu"
 #include "sm75_gemm_ldsm.cu"
@@ -73,5 +74,8 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
 
+    gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
     return 0;
 }
