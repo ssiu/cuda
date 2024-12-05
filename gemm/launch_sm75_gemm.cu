@@ -11,7 +11,7 @@
 #include "sm75_gemm_vectorized_load.cu"
 #include "sm75_gemm_swizzle.cu"
 #include "sm75_gemm_ldsm.cu"
-#include "sm75_gemm_smem_buffering"
+#include "sm75_gemm_smem_buffering.cu"
 
 
 //#include "sm75_gemm_test.cu"
