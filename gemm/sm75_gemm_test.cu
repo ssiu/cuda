@@ -194,7 +194,7 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                     Layout<Shape<_2, _2, _1>>{},
-                                    Tile<_128,_128,_16>{});
+                                    Tile<_128,_128,_32>{});
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(128);
