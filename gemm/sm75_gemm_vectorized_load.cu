@@ -87,7 +87,7 @@ __global__ void gemm_vectorized_load_kernel(
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCgC);
 
-    #if 0
+    #if 1
         if(thread0()) {
             print("  mA : "); print(  mA); print("\n");
             print("  gA : "); print(  gA); print("\n");
