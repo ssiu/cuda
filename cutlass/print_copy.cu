@@ -4,9 +4,26 @@ using namespace cute;
 int main()
 {
 
+    TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopyWithAssumedAlignment<16>, half_t>{},
+                                     Layout<Shape<_4,_8>, Stride<_1,_4>>{},
+                                     Layout<Shape< _4,_1>>{});
+
+
+#if 0
+    // test partition
+        auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{}, Layout<Shape<_1, _1, _1>>{}, Tile<_32,_32,_32>{});
+        //auto tiled_copy = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+        auto tiled_copy = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+
+        print_latex(tiled_copy);
+        // print_latex(mma);
+
+
+#endif
+
 #if 0
     using SrcLayout = typename Copy_Traits<SM75_U32x4_LDSM_N>::DstLayout;
-    auto s =
+
 #endif
 #if 0
 
