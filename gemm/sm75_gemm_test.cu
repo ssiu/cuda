@@ -1,3 +1,8 @@
+// try 2 things:
+//
+// try a 256 x 128 x 32 gemm and see what happens
+// load a 128 x 128 x 32 tile, but do 128 x 128 x 8 gemm
+
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
@@ -144,6 +149,9 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
+
+// https://github.com/Dao-AILab/flash-attention/blob/cf0f4c38ef4cfd861caa8173a39ef34e299c5048/csrc/flash_attn/src/kernel_traits.h#L120
+// looks like its possible to do tiled to shape to the layout first
     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
