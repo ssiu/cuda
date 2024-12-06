@@ -6,6 +6,18 @@ using namespace cute;
 int main() {
 
 
+    #if 1
+        auto copy_atom = Layout<Shape<_8, _4>,
+                                Stride<_1,_8>>{};
+
+        auto tile_shape = Shape<_32, _32>{};
+
+        auto copy_layout =  tile_to_shape(copy_atom, tile_shape);
+
+        print_latex(copy_layout);
+    #endif
+
+
     #if 0
     {
         Layout layout = make_layout(make_shape (_8{}, _64{}),
@@ -13,7 +25,7 @@ int main() {
         print_latex(layout);
     }
     #endif
-    #if 1
+    #if 0
     {
 //        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
 //        print_layout(smem_atom);
