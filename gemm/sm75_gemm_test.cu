@@ -79,7 +79,7 @@ __global__ void gemm_test_kernel(
         __syncthreads();
         CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-            gemm(mma, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
+            gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
         }
         // Compute gemm on mma-partitioned smem
 
