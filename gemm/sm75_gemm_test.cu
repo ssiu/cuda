@@ -54,6 +54,8 @@ __global__ void gemm_test_kernel(
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
     // Allocate the accumulators -- same size as the projected data
+    Tensor tCrA = thr_mma.make_fragment_A(tCsA);
+    Tensor tCrB = thr_mma.make_fragment_B(tCsB);
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
 
     //printf("tCrC: %f\n", tCrC[0]);
@@ -83,8 +85,12 @@ __global__ void gemm_test_kernel(
 //             //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
 //         }
         // Compute gemm on mma-partitioned smem
-        gemm(mma, tCrC, tCsA, tCsB, tCrC);
-        //gemm(mma, tCrC, tCsA(_,_,0), tCsB(_,_,0), tCrC);
+        // gemm(mma, tCrC, tCsA, tCsB, tCrC);
+        copy(tCsA, tCrA);
+        copy(tCsB, tCrB);
+
+        //gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
+        gemm(mma, tCrA, tCrB, tCrC);
 
         __syncthreads();
 
