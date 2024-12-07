@@ -108,7 +108,7 @@ __global__ void gemm_vectorized_load_kernel(
         }
     #endif
 
-    #if 0
+    #if 1
         if(thread(1)) {
             print("  mC : "); print(  mC); print("\n");
             print("  gC : "); print(  gC); print("\n");
