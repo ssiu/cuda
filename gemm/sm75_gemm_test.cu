@@ -100,7 +100,7 @@ __global__ void gemm_test_kernel(
             print("  sA : "); print(  sA); print("\n");
             print("tAgA : "); print(tAgA); print("\n");
             print("tAsA : "); print(tAsA); print("\n");
-            print("tAsA(0) : "); print(tAsA(_,_,0); print("\n");
+
         }
     #endif
 
@@ -122,6 +122,7 @@ __global__ void gemm_test_kernel(
             print("tCsB : "); print(tCsB); print("\n");
             print("tCgC : "); print(tCgC); print("\n");
             print("tCrC : "); print(tCrC); print("\n");
+            print("tCsA(0) : "); print(tCsA(_,_,0); print("\n");
         }
     #endif
 
