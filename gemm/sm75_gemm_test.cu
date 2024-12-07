@@ -79,7 +79,8 @@ __global__ void gemm_test_kernel(
         __syncthreads();
         CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-            gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
+
+            //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
         }
         // Compute gemm on mma-partitioned smem
 
@@ -93,12 +94,13 @@ __global__ void gemm_test_kernel(
 
     #if 1
         if(thread0()) {
+
             print("  mA : "); print(  mA); print("\n");
             print("  gA : "); print(  gA); print("\n");
             print("  sA : "); print(  sA); print("\n");
             print("tAgA : "); print(tAgA); print("\n");
             print("tAsA : "); print(tAsA); print("\n");
-
+            print("tAsA(0) : "); print(tAsA(_,_,0); print("\n");
         }
     #endif
 
