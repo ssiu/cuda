@@ -89,8 +89,8 @@ __global__ void gemm_test_kernel(
         copy(tCsA, tCrA);
         copy(tCsB, tCrB);
 
-        //gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
-        gemm(mma, tCrA, tCrB, tCrC);
+        gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
+        //gemm(mma, tCrA, tCrB, tCrC);
 
         __syncthreads();
 
@@ -127,6 +127,8 @@ __global__ void gemm_test_kernel(
             print("  gC : "); print(  gC); print("\n");
             print("tCsA : "); print(tCsA); print("\n");
             print("tCsB : "); print(tCsB); print("\n");
+            print("tCrA : "); print(tCrA); print("\n");
+            print("tCrB : "); print(tCrB); print("\n");
             print("tCgC : "); print(tCgC); print("\n");
             print("tCrC : "); print(tCrC); print("\n");
             print("tCsA(0) : "); print(tCsA(_,_,0)); print("\n");
