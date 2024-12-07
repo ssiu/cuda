@@ -131,7 +131,7 @@ __global__ void gemm_test_kernel(
             print("tCrB : "); print(tCrB); print("\n");
             print("tCgC : "); print(tCgC); print("\n");
             print("tCrC : "); print(tCrC); print("\n");
-            print("tCsA(0) : "); print(tCsA(_,_,0)); print("\n");
+            print("tCrA(0) : "); print(tCrA(_,_,0)); print("\n");
         }
     #endif
 
