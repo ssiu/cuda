@@ -78,12 +78,13 @@ __global__ void gemm_test_kernel(
 
         __syncthreads();
         CUTE_UNROLL
-        for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-
-            //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
-        }
+//         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
+//
+//             //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
+//         }
         // Compute gemm on mma-partitioned smem
-
+        gemm(mma, tCrC, tCsA, tCsB, tCrC);
+        //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
 
         __syncthreads();
 
@@ -175,7 +176,7 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
     auto bN = Int<128>{};
-    auto bK = Int< 32>{};
+    auto bK = Int<  8>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
 
