@@ -69,7 +69,7 @@ __global__ void gemm_test_kernel(
 
     auto K_TILE_MAX = size<3>(tAgA);
     auto K_BLOCK_MAX = size<2>(tCsA);
-    CUTE_NO_UNROLL
+    //CUTE_NO_UNROLL
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
 
@@ -77,7 +77,7 @@ __global__ void gemm_test_kernel(
         copy(copy_b, tBgB(_,_,_,k_tile), tBsB);
 
         __syncthreads();
-        CUTE_UNROLL
+        //CUTE_UNROLL
 //         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 //
 //             //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
