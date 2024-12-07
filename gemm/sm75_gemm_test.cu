@@ -83,8 +83,8 @@ __global__ void gemm_test_kernel(
 //             //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
 //         }
         // Compute gemm on mma-partitioned smem
-        //gemm(mma, tCsA, tCsB, tCrC);
-        gemm(mma, tCrC, tCsA(_,_,0), tCsB(_,_,0), tCrC);
+        gemm(mma, tCsA, tCsB, tCrC);
+        //gemm(mma, tCrC, tCsA(_,_,0), tCsB(_,_,0), tCrC);
 
         __syncthreads();
 
