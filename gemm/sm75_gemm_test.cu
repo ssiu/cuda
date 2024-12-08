@@ -54,8 +54,7 @@ __global__ void gemm_test_kernel(
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
 
     // Allocate the accumulators -- same size as the projected data
-    //Tensor tCrA = thr_mma.make_fragment_A(tCsA);
-    Tensor tCrA = thr_mma.make_fragment_like(tCsA);
+    Tensor tCrA = thr_mma.make_fragment_A(tCsA);
     Tensor tCrB = thr_mma.make_fragment_B(tCsB);
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
 
