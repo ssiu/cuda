@@ -100,7 +100,7 @@ __global__ void gemm_test_kernel(
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCgC);
 
-    #if 1
+    #if 0
         if(thread0()) {
 
             print("  mA : "); print(  mA); print("\n");
