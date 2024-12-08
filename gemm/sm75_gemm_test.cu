@@ -80,17 +80,18 @@ __global__ void gemm_test_kernel(
 
         __syncthreads();
         //CUTE_UNROLL
-//         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-//
-//             //gemm(mma, tCrC, tCsA(_,_,k_block), tCsB(_,_,k_block), tCrC);
-//         }
-        // Compute gemm on mma-partitioned smem
-        // gemm(mma, tCrC, tCsA, tCsB, tCrC);
-        copy(tCsA, tCrA);
-        copy(tCsB, tCrB);
+        for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
-        gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
-        //gemm(mma, tCrA, tCrB, tCrC);
+            copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
+            copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
+
+            gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
+        }
+        // Compute gemm on mma-partitioned smem
+//         copy(tCsA, tCrA);
+//         copy(tCsB, tCrB);
+//
+//         gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
 
         __syncthreads();
 
@@ -184,14 +185,14 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
     auto bN = Int<128>{};
-    auto bK = Int<  8>{};
+    auto bK = Int< 32>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
 
-    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
+    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
                         make_stride(Int<1>{}, Int<128>{}));
-    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{}));
+    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
+                        make_stride(Int<32>{}, Int<1>{}));
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
