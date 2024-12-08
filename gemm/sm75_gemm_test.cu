@@ -122,7 +122,7 @@ __global__ void gemm_test_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread(1)) {
             print("  mC : "); print(  mC); print("\n");
             print("  gC : "); print(  gC); print("\n");
