@@ -70,7 +70,7 @@ __global__ void gemm_ldsm_kernel(
     auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
 
 
-    #if 1
+    #if 0
         if(thread0()) {
             print("tCrA : "); print(  tCrA); print("\n");
             print("tCrA_copy_view : "); print(  tCrA_copy_view); print("\n");
