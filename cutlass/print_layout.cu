@@ -5,8 +5,19 @@ using namespace cute;
 
 int main() {
 
-
     #if 1
+    {
+//        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
+//        print_layout(smem_atom);
+        auto layout = composition(Swizzle<2, 3, 3>{},
+                                    Layout<Shape<_128, _32>,
+                                    Stride<_32, _1>>{});
+        print_layout(layout);
+    }
+    #endif
+
+
+    #if 0
         auto copy_atom = Layout<Shape<_8, _4>,
                                 Stride<_1,_8>>{};
 
