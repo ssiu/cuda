@@ -196,10 +196,10 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
 //     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
 //                         make_stride(Int<32>{}, Int<1>{}));
 
-    auto sA_layout = composition(Swizzle<2, 3, 3>{},
+    auto sA_layout = composition(Swizzle<3, 3, 3>{},
                                 Layout<Shape<_128, _32>,
                                 Stride<_32, _1>>{});
-    auto sB_layout = composition(Swizzle<2, 3, 3>{},
+    auto sB_layout = composition(Swizzle<3, 3, 3>{},
                                 Layout<Shape<_128, _32>,
                                 Stride<_32, _1>>{});
 
