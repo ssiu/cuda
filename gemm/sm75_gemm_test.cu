@@ -48,7 +48,7 @@ __global__ void gemm_test_kernel(
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
-    Tensor tArA = make_fragment_like(tBsB);
+    Tensor tBrB = make_fragment_like(tBsB);
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
