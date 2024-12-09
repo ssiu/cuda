@@ -212,18 +212,18 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
-    TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                               Layout<Shape<_16,_8>, Stride<_1,_16>>{},
-                               Layout<Shape< _8,_1>>{});
-    TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-                               Layout<Shape<_128,_1>, Stride<_1,_0>>{},
-                               Layout<Shape< _1,_8>>{});
-//     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+//     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
 //                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
 //                                Layout<Shape< _8,_1>>{});
-//     TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-//                                Layout<Shape<_32,_4>, Stride<_4,_1>>{},
+//     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+//                                Layout<Shape<_128,_1>, Stride<_1,_0>>{},
 //                                Layout<Shape< _1,_8>>{});
+    TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+                               Layout<Shape<_16,_8>, Stride<_1,_16>>{},
+                               Layout<Shape< _8,_1>>{});
+    TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+                               Layout<Shape<_32,_4>, Stride<_4,_1>>{},
+                               Layout<Shape< _1,_8>>{});
 
 //     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
 //                                     Layout<Shape<_2, _2, _1>>{},
