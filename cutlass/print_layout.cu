@@ -12,7 +12,7 @@ int main() {
         auto layout = composition(Swizzle<2, 3, 3>{},
                                     Layout<Shape<_128, _32>,
                                     Stride<_32, _1>>{});
-        print_layout(layout);
+        print_latex(layout);
     }
     #endif
 
