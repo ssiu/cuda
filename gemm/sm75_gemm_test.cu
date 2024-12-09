@@ -189,10 +189,20 @@ void gemm_test(half_t* A, half_t* B, float* C, int m, int n, int k) {
     auto cta_tiler = make_shape(bM, bN, bK);
 
 
-    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
-                        make_stride(Int<1>{}, Int<128>{}));
-    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
-                        make_stride(Int<32>{}, Int<1>{}));
+
+
+//     auto sA_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
+//                         make_stride(Int<1>{}, Int<128>{}));
+//     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
+//                         make_stride(Int<32>{}, Int<1>{}));
+
+    auto sA_layout = composition(Swizzle<2, 3, 3>{},
+                                Layout<Shape<_128, _32>,
+                                Stride<_32, _1>>{});
+    auto sB_layout = composition(Swizzle<2, 3, 3>{},
+                                Layout<Shape<_128, _32>,
+                                Stride<_32, _1>>{});
+
     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
                         make_stride(Int<1>{}, Int<128>{}));
 
