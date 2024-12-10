@@ -18,7 +18,7 @@
 
 #include "sm75_gemm_vectorized_load_256.cu"
 #include "sm75_gemm_swizzle_256.cu"
-//#include "sm75_gemm_test.cu"
+
 using namespace cute;
 
 

@@ -8,22 +8,24 @@ int main() {
     #if 1
     {
 
-        using SmemLayoutAtom = decltype(composition(
+        using SmemLayoutAtomA = decltype(composition(
             Swizzle<3, 3, 3>{},
             make_layout(make_shape(Int<32>{}, Int<32>{}),
                         make_stride(Int<1>{}, Int<32>{}))));
-        using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtom{},
+        using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtomA{},
                                                    make_shape(Int<128>{}, Int<32>{})));
-        SmemLayoutA SmemLayout;
+        SmemLayoutA sA_layout;
 
-//         using SmemLayoutAtom = decltype(composition(
-//             Swizzle<3, 3, 3>{},
-//             make_layout(make_shape(Int<32>{}, Int<32>{}),
-//                         make_stride(Int<32>{}, Int<1>{}))));
-//         using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtom{},
-//                                                    make_shape(Int<128>{}, Int<32>{})));
-//         SmemLayoutA SmemLayout;
+        using SmemLayoutAtomB = decltype(composition(
+            Swizzle<3, 3, 3>{},
+            make_layout(make_shape(Int<32>{}, Int<32>{}),
+                        make_stride(Int<32>{}, Int<1>{}))));
+        using SmemLayoutB = decltype(tile_to_shape(SmemLayoutAtomB{},
+                                                   make_shape(Int<128>{}, Int<32>{})));
+        SmemLayoutB sB_layout;
 
+        print_layout(SmemLayoutA);
+        print_layout(SmemLayoutB);
 
 
 //         auto SmemLayoutAtom = decltype(composition(
