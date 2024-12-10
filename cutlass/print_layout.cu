@@ -10,7 +10,7 @@ int main() {
 //        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
 //        print_layout(smem_atom);
         using SmemLayoutAtom = decltype(composition(
-            Swizzle<3, 3, 3>{},
+            Swizzle<3, 3, 2>{},
             make_layout(make_shape(Int<32>{}, Int<8>{}),
                         make_stride(Int<1>{}, Int<128>{}))));
         using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtom{},
