@@ -13,7 +13,7 @@
 #include "sm75_gemm_swizzle.cu"
 #include "sm75_gemm_ldsm.cu"
 #include "sm75_gemm_smem_buffering.cu"
-
+#include "sm75_gemm_vectorized_load_256.cu"
 
 //#include "sm75_gemm_test.cu"
 using namespace cute;
@@ -58,24 +58,28 @@ int main(int argc, char** argv)
 //
 //
     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
-    gemm_vectorized_load(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load");
-
-    gemm_swizzle(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle");
-
-    gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
+//     gemm_vectorized_load(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load");
 //
-    gemm_smem_buffering(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     gemm_swizzle(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle");
+//
+//     gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
+// //
+//     gemm_smem_buffering(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
+//
+//     gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "test");
+//
+    gemm_vectorized_load_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
-
-    gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "test");
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load_256");
     return 0;
 }
