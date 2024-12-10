@@ -18,8 +18,8 @@ int main() {
 
         using SmemLayoutAtom = decltype(composition(
             Swizzle<3, 3, 3>{},
-            make_layout(make_shape(Int<32>{}, Int<8>{}),
-                        make_stride(Int<8>{}, Int<1>{}))));
+            make_layout(make_shape(Int<32>{}, Int<32>{}),
+                        make_stride(Int<32>{}, Int<1>{}))));
         using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtom{},
                                                    make_shape(Int<128>{}, Int<32>{})));
         SmemLayoutA SmemLayout;
