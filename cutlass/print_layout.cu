@@ -10,15 +10,17 @@ int main() {
 //        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
 //        print_layout(smem_atom);
 
-        auto layout1 = composition(Swizzle<3, 2, 3>{},
+        auto layout1 = composition(Swizzle<1, 3, 3>{},
                                     Layout<Shape<_128, _32>,
                                     Stride<_1, _128>>{});
-        auto layout2 = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_128, _32>,
-                                    Stride<_32, _1>>{});
 
         print_layout(layout1);
-        print_layout(layout2);
+//         auto layout2 = composition(Swizzle<3, 3, 3>{},
+//                                     Layout<Shape<_128, _32>,
+//                                     Stride<_32, _1>>{});
+//
+//
+//         print_layout(layout2);
     }
     #endif
 
