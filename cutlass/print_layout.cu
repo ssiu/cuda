@@ -24,8 +24,8 @@ int main() {
                                                    make_shape(Int<128>{}, Int<32>{})));
         SmemLayoutB sB_layout;
 
-        print_layout(SmemLayoutA);
-        print_layout(SmemLayoutB);
+        print_layout(sA_layout);
+        print_layout(sB_layout);
 
 
 //         auto SmemLayoutAtom = decltype(composition(
@@ -35,7 +35,7 @@ int main() {
 //
 //         auto SmemLayout = tile_to_shape(SmemLayoutAtom{}, make_shape(Int<128>{}, Int<32>{}));
 
-        print_layout(SmemLayout);
+
 
 
 //         auto layout1 = composition(Swizzle<3, 3, 2>{},
