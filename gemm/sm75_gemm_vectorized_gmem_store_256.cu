@@ -67,7 +67,7 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrA = thr_mma.make_fragment_A(tCsA);
     Tensor tCrB = thr_mma.make_fragment_B(tCsB);
-    Tensor tCrC = thr_mma.make_fragment_C(tCgC);
+    Tensor tCrC = thr_mma.make_fragment_C(tCsC);
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
