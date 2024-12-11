@@ -244,6 +244,7 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     gemm_vectorized_gmem_store_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
-                                                     C, dC, sC_layout, mmaC);
+                                                     C, dC, sC_layout, copyC,
+                                                     mmaC);
 }
 
