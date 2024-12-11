@@ -114,7 +114,9 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCsC);
-    
+
+    __syncthreads();
+
     copy(copy_c, s2g_tCsC, s2g_tCgC);
     
     #if 0
