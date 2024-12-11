@@ -48,7 +48,6 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
     Tensor tArA = make_fragment_like(tAsA);
 
-
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
@@ -113,8 +112,9 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     }
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
-    copy(tCrC, tCgC);
-
+//    copy(tCrC, tCgC);
+   copy(tCrC, tCsC);
+   copy(tCsC, tCgC);
 //     __syncthreads();
 //
 //     copy(copy_c, s2g_tCsC, s2g_tCgC);
