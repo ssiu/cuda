@@ -37,7 +37,7 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
 
     __shared__ TA smemA[cosize_v<ASmemLayout>];
     __shared__ TB smemB[cosize_v<BSmemLayout>];
-    __shared__ TC smemC[cosize_v<CSmemLayout>];
+    //__shared__ TC smemC[cosize_v<CSmemLayout>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
