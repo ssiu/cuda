@@ -23,13 +23,13 @@ __global__ void mm_kernel(
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
     Tensor g_out = make_tensor(make_gmem_ptr(out), layout_out);
 
-    __shared__ T smem[cosize_v<LayoutOut>];
+//     __shared__ T smem[cosize_v<LayoutOut>];
 
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
     Tensor tg_in = thr_copy.partition_S(g_in);
     Tensor tg_out = thr_copy.partition_D(g_out);
-    Tensor ts = thr_copy.partition_D(smem);
-    Tensor tr = make_fragment_like(tg_in);
+//     Tensor ts = thr_copy.partition_D(smem);
+//     Tensor tr = make_fragment_like(tg_in);
 
     #if 1
         if(thread0()) {
