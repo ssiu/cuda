@@ -36,7 +36,7 @@ __global__ void mm_kernel(
         print("  g_in : "); print(  g_in); print("\n");
         print(" g_out : "); print( g_out); print("\n");
         print(" tg_in : "); print( tg_in); print("\n");
-        print("ts_out : "); print(ts_out); print("\n");
+        print("tg_out : "); print(ts_out); print("\n");
 
         }
     #endif
