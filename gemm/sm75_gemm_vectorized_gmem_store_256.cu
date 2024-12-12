@@ -39,16 +39,11 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
 //     __shared__ TB smemB[cosize_v<BSmemLayout>];
 //     __shared__ half smemC[cosize_v<CSmemLayout>];
 
-    extern __shared__ TA sharedMemory_TA[];
-    TC* sharedMemory_TC = reinterpret_cast<TC*>(sharedMemory_TA);
+    extern __shared__ char smem_[];
 
-    TA* smemA = &sharedMemory_TA[0];
-    TB* smemB = smemA + cosize_v<ASmemLayout>;
-    TC* smemC = &sharedMemory_TC[0];
-
-    Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
-    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
-    Tensor sC = make_tensor(make_smem_ptr(smemC), sC_layout);
+    Tensor sA = make_tensor(make_smem_ptr(reinterpret_cast<TA*>(smem_)), sA_layout);
+    Tensor sB = make_tensor(sA.data() + size(sA), sB_layout);
+    Tensor sC = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
