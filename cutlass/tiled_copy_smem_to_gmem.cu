@@ -23,7 +23,9 @@ __global__ void mm_kernel(
     Tensor g_in = make_tensor(make_gmem_ptr(in), layout_in);
     Tensor g_out = make_tensor(make_gmem_ptr(out), layout_out);
 
-    __shared__ T smem[cosize_v<LayoutOut>];
+    __shared__ T shared[cosize_v<LayoutOut>];
+    Tensor smem = make_tensor(make_smem_ptr(shared), layout_out);
+
 
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
     Tensor tg_in = thr_copy.partition_S(g_in);
