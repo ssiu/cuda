@@ -26,9 +26,9 @@ __global__ void mm_kernel(
     __shared__ T smem[cosize_v<LayoutOut>];
 
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
-    Tensor tg_in = thr_copy.partition_S(g_in);                            // (CPY,CPY_M,CPY_K,k)
-    Tensor tg_out = thr_copy.partition_D(g_out);                            // (CPY,CPY_M,CPY_K)
-    Tensor ts = make_fragment_like(smem);
+    Tensor tg_in = thr_copy.partition_S(g_in);
+    Tensor tg_out = thr_copy.partition_D(g_out);
+    Tensor ts = thr_copy.partition_D(smem);
     Tensor tr = make_fragment_like(tg_in);
 
     #if 1
