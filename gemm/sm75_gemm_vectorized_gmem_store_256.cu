@@ -250,7 +250,7 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     dim3 dimBlock(256);
     int maxbytes = 65536;
 //     auto kernel = &ln_fwd_kernel<Kernel_traits, IsDropoutConst, HasColscaleConst, HasSubsetConst, IsEvenColsConst>;
-    auto kernel = &gemm_vectorized_gmem_store_256_kernel<decltype(prob_shape), decltype(cta_tiler),
+    auto kernel = gemm_vectorized_gmem_store_256_kernel<decltype(prob_shape), decltype(cta_tiler),
                                                     decltype(A), decltype(dA), decltype(sA_layout), decltype(copyA),
                                                     decltype(B), decltype(dB), decltype(sB_layout), decltype(copyB),
                                                     decltype(C), decltype(dC), decltype(sC_layout), decltype(copyC),
