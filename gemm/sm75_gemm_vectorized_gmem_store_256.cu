@@ -35,9 +35,16 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
     Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
-    __shared__ TA smemA[cosize_v<ASmemLayout>];
-    __shared__ TB smemB[cosize_v<BSmemLayout>];
-    __shared__ half smemC[cosize_v<CSmemLayout>];
+//     __shared__ TA smemA[cosize_v<ASmemLayout>];
+//     __shared__ TB smemB[cosize_v<BSmemLayout>];
+//     __shared__ half smemC[cosize_v<CSmemLayout>];
+
+    extern __shared__ TA sharedMemory_TA[];
+    TC* sharedMemory_TC = reinterpret_cast<TC*>(sharedMemory_TA);
+
+    TA* smemA = &sharedMemory_TA[0];
+    TB* smemB = smemA + cosize_v<ASmemLayout>;
+    TC* smemC = &sharedMemory_TC[0];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
@@ -243,10 +250,13 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
+    int maxbytes = 65536;
+    cudaFuncSetAttribute(gemm_vectorized_gmem_store_256_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
     gemm_vectorized_gmem_store_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, copyC,
                                                      mmaC);
+
 }
 
