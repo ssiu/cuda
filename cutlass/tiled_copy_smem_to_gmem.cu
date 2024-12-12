@@ -43,7 +43,9 @@ __global__ void mm_kernel(
         }
     #endif
 
-    copy(tiled_copy, tg_in, tg_out);
+    copy(tiled_copy, tg_in, ts);
+    copy(tiled_copy, ts, tg_out);
+    //copy(tiled_copy, tg_in, tg_out);
 
 
 }
