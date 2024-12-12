@@ -66,7 +66,7 @@ void mm(T* in, T* out) {
 //     print_layout(out_layout);
 
     TiledCopy tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, T>{},
-                                     Layout<Shape<_8,_8>, Stride<_1,_4>>{},
+                                     Layout<Shape<_8,_8>, Stride<_1,_8>>{},
                                      Layout<Shape< _1,_1>>{});
 
     //print_latex(tiled_copy);
