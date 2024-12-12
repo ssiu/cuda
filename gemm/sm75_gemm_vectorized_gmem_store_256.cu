@@ -251,7 +251,7 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
     int maxbytes = 65536;
-    cudaFuncSetAttribute(gemm_vectorized_gmem_store_256_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+    cudaFuncSetAttribute((const void*)gemm_vectorized_gmem_store_256_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
     gemm_vectorized_gmem_store_256_kernel<<<dimGrid, dimBlock, maxbytes>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
