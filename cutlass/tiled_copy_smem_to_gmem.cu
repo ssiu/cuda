@@ -28,7 +28,7 @@ __global__ void mm_kernel(
     ThrCopy thr_copy = tiled_copy.get_slice(threadIdx.x);
     Tensor tg_in = thr_copy.partition_S(g_in);
     Tensor tg_out = thr_copy.partition_D(g_out);
-//     Tensor ts = thr_copy.partition_D(smem);
+    Tensor ts = thr_copy.partition_D(smem);
 //     Tensor tr = make_fragment_like(tg_in);
 
     #if 1
