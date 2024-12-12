@@ -43,10 +43,10 @@ __global__ void mm_kernel(
         }
     #endif
 
-    copy(tiled_copy, tg_in, ts);
-    copy(tiled_copy, ts, tr);
-    copy(tiled_copy, tr, tg_out);
-    //copy(tiled_copy, tg_in, tg_out);
+//     copy(tiled_copy, tg_in, ts);
+//     copy(tiled_copy, ts, tr);
+//     copy(tiled_copy, tr, tg_out);
+    copy(tiled_copy, tg_in, tg_out);
 
 
 }
@@ -66,12 +66,12 @@ void mm(T* in, T* out) {
 //     print_layout(out_layout);
 
     TiledCopy tiled_copy = make_tiled_copy(Copy_Atom<DefaultCopy, T>{},
-                                     Layout<Shape<_4,_8>, Stride<_1,_4>>{},
-                                     Layout<Shape< _2,_1>>{});
+                                     Layout<Shape<_8,_8>, Stride<_1,_4>>{},
+                                     Layout<Shape< _1,_1>>{});
 
     //print_latex(tiled_copy);
     dim3 dimGrid(1);
-    dim3 dimBlock(32);
+    dim3 dimBlock(64);
     mm_kernel<<<dimGrid, dimBlock>>>(in, in_layout,
                                      out, out_layout,
                                      tiled_copy);
