@@ -100,6 +100,10 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle_256");
 
+    for (int i=0;i<32;i++) {
+        printf("cutlass = %f, cublas = %f\n", h_C[i], h_C_cublas[i]);
+    }
+
     gemm_ldsm_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm_256");
