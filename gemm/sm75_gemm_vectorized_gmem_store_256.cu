@@ -238,8 +238,8 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
                                Layout<Shape< _1,_8>>{});
     TiledCopy copyC = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                               Layout<Shape<_16,_16>, Stride<_1,_16>>{},
-                               Layout<Shape< _8,_1>>{});
+                               Layout<Shape<_32,_8>, Stride<_1,_32>>{},
+                               Layout<Shape< _4,_1>>{});
 
 //     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
 //                                     Layout<Shape<_2, _2, _1>>{},
