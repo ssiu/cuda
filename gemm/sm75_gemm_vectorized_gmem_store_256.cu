@@ -222,8 +222,20 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
                         make_stride(Int<32>{}, Int<1>{}));
 
-    auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
-                        make_stride(Int<1>{}, Int<128>{}));
+//     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
+//                         make_stride(Int<1>{}, Int<128>{}));
+
+
+    using SmemLayoutAtomC = decltype(composition(
+        Swizzle<3, 3, 3>{},
+        make_layout(make_shape(Int<32>{}, Int<8>{}),
+                    make_stride(Int<1>{}, Int<32>{}))));
+    using SmemLayoutC = decltype(tile_to_shape(SmemLayoutAtomB{},
+                                               make_shape(Int<128>{}, Int<128>{})));
+    SmemLayoutC sC_layout;
+
+
+
 
 //     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
 //                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
