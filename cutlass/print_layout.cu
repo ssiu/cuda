@@ -7,6 +7,17 @@ int main() {
 
     #if 1
     {
+//        auto smem_atom = composition(Swizzle<2,0,3>{}, Layout<Shape<_4,_8>,Stride<_8,_1>>{});
+//        print_layout(smem_atom);
+        auto layout = composition(Swizzle<2, 2, 2>{},
+                                    Layout<Shape<Shape<_8,_2>, Shape<_2,_4>>,
+                                    Stride<Stride<_4,_64>, Stride<_32,_1>>>{});
+        print_latex(layout);
+    }
+    #endif
+
+    #if 0
+    {
 
         using SmemLayoutAtomA = decltype(composition(
             Swizzle<3, 3, 3>{},
