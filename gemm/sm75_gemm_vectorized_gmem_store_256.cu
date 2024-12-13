@@ -57,16 +57,16 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
     Tensor tBrB = make_fragment_like(tBsB);
     
-    //ThrCopy thr_copy_c = copy_c.get_slice(threadIdx.x);
-    //Tensor s2g_tCsC = thr_copy_c.partition_S(sC);                            // (CPY,CPY_N,CPY_K,k)
-    //Tensor s2g_tCgC = thr_copy_c.partition_D(gC);                            // (CPY,CPY_N,CPY_K)
+    ThrCopy thr_copy_c = copy_c.get_slice(threadIdx.x);
+    Tensor s2g_tCsC = thr_copy_c.partition_S(sC);                            // (CPY,CPY_N,CPY_K,k)
+    Tensor s2g_tCgC = thr_copy_c.partition_D(gC);                            // (CPY,CPY_N,CPY_K)
     
     
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
     Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
-    //Tensor tCsC = thr_mma.partition_C(sC);
+    Tensor tCsC = thr_mma.partition_C(sC);
     
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrA = thr_mma.make_fragment_A(tCsA);
@@ -117,11 +117,11 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     }
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
-    copy(tCrC, tCgC);
+    //copy(tCrC, tCgC);
 
-//     copy(tCrC, tCsC);
-//     __syncthreads();
-//     copy(copy_c, s2g_tCsC, s2g_tCgC);
+    copy(tCrC, tCsC);
+    __syncthreads();
+    copy(copy_c, s2g_tCsC, s2g_tCgC);
     
     #if 0
         if(thread0()) {
