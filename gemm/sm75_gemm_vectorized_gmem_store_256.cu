@@ -45,7 +45,7 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
 
     Tensor sA = make_tensor(make_smem_ptr(reinterpret_cast<TA*>(smem_)), sA_layout);
     Tensor sB = make_tensor(sA.data() + size(sA), sB_layout);
-//     Tensor sC = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
+    Tensor sC = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
