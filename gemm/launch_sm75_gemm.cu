@@ -22,7 +22,7 @@
 #include "sm75_gemm_ldsm_256.cu"
 #include "sm75_gemm_smem_pipelining_256.cu"
 #include "sm75_gemm_register_pipelining_256.cu"
-
+#include "sm75_gemm_register_pipelining_128.cu"
 
 
 using namespace cute;
@@ -119,7 +119,9 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
 
-
+    gemm_register_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128");
 
     return 0;
 }
