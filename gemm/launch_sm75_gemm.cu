@@ -21,6 +21,7 @@
 #include "sm75_gemm_swizzle_256.cu"
 #include "sm75_gemm_ldsm_256.cu"
 #include "sm75_gemm_smem_pipelining_256.cu"
+#include "sm75_gemm_smem_pipelining_128.cu"
 #include "sm75_gemm_register_pipelining_256.cu"
 #include "sm75_gemm_register_pipelining_128.cu"
 
