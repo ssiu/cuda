@@ -95,47 +95,47 @@ int main(int argc, char** argv)
 
 
 
-//     gemm_vectorized_load_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load_256");
-//
-//     gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_gmem_store_256");
-//
-//
-//
-//     gemm_swizzle_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle_256");
+    gemm_vectorized_load_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load_256");
+
+    gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_gmem_store_256");
 
 
 
-//     gemm_ldsm_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm_256");
-//
-//     gemm_smem_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_256");
-//
-//     gemm_smem_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
-//
-//     gemm_smem_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_64");
-//
-//
-//
-//     gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
-//
-//     gemm_register_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128");
+    gemm_swizzle_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle_256");
+
+
+
+    gemm_ldsm_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm_256");
+
+    gemm_smem_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_256");
+
+    gemm_smem_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
+
+    gemm_smem_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_64");
+
+
+
+    gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
+
+    gemm_register_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128");
 
     gemm_register_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
