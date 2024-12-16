@@ -16,7 +16,7 @@ template <class ProblemShape, class CtaTiler,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
 __global__ __launch_bounds__(128)
-void gemm_smem_pipelining_128_kernel(
+void gemm_register_pipelining_128_bk_64_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -98,13 +98,19 @@ void gemm_smem_pipelining_128_kernel(
             copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
         }
 
+
+        copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
+        copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
         CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-
+            if (k_block < K_BLOCK_MAX - 1) {
+                int k_block_next = k_block + 1;
+                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+            }
 //             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
 //             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
-            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block), tCrA_copy_view(_,_,k_block));
-            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block), tCrB_copy_view(_,_,k_block));
+
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
 
@@ -197,7 +203,7 @@ void gemm_smem_pipelining_128_kernel(
 }
 
 
-void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_register_pipelining_128_bk_64(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
@@ -208,7 +214,7 @@ void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int 
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
     auto bN = Int<128>{};
-    auto bK = Int< 32>{};
+    auto bK = Int< 64>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
     using SmemLayoutAtomA = decltype(composition(
@@ -216,7 +222,7 @@ void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int 
         make_layout(make_shape(Int<64>{}, Int<16>{}),
                     make_stride(Int<1>{}, Int<64>{}))));
     using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtomA{},
-                                               make_shape(Int<128>{}, Int<32>{})));
+                                               make_shape(Int<128>{}, Int<64>{})));
 
     SmemLayoutA sA_layout;
 
@@ -226,7 +232,7 @@ void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int 
         make_layout(make_shape(Int<32>{}, Int<32>{}),
                     make_stride(Int<32>{}, Int<1>{}))));
     using SmemLayoutB = decltype(tile_to_shape(SmemLayoutAtomB{},
-                                               make_shape(Int<128>{}, Int<32>{})));
+                                               make_shape(Int<128>{}, Int<64>{})));
     SmemLayoutB sB_layout;
 
 
@@ -248,7 +254,7 @@ void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int 
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(128);
-    gemm_smem_pipelining_128_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    gemm_register_pipelining_128_bk_64_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);
