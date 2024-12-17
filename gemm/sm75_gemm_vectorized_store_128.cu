@@ -36,11 +36,19 @@ void gemm_vectorized_store_128_kernel(
     Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
     Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
-    __shared__ half_t smemA[cosize_v<ASmemLayout>];
-    __shared__ half_t smemB[cosize_v<BSmemLayout>];
+//     __shared__ half_t smemA[cosize_v<ASmemLayout>];
+//     __shared__ half_t smemB[cosize_v<BSmemLayout>];
+//
+//     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
+//     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
 
-    Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
-    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+
+    extern __shared__ char smem_[];
+
+    Tensor sA = make_tensor(make_smem_ptr(reinterpret_cast<TA*>(smem_)), sA_layout);
+    Tensor sB = make_tensor(sA.data() + size(sA), sB_layout);
+    Tensor sC = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
+
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
