@@ -138,12 +138,13 @@ void gemm_vectorized_store_128_kernel(
     }
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
-    //copy(tCrC, tCgC);
-    copy(tCrC, tCsC);
-    __syncthreads();
+    copy(tCrC, tCgC);
+//     copy(tCrC, tCsC);
+//     __syncthreads();
+//
+//     copy(copy_c, s2g_tCsC, s2g_tCrC);
+//     copy(copy_c, s2g_tCrC, s2g_tCgC);
 
-    copy(copy_c, s2g_tCsC, s2g_tCrC);
-    copy(copy_c, s2g_tCrC, s2g_tCgC);
     #if 0
         if(thread0()) {
 
@@ -253,7 +254,7 @@ void gemm_vectorized_store_128(half_t* A, half_t* B, float* C, int m, int n, int
 
     using SmemLayoutAtomC = decltype(composition(
         Swizzle<3, 3, 3>{},
-        make_layout(make_shape(Int<32>{}, Int<4>{}),
+        make_layout(make_shape(Int<32>{}, Int<8>{}),
                     make_stride(Int<1>{}, Int<32>{}))));
     using SmemLayoutC = decltype(tile_to_shape(SmemLayoutAtomC{},
                                                make_shape(Int<128>{}, Int<128>{})));
