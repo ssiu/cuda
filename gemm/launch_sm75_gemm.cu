@@ -65,8 +65,8 @@ int main(int argc, char** argv)
 //     //gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
 //
 //
-//     gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
-//     h_C_cublas = d_C_cublas;
+    gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+    h_C_cublas = d_C_cublas;
 // //
 // //
 //     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
