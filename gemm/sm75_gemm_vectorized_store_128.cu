@@ -21,7 +21,8 @@ void gemm_vectorized_store_128_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
-            TC      * C, CStride dC, CSmemLayout          , TiledMma mma
+            TC      * C, CStride dC, CSmemLayout          , TiledCopyC copy_c,
+            TiledMma mma
 )
 {
 
