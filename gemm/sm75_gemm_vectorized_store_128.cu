@@ -280,6 +280,7 @@ void gemm_vectorized_store_128(half_t* A, half_t* B, float* C, int m, int n, int
     gemm_vectorized_store_128_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
-                                                     C, dC, sC_layout, mmaC);
+                                                     C, dC, sC_layout, copyC,
+                                                     mmaC);
 }
 
