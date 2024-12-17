@@ -265,7 +265,7 @@ void gemm_vectorized_store_256(half_t* A, half_t* B, float* C, int m, int n, int
                                Layout<Shape<_16,_16>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
     TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                               Layout<Shape<_32,_8>, Stride<_4,_1>>{},
+                               Layout<Shape<_64,_4>, Stride<_4,_1>>{},
                                Layout<Shape< _1,_8>>{});
     TiledCopy copyC = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_32,_8>, Stride<_1,_32>>{},
