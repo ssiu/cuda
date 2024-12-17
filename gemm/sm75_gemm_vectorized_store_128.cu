@@ -16,7 +16,7 @@ template <class ProblemShape, class CtaTiler,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledCopyC,
           class TiledMma>
-__global__ __launch_bounds__(128)
+__global__ __launch_bounds__(128,2)
 void gemm_vectorized_store_128_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
