@@ -145,7 +145,9 @@ int main(int argc, char** argv)
     gemm_vectorized_store_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_store_128");
-
+    for (int i=0;i<100;i++) {
+        print("cublas = %f, gemm = %f\n", h_C_cublas[i], h_C[i]);
+    }
 
     return 0;
 }
