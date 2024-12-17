@@ -61,7 +61,9 @@ void gemm_vectorized_store_128_kernel(
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
     Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
+    Tensor tCsC = thr_mma.partition_C(sC);
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+
 
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrA = thr_mma.make_fragment_A(tCsA);
