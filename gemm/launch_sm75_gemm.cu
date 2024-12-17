@@ -62,85 +62,85 @@ int main(int argc, char** argv)
     thrust::device_vector<TC> d_C = h_C;
     thrust::device_vector<TC> d_C_cublas = h_C_cublas;
 
-    //gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-
-
-    gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
-    h_C_cublas = d_C_cublas;
+//     //gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
 //
 //
-    //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
-//     gemm_vectorized_load(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load");
-//
-//     gemm_swizzle(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle");
-//
-//     gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
+//     gemm_cublas(d_A.data().get(), d_B.data().get(), d_C_cublas.data().get(), m, n, k);
+//     h_C_cublas = d_C_cublas;
 // //
-//     gemm_smem_buffering(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
+// //
+//     //if (isSameMatrices(h_C.data(), h_C_cpu.data(), m, n) && isSameMatrices(h_C.data(), h_C_cublas.data(), m, n)) {
+// //     gemm_vectorized_load(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load");
+// //
+// //     gemm_swizzle(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle");
+// //
+// //     gemm_ldsm(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm");
+// // //
+// //     gemm_smem_buffering(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_buffering");
+// //
+// //     gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "test");
+// //
 //
-//     gemm_test(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "test");
 //
-
-
-
-
-
-
-    gemm_vectorized_load_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load_256");
-
-    gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_gmem_store_256");
-
-
-
-    gemm_swizzle_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle_256");
-
-
-
-    gemm_ldsm_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm_256");
-
-//     gemm_smem_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_256");
-
-    gemm_smem_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
-
-//     gemm_smem_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_64");
-
-
-
-//     gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
 //
-//     gemm_register_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-//     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128");
 //
-//     gemm_register_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//
+//
+//     gemm_vectorized_load_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
 //     h_C = d_C;
-//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128_bk_64");
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_load_256");
+//
+//     gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_gmem_store_256");
+//
+//
+//
+//     gemm_swizzle_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "swizzle_256");
+//
+//
+//
+//     gemm_ldsm_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "ldsm_256");
+//
+// //     gemm_smem_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_256");
+//
+//     gemm_smem_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
+//
+// //     gemm_smem_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_64");
+//
+//
+//
+// //     gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
+// //
+// //     gemm_register_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128");
+// //
+// //     gemm_register_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+// //     h_C = d_C;
+// //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_128_bk_64");
 //
     gemm_vectorized_store_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
