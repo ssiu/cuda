@@ -138,12 +138,12 @@ void gemm_vectorized_store_128_kernel(
     }
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
-    copy(tCrC, tCgC);
-//     copy(tCrC, tCsC);
-//     __syncthreads();
-//
-//     copy(copy_c, s2g_tCsC, s2g_tCrC);
-//     copy(copy_c, s2g_tCrC, s2g_tCgC);
+    //copy(tCrC, tCgC);
+    copy(tCrC, tCsC);
+    __syncthreads();
+
+    copy(copy_c, s2g_tCsC, s2g_tCrC);
+    copy(copy_c, s2g_tCrC, s2g_tCgC);
 
     #if 0
         if(thread0()) {
