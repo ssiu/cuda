@@ -16,7 +16,7 @@ template <class ProblemShape, class CtaTiler,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
 __global__ __launch_bounds__(128)
-void gemm_smem_pipelining_128_kernel(
+void gemm_smem_pipelining_128_mma_k_32_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -197,7 +197,7 @@ void gemm_smem_pipelining_128_kernel(
 }
 
 
-void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_smem_pipelining_128_mma_k_32(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
@@ -248,7 +248,7 @@ void gemm_smem_pipelining_128(half_t* A, half_t* B, float* C, int m, int n, int 
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(128);
-    gemm_smem_pipelining_128_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    gemm_smem_pipelining_128_mma_k_32_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);
