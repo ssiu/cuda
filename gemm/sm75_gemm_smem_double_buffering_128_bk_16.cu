@@ -16,7 +16,7 @@ template <class ProblemShape, class CtaTiler,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
 __global__ __launch_bounds__(128)
-void gemm_smem_double_buffering_128_bk_16_bk_16_kernel(
+void gemm_smem_double_buffering_128_bk_16_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
