@@ -238,7 +238,7 @@ void gemm_smem_double_buffering_128_bk_16(half_t* A, half_t* B, float* C, int m,
 //     printf("%d\n", prob_shape[2]);
     auto bM = Int<128>{};
     auto bN = Int<128>{};
-    auto bK = Int< 32>{};
+    auto bK = Int< 16>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
     using SmemLayoutAtomA = decltype(composition(
