@@ -145,7 +145,7 @@ void gemm_smem_pipelining_128_kernel(
         }
     #endif
 
-    #if 1
+    #if 0
         if(thread(0)) {
             print("  mC : "); print(  mC); print("\n");
             print("  gC : "); print(  gC); print("\n");

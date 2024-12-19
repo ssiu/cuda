@@ -141,7 +141,7 @@ void gemm_vectorized_store_128_kernel(
     //copy(tCrC, tCgC);
     //copy(tCrC, tCsC);
     for (int i=0;i<4;i++) {
-        for (int j=0; j<8; j++) {
+        for (int j=0; j<4; j++) {
             copy(tCrC(_,i,j), tCsC(_,i,j));
         }
     }
@@ -173,17 +173,18 @@ void gemm_vectorized_store_128_kernel(
         }
     #endif
 
-    #if 0
-        if(thread(1)) {
+    #if 1
+        if(thread(0)) {
             print("  mC : "); print(  mC); print("\n");
             print("  gC : "); print(  gC); print("\n");
-            print("tCsA : "); print(tCsA); print("\n");
-            print("tCsB : "); print(tCsB); print("\n");
-            print("tCrA : "); print(tCrA); print("\n");
-            print("tCrB : "); print(tCrB); print("\n");
+//             print("tCsA : "); print(tCsA); print("\n");
+//             print("tCsB : "); print(tCsB); print("\n");
+//             print("tCrA : "); print(tCrA); print("\n");
+//             print("tCrB : "); print(tCrB); print("\n");
             print("tCgC : "); print(tCgC); print("\n");
+            print("tCsC : "); print(tCrC); print("\n");
             print("tCrC : "); print(tCrC); print("\n");
-            print("tCrA(0) : "); print(tCrA(_,_,0)); print("\n");
+            //print("tCrA(0) : "); print(tCrA(_,_,0)); print("\n");
         }
     #endif
 
@@ -263,7 +264,7 @@ void gemm_vectorized_store_128(half_t* A, half_t* B, float* C, int m, int n, int
         make_layout(make_shape(Int<32>{}, Int<8>{}),
                     make_stride(Int<1>{}, Int<32>{}))));
     using SmemLayoutC = decltype(tile_to_shape(SmemLayoutAtomC{},
-                                               make_shape(Int<128>{}, Int<128>{})));
+                                               make_shape(Int<128>{}, Int<64>{})));
     SmemLayoutC sC_layout;
 
 
