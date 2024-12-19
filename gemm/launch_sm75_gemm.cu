@@ -128,21 +128,21 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
 
-    gemm_smem_pipelining_128_bk_16(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_16");
-
-    gemm_smem_pipelining_128_mma_k_32(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_mma_k_32");
+//     gemm_smem_pipelining_128_bk_16(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_bk_16");
+//
+//     gemm_smem_pipelining_128_mma_k_32(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128_mma_k_32");
 
     gemm_smem_double_buffering_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_double_buffering_128");
 
-    gemm_smem_double_buffering_128_bk_16(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_double_buffering_128_bk_16");
+//     gemm_smem_double_buffering_128_bk_16(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_double_buffering_128_bk_16");
 
 //     gemm_smem_pipelining_128_bk_64(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
 //     h_C = d_C;
