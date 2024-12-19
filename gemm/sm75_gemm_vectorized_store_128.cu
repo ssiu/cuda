@@ -302,6 +302,6 @@ void gemm_vectorized_store_128(half_t* A, half_t* B, float* C, int m, int n, int
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, copyC,
                                                      mmaC);
-    print("hi\n")
+    print("hi\n");
 }
 
