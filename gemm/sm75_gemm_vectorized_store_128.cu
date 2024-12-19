@@ -142,7 +142,7 @@ void gemm_vectorized_store_128_kernel(
     //copy(tCrC, tCsC);
     //copy(tCrC(_,0,0), tCsC(_,0,0));
     for (int i=0;i<4;i++) {
-        for (int j=0; j<8; j++) {
+        for (int j=0; j<7; j++) {
             #if 1
                 if(thread0()) {
                     print("tCrC(_,i,j) : "); print(tCrC(_,i,j)); print("\n");
