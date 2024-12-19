@@ -183,6 +183,7 @@ void gemm_vectorized_store_128_kernel(
         if(thread(0)) {
             print("  mC : "); print(  mC); print("\n");
             print("  gC : "); print(  gC); print("\n");
+            print("  sC : "); print(  gC); print("\n");
 //             print("tCsA : "); print(tCsA); print("\n");
 //             print("tCsB : "); print(tCsB); print("\n");
 //             print("tCrA : "); print(tCrA); print("\n");
