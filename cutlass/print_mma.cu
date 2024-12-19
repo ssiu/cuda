@@ -10,6 +10,7 @@ int main() {
                                         Layout<Shape<_1, _2, _1>>{},
                                         Tile<_32,_32,_8>{});
         print_latex(mmaC);
+
     }
 
     #endif
