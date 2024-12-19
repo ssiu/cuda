@@ -271,7 +271,7 @@ void gemm_vectorized_store_128(half_t* A, half_t* B, float* C, int m, int n, int
         make_layout(make_shape(Int<32>{}, Int<8>{}),
                     make_stride(Int<1>{}, Int<32>{}))));
     using SmemLayoutC = decltype(tile_to_shape(SmemLayoutAtomC{},
-                                               make_shape(Int<128>{}, Int<64>{})));
+                                               make_shape(Int<128>{}, Int<63>{})));
     SmemLayoutC sC_layout;
 
 
