@@ -14,9 +14,9 @@ using namespace cute;
 template <class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
-          class TC, class CStride, class CSmemLayout, class TiledCopyC,
-          class TiledMma>
-__global__ void gemm_vectorized_gmem_store_256_kernel(
+          class TC, class CStride, class CSmemLayout, class TiledMma>
+__global__ __launch_bounds__(256)
+void gemm_vectorized_gmem_store_256_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -35,12 +35,11 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
     Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
-//     __shared__ TA smemA[cosize_v<ASmemLayout>];
-//     __shared__ TB smemB[cosize_v<BSmemLayout>];
+//     __shared__ half_t smemA[cosize_v<ASmemLayout>];
+//     __shared__ half_t smemB[cosize_v<BSmemLayout>];
+//
 //     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
 //     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
-
-
     extern __shared__ char smem_[];
 
     Tensor sA = make_tensor(make_smem_ptr(reinterpret_cast<TA*>(smem_)), sA_layout);
@@ -52,38 +51,53 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
     Tensor tArA = make_fragment_like(tAsA);
 
+
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
     Tensor tBrB = make_fragment_like(tBsB);
-    
+
     ThrCopy thr_copy_c = copy_c.get_slice(threadIdx.x);
     Tensor s2g_tCgC = thr_copy_c.partition_D(gC);
     Tensor s2g_tCsC = thr_copy_c.partition_S(sC);
     Tensor s2g_tCrC = make_fragment_like(s2g_tCsC);
-    
+
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
     Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
     Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
     Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
     Tensor tCsC = thr_mma.partition_C(sC);
-    
+
     // Allocate the accumulators -- same size as the projected data
     Tensor tCrA = thr_mma.make_fragment_A(tCsA);
     Tensor tCrB = thr_mma.make_fragment_B(tCsB);
     Tensor tCrC = thr_mma.make_fragment_C(tCgC);
-    //Tensor tCrC = thr_mma.make_fragment_C(tCsC);
+
+
+    auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U16x8_LDSM_T, half_t>{}, mma);
+    auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
+    auto s2r_tCsA = s2r_thr_copy_a.partition_S(sA);
+    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+
+    auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+    auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
+    auto s2r_tCsB = s2r_thr_copy_b.partition_S(sB);
+    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
+
 
     //printf("tCrC: %f\n", tCrC[0]);
     clear(tCrC);
 
-//     copy(copy_a, tAgA(_,_,_,0), tAsA);
-//     copy(copy_b, tBgB(_,_,_,0), tBsB);
-//
-//     __syncthreads();
-//
-//     gemm(mma, tCsA, tCsB, tCrC);
-//
+
+    // prologue
+    copy(copy_a, tAgA(_,_,_,0), tArA);
+    copy(copy_b, tBgB(_,_,_,0), tBrB);
+
+    copy(copy_a, tArA, tAsA);
+    copy(copy_b, tBrB, tBsB);
+
+    __syncthreads();
+
 
     auto K_TILE_MAX = size<3>(tAgA);
     auto K_BLOCK_MAX = size<2>(tCsA);
@@ -91,26 +105,28 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
 
-        copy(copy_a, tAgA(_,_,_,k_tile), tArA);
-        copy(copy_b, tBgB(_,_,_,k_tile), tBrB);
+        if (k_tile < K_TILE_MAX - 1) {
+            copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
+            copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
+        }
 
-        copy(copy_a, tArA, tAsA);
-        copy(copy_b, tBrB, tBsB);
-
-        __syncthreads();
         CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
-            copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
-            copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
-
+//             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
+//             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
+            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block), tCrA_copy_view(_,_,k_block));
+            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block), tCrB_copy_view(_,_,k_block));
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
-        // Compute gemm on mma-partitioned smem
-//         copy(tCsA, tCrA);
-//         copy(tCsB, tCrB);
-//
-//         gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
+
+        __syncthreads();
+
+        if (k_tile < K_TILE_MAX - 1) {
+            copy(copy_a, tArA, tAsA);
+            copy(copy_b, tBrB, tBsB);
+        }
+
 
         __syncthreads();
 
@@ -118,13 +134,11 @@ __global__ void gemm_vectorized_gmem_store_256_kernel(
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     //copy(tCrC, tCgC);
-
     copy(tCrC, tCsC);
     __syncthreads();
 
     copy(copy_c, s2g_tCsC, s2g_tCrC);
     copy(copy_c, s2g_tCrC, s2g_tCgC);
-
     #if 0
         if(thread0()) {
 
@@ -213,17 +227,24 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     auto bK = Int< 32>{};
     auto cta_tiler = make_shape(bM, bN, bK);
 
+    using SmemLayoutAtomA = decltype(composition(
+        Swizzle<3, 3, 3>{},
+        make_layout(make_shape(Int<64>{}, Int<16>{}),
+                    make_stride(Int<1>{}, Int<64>{}))));
+    using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtomA{},
+                                               make_shape(Int<128>{}, Int<32>{})));
+
+    SmemLayoutA sA_layout;
 
 
+    using SmemLayoutAtomB = decltype(composition(
+        Swizzle<3, 3, 3>{},
+        make_layout(make_shape(Int<32>{}, Int<32>{}),
+                    make_stride(Int<32>{}, Int<1>{}))));
+    using SmemLayoutB = decltype(tile_to_shape(SmemLayoutAtomB{},
+                                               make_shape(Int<128>{}, Int<32>{})));
+    SmemLayoutB sB_layout;
 
-    auto sA_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
-                        make_stride(Int<1>{}, Int<128>{}));
-
-    auto sB_layout = make_layout(make_shape (Int<128>{}, Int<32>{}),
-                        make_stride(Int<32>{}, Int<1>{}));
-
-//     auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
-//                         make_stride(Int<1>{}, Int<128>{}));
 
 
     using SmemLayoutAtomC = decltype(composition(
@@ -235,34 +256,25 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
     SmemLayoutC sC_layout;
 
 
-
-
-//     TiledCopy copyA = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-//                                Layout<Shape<_16,_8>, Stride<_1,_16>>{},
-//                                Layout<Shape< _8,_1>>{});
-//     TiledCopy copyB = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
-//                                Layout<Shape<_128,_1>, Stride<_1,_0>>{},
-//                                Layout<Shape< _1,_8>>{});
     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_16,_16>, Stride<_1,_16>>{},
                                Layout<Shape< _8,_1>>{});
     TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
                                Layout<Shape< _1,_8>>{});
+
     TiledCopy copyC = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                Layout<Shape<_32,_8>, Stride<_1,_32>>{},
                                Layout<Shape< _4,_1>>{});
 
-//     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-//                                     Layout<Shape<_2, _2, _1>>{},
-//                                     Tile<_128,_128,_32>{});
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                    Layout<Shape<_2, _4, _1>>{});
+                                    Layout<Shape<_2, _4, _1>>{},
+                                    Tile<_128,_128,_8>{});
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
     int maxbytes = 65536;
-//     auto kernel = &ln_fwd_kernel<Kernel_traits, IsDropoutConst, HasColscaleConst, HasSubsetConst, IsEvenColsConst>;
+
     auto kernel = gemm_vectorized_gmem_store_256_kernel<decltype(prob_shape), decltype(cta_tiler),
                                                     half_t, decltype(dA), decltype(sA_layout), decltype(copyA),
                                                     half_t, decltype(dB), decltype(sB_layout), decltype(copyB),
@@ -275,10 +287,5 @@ void gemm_vectorized_gmem_store_256(half_t* A, half_t* B, float* C, int m, int n
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, copyC,
                                                      mmaC);
-//     gemm_vectorized_gmem_store_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
-//                                                      A, dA, sA_layout, copyA,
-//                                                      B, dB, sB_layout, copyB,
-//                                                      C, dC, sC_layout, copyC,
-//                                                      mmaC);
 }
 
