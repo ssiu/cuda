@@ -14,7 +14,8 @@ using namespace cute;
 template <class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
-          class TC, class CStride, class CSmemLayout, class TiledMma>
+          class TC, class CStride, class CSmemLayout, class TiledCopyC,
+          class TiledMma>
 __global__ __launch_bounds__(256)
 void gemm_vectorized_gmem_store_256_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
