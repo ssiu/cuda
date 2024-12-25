@@ -101,7 +101,7 @@ void gemm_register_pipelining_256_kernel(
 
         copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
         copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
-        CUTE_NO_UNROLL
+        CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
             if (k_block < K_BLOCK_MAX - 1) {
                 int k_block_next = k_block + 1;
