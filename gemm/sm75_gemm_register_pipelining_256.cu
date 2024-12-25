@@ -78,51 +78,79 @@ void gemm_register_pipelining_256_kernel(
 
 
     // prologue
-    copy(copy_a, tAgA(_,_,_,0), tArA);
-    copy(copy_b, tBgB(_,_,_,0), tBrB);
-
-    copy(copy_a, tArA, tAsA);
-    copy(copy_b, tBrB, tBsB);
+    copy(copy_a, tAgA(_,_,_,0), tAsA);
+    copy(copy_b, tBgB(_,_,_,0), tBsB);
+//     copy(copy_a, tAgA(_,_,_,0), tArA);
+//     copy(copy_b, tBgB(_,_,_,0), tBrB);
+//
+//     copy(copy_a, tArA, tAsA);
+//     copy(copy_b, tBrB, tBsB);
 
     __syncthreads();
 
+    copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
+    copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
 
     auto K_TILE_MAX = size<3>(tAgA);
     auto K_BLOCK_MAX = size<2>(tCsA);
     CUTE_NO_UNROLL
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
-
-        if (k_tile < K_TILE_MAX - 1) {
-            copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
-            copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
-        }
-
-
-        copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
-        copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
-        CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-            if (k_block < K_BLOCK_MAX - 1) {
-                int k_block_next = k_block + 1;
-                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+            if (k_block == K_BLOCK_MAX - 1)
+            {
+            // Copy rmem to smem
+                __syncthreads();
+                copy(copy_a, tArA, tAsA);
+                copy(copy_b, tBrB, tBsB);
+                __syncthreads();
             }
-//             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
-//             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
+
+            int k_block_next = (k_block + 1) % K_BLOCK_MAX;
+            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+            if (k_block == 0)
+            {
+            // Copy gmem to rmem for k_tile+1
+                int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
+                copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
+                copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
+            }
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
-
-        __syncthreads();
-
-        if (k_tile < K_TILE_MAX - 1) {
-            copy(copy_a, tArA, tAsA);
-            copy(copy_b, tBrB, tBsB);
-        }
-
-
-        __syncthreads();
+//         if (k_tile < K_TILE_MAX - 1) {
+//             copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
+//             copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
+//         }
+//
+//
+//         copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
+//         copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
+//         CUTE_UNROLL
+//         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
+//             if (k_block < K_BLOCK_MAX - 1) {
+//                 int k_block_next = k_block + 1;
+//                 copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+//                 copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+//             }
+// //             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
+// //             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
+//
+//             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
+//         }
+//
+//         __syncthreads();
+//
+//         if (k_tile < K_TILE_MAX - 1) {
+//             copy(copy_a, tArA, tAsA);
+//             copy(copy_b, tBrB, tBsB);
+//         }
+//
+//
+//         __syncthreads();
 
     }
 
