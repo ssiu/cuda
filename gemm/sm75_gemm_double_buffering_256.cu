@@ -165,7 +165,7 @@ void gemm_double_buffering_256_kernel(
         }
 
     }
-    #if
+    #if 1
         if(thread0()) {
             for (int i=0; i<32; i++) {
                 printf("sA : %f\n", static_cast<float>(sA_1[i]));
