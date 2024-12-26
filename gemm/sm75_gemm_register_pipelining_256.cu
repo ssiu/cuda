@@ -78,13 +78,13 @@ void gemm_register_pipelining_256_kernel(
 
 
     // prologue
-    copy(copy_a, tAgA(_,_,_,0), tAsA);
-    copy(copy_b, tBgB(_,_,_,0), tBsB);
-//     copy(copy_a, tAgA(_,_,_,0), tArA);
-//     copy(copy_b, tBgB(_,_,_,0), tBrB);
-//
-//     copy(copy_a, tArA, tAsA);
-//     copy(copy_b, tBrB, tBsB);
+//     copy(copy_a, tAgA(_,_,_,0), tAsA);
+//     copy(copy_b, tBgB(_,_,_,0), tBsB);
+    copy(copy_a, tAgA(_,_,_,0), tArA);
+    copy(copy_b, tBgB(_,_,_,0), tBrB);
+
+    copy(copy_a, tArA, tAsA);
+    copy(copy_b, tBrB, tBsB);
 
     __syncthreads();
 
