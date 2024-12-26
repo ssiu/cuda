@@ -154,6 +154,16 @@ void gemm_register_pipelining_256_kernel(
 //         __syncthreads();
 
     }
+    #if 1
+        if(thread0()) {
+            for (int i=0; i<32; i++) {
+                printf("sA : %f\n", static_cast<float>(sA_1[i]));
+            }
+            for (int i=0; i<32; i++) {
+                printf("sB : %f\n", static_cast<float>(sB_1[i]));
+            }
+        }
+    #endif
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCgC);
