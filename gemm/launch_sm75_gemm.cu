@@ -21,7 +21,8 @@
 #include "sm75_gemm_swizzle_256.cu"
 #include "sm75_gemm_ldsm_256.cu"
 #include "sm75_gemm_smem_pipelining_256.cu"
-#include "sm75_gemm_smem_pipelining_new_256.cu"
+#include "sm75_gemm_register_pipelining_256.cu"
+#include "sm75_gemm_register_pipelining_new_256.cu"
 
 #include "sm75_gemm_smem_pipelining_128.cu"
 #include "sm75_gemm_smem_pipelining_128_mma_k_32.cu"
@@ -30,7 +31,8 @@
 #include "sm75_gemm_smem_double_buffering_128_bk_16.cu"
 
 #include "sm75_gemm_smem_pipelining_128_bk_64.cu"
-#include "sm75_gemm_register_pipelining_256.cu"
+
+
 #include "sm75_gemm_register_pipelining_128.cu"
 #include "sm75_gemm_register_pipelining_128_bk_64.cu"
 #include "sm75_gemm_vectorized_store_128.cu"
