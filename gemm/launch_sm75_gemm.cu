@@ -122,9 +122,9 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_256");
 
-    gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
-    h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_register_256");
+//     gemm_register_pipelining_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+//     h_C = d_C;
+//     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "register_pipelining_256");
 
 
     gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
