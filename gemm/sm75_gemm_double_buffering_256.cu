@@ -128,8 +128,15 @@ void gemm_double_buffering_256_kernel(
                 }
 
                 int k_block_next = (k_block + 1) % K_BLOCK_MAX;
-                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+                if (k_block_next == 0) {
+                    copy(s2r_tiled_copy_a, s2r_tCsA_1(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                    copy(s2r_tiled_copy_b, s2r_tCsB_1(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                } else {
+                    copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                    copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                }
+
 
                 if (k_block == 0)
                 {
@@ -154,9 +161,17 @@ void gemm_double_buffering_256_kernel(
                     __syncthreads();
                 }
 
+
                 int k_block_next = (k_block + 1) % K_BLOCK_MAX;
-                copy(s2r_tiled_copy_a, s2r_tCsA_1(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-                copy(s2r_tiled_copy_b, s2r_tCsB_1(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                if (k_block_next == 0) {
+                    copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                    copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                } else {
+                    copy(s2r_tiled_copy_a, s2r_tCsA_1(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                    copy(s2r_tiled_copy_b, s2r_tCsB_1(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                }
+
+
 
                 if (k_block == 0)
                 {
