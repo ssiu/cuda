@@ -154,7 +154,7 @@ void gemm_register_pipelining_256_kernel(
 //         __syncthreads();
 
     }
-    #if 1
+    #if 0
         if(thread0()) {
             for (int i=0; i<32; i++) {
                 printf("sA : %f\n", static_cast<float>(sA[i]));
