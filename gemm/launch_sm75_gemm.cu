@@ -21,6 +21,8 @@
 #include "sm75_gemm_swizzle_256.cu"
 #include "sm75_gemm_ldsm_256.cu"
 #include "sm75_gemm_smem_pipelining_256.cu"
+#include "sm75_gemm_smem_pipelining_new_256.cu"
+
 #include "sm75_gemm_smem_pipelining_128.cu"
 #include "sm75_gemm_smem_pipelining_128_mma_k_32.cu"
 #include "sm75_gemm_smem_pipelining_128_bk_16.cu"
@@ -126,10 +128,16 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "register_pipelining_256");
 
+    gemm_register_pipelining_new_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+    h_C = d_C;
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "register_pipelining_256");
 
     gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "vectorized_gmem_store_256");
+
+
+
 //     gemm_smem_pipelining_128(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
 //     h_C = d_C;
 //     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "smem_pipelining_128");
