@@ -36,6 +36,7 @@ void gemm_double_buffering_256_kernel(
 
     __shared__ half_t smemA[cosize_v<ASmemLayout>];
     __shared__ half_t smemA_1[cosize_v<ASmemLayout>];
+    __shared__ half_t smemC[cosize_v<ASmemLayout>];
 
     __shared__ half_t smemB[cosize_v<BSmemLayout>];
     __shared__ half_t smemB_1[cosize_v<BSmemLayout>];
@@ -165,7 +166,7 @@ void gemm_double_buffering_256_kernel(
         }
 
     }
-    #if 1
+    #if 0
         if(thread0()) {
             for (int i=0; i<32; i++) {
                 printf("sA : %f\n", static_cast<float>(sA_1[i]));
