@@ -241,7 +241,7 @@ void gemm_register_pipelining_256(half_t* A, half_t* B, float* C, int m, int n, 
     auto dC = make_stride(Int<1>{}, m);                      // (dM, dN)
 //     printf("%d\n", prob_shape[1]);
 //     printf("%d\n", prob_shape[2]);
-    auto bM = Int<128>{};
+    auto bM = Int<256>{};
     auto bN = Int<128>{};
     auto bK = Int< 32>{};
     auto cta_tiler = make_shape(bM, bN, bK);
@@ -251,7 +251,7 @@ void gemm_register_pipelining_256(half_t* A, half_t* B, float* C, int m, int n, 
         make_layout(make_shape(Int<64>{}, Int<16>{}),
                     make_stride(Int<1>{}, Int<64>{}))));
     using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtomA{},
-                                               make_shape(Int<128>{}, Int<32>{})));
+                                               make_shape(Int<256>{}, Int<32>{})));
 
     SmemLayoutA sA_layout;
 
@@ -266,8 +266,8 @@ void gemm_register_pipelining_256(half_t* A, half_t* B, float* C, int m, int n, 
 
 
 
-    auto sC_layout = make_layout(make_shape (Int<128>{}, Int<128>{}),
-                        make_stride(Int<1>{}, Int<128>{}));
+    auto sC_layout = make_layout(make_shape (Int<256>{}, Int<128>{}),
+                        make_stride(Int<1>{}, Int<256>{}));
 
 
     TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
@@ -279,7 +279,7 @@ void gemm_register_pipelining_256(half_t* A, half_t* B, float* C, int m, int n, 
 
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                     Layout<Shape<_2, _4, _1>>{},
-                                    Tile<_128,_128,_8>{});
+                                    Tile<_256,_128,_8>{});
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);

@@ -16,7 +16,7 @@ template <class ProblemShape, class CtaTiler,
           class TB, class BStride, class BSmemLayout, class TiledCopyB,
           class TC, class CStride, class CSmemLayout, class TiledMma>
 __global__ __launch_bounds__(256)
-void gemm_register_pipelining_new_256_kernel(
+void gemm_double_buffering_256_kernel(
             ProblemShape shape_MNK, CtaTiler cta_tiler,
             TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
             TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
@@ -35,20 +35,28 @@ void gemm_register_pipelining_new_256_kernel(
     Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
     __shared__ half_t smemA[cosize_v<ASmemLayout>];
+    __shared__ half_t smemA_1[cosize_v<ASmemLayout>];
+
     __shared__ half_t smemB[cosize_v<BSmemLayout>];
+    __shared__ half_t smemB_1[cosize_v<BSmemLayout>];
 
     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
+    Tensor sA_1 = make_tensor(make_smem_ptr(smemA_1), sA_layout);
     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+    Tensor sB_1 = make_tensor(make_smem_ptr(smemB_1), sB_layout);
+
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
     Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
-    Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+    Tensor tAsA = thr_copy_a.partition_D(sA);
+    Tensor tAsA_1 = thr_copy_a.partition_D(sA_1);                           // (CPY,CPY_M,CPY_K)
     Tensor tArA = make_fragment_like(tAsA);
 
 
     ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
     Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
     Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
+    Tensor tBsB_1 = thr_copy_b.partition_D(sB_1);
     Tensor tBrB = make_fragment_like(tBsB);
 
     ThrMMA thr_mma = mma.get_slice(threadIdx.x);
@@ -65,11 +73,13 @@ void gemm_register_pipelining_new_256_kernel(
     auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U16x8_LDSM_T, half_t>{}, mma);
     auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
     auto s2r_tCsA = s2r_thr_copy_a.partition_S(sA);
+    auto s2r_tCsA_1 = s2r_thr_copy_a.partition_S(sA_1);
     auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
 
     auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
     auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
     auto s2r_tCsB = s2r_thr_copy_b.partition_S(sB);
+    auto s2r_tCsB_1 = s2r_thr_copy_b.partition_S(sB_1);
     auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
 
 
@@ -102,15 +112,25 @@ void gemm_register_pipelining_new_256_kernel(
             if (k_block == K_BLOCK_MAX - 1)
             {
             // Copy rmem to smem
-                __syncthreads();
-                copy(copy_a, tArA, tAsA);
-                copy(copy_b, tBrB, tBsB);
+                if (k_tile % 2 == 0) {
+                    copy(copy_a, tArA, tAsA);
+                    copy(copy_b, tBrB, tBsB);
+                } else {
+                    copy(copy_a, tArA, tAsA_1);
+                    copy(copy_b, tBrB, tBsB_1);
+                }
                 __syncthreads();
             }
 
             int k_block_next = (k_block + 1) % K_BLOCK_MAX;
-            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+            if (k_tile % 2 == 0) {
+                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+            } else {
+                copy(s2r_tiled_copy_a, s2r_tCsA_1(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                copy(s2r_tiled_copy_b, s2r_tCsB_1(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+            }
 
             if (k_block == 0)
             {
@@ -122,36 +142,6 @@ void gemm_register_pipelining_new_256_kernel(
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
-//         if (k_tile < K_TILE_MAX - 1) {
-//             copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
-//             copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
-//         }
-//
-//
-//         copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
-//         copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
-//         CUTE_UNROLL
-//         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-//             if (k_block < K_BLOCK_MAX - 1) {
-//                 int k_block_next = k_block + 1;
-//                 copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-//                 copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
-//             }
-// //             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
-// //             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
-//
-//             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
-//         }
-//
-//         __syncthreads();
-//
-//         if (k_tile < K_TILE_MAX - 1) {
-//             copy(copy_a, tArA, tAsA);
-//             copy(copy_b, tBrB, tBsB);
-//         }
-//
-//
-//         __syncthreads();
 
     }
 
@@ -232,7 +222,7 @@ void gemm_register_pipelining_new_256_kernel(
 }
 
 
-void gemm_register_pipelining_new_256(half_t* A, half_t* B, float* C, int m, int n, int k) {
+void gemm_double_buffering_256(half_t* A, half_t* B, float* C, int m, int n, int k) {
 
     auto prob_shape = make_shape(m, n, k);
 
@@ -283,7 +273,7 @@ void gemm_register_pipelining_new_256(half_t* A, half_t* B, float* C, int m, int
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
-    gemm_register_pipelining_new_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    gemm_double_buffering_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);

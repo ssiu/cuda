@@ -22,7 +22,8 @@
 #include "sm75_gemm_ldsm_256.cu"
 #include "sm75_gemm_smem_pipelining_256.cu"
 #include "sm75_gemm_register_pipelining_256.cu"
-#include "sm75_gemm_register_pipelining_new_256.cu"
+#include "sm75_gemm_double_buffering_256.cu"
+
 
 #include "sm75_gemm_smem_pipelining_128.cu"
 #include "sm75_gemm_smem_pipelining_128_mma_k_32.cu"
@@ -130,9 +131,10 @@ int main(int argc, char** argv)
     h_C = d_C;
     isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "register_pipelining_256");
 
-    gemm_register_pipelining_new_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
+
+    gemm_double_buffering_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
-    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "register_pipelining_new_256");
+    isSameMatrices(h_C.data(), h_C_cublas.data(), m * n, "double_buffering_256");
 
     gemm_vectorized_gmem_store_256(d_A.data().get(), d_B.data().get(), d_C.data().get(), m, n, k);
     h_C = d_C;
