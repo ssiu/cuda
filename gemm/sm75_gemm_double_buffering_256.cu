@@ -106,32 +106,63 @@ void gemm_double_buffering_256_kernel(
     CUTE_NO_UNROLL
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
-        CUTE_UNROLL
-        for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
-            if (k_block == K_BLOCK_MAX - 1)
-            {
-            // Copy rmem to smem
-                __syncthreads();
-                copy(copy_a, tArA, tAsA);
-                copy(copy_b, tBrB, tBsB);
-                __syncthreads();
+        if (k_tile % 2 == 0) {
+            CUTE_UNROLL
+            for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
+
+                if (k_block == K_BLOCK_MAX - 1)
+                {
+                // Copy rmem to smem
+                    __syncthreads();
+                    copy(copy_a, tArA, tAsA);
+                    copy(copy_b, tBrB, tBsB);
+                    __syncthreads();
+                }
+
+                int k_block_next = (k_block + 1) % K_BLOCK_MAX;
+                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+                if (k_block == 0)
+                {
+                // Copy gmem to rmem for k_tile+1
+                    int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
+                    copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
+                    copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
+                }
+
+                gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
             }
+        } else {
+            CUTE_UNROLL
+            for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
-            int k_block_next = (k_block + 1) % K_BLOCK_MAX;
-            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+                if (k_block == K_BLOCK_MAX - 1)
+                {
+                // Copy rmem to smem
+                    __syncthreads();
+                    copy(copy_a, tArA, tAsA);
+                    copy(copy_b, tBrB, tBsB);
+                    __syncthreads();
+                }
 
-            if (k_block == 0)
-            {
-            // Copy gmem to rmem for k_tile+1
-                int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
-                copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
-                copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
+                int k_block_next = (k_block + 1) % K_BLOCK_MAX;
+                copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+                copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+                if (k_block == 0)
+                {
+                // Copy gmem to rmem for k_tile+1
+                    int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
+                    copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
+                    copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
+                }
+
+                gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
             }
-
-            gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
+
 
     }
 
