@@ -113,11 +113,11 @@ void gemm_double_buffering_256_kernel(
             {
             // Copy rmem to smem
                 if (k_tile % 2 == 0) {
-                    copy(copy_a, tArA, tAsA);
-                    copy(copy_b, tBrB, tBsB);
-                } else {
                     copy(copy_a, tArA, tAsA_1);
                     copy(copy_b, tBrB, tBsB_1);
+                } else {
+                    copy(copy_a, tArA, tAsA);
+                    copy(copy_b, tBrB, tBsB);
                 }
                 __syncthreads();
             }
