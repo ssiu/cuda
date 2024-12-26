@@ -141,7 +141,7 @@ void gemm_double_buffering_256_kernel(
 
                 gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
             }
-        } else {
+        } else if (k_tile % 2 == 1) {
             CUTE_UNROLL
             for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
