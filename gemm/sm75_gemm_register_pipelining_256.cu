@@ -96,6 +96,7 @@ void gemm_register_pipelining_256_kernel(
     CUTE_NO_UNROLL
     for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
     {
+        CUTE_UNROLL
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
             if (k_block == K_BLOCK_MAX - 1)
