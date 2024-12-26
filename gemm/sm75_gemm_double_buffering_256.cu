@@ -161,10 +161,21 @@ void gemm_double_buffering_256_kernel(
 
                 gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
             }
+
         }
 
-
     }
+    #if
+        if(thread0()) {
+            for (int i=0; i<32; i++) {
+                printf("sA : %f\n", static_cast<float>(sA_1[i]));
+            }
+            for (int i=0; i<32; i++) {
+                printf("sB : %f\n", static_cast<float>(sB_1[i]));
+            }
+        }
+    #endif
+
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCgC);
