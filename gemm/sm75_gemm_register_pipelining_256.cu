@@ -116,8 +116,8 @@ void gemm_register_pipelining_256_kernel(
             {
             // Copy gmem to rmem for k_tile+1
                 int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
-                copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
-                copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
+                copy(copy_a, tAgA(_,_,_,k_tile), tArA);
+                copy(copy_b, tBgB(_,_,_,k_tile), tBrB);
             }
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
@@ -156,7 +156,7 @@ void gemm_register_pipelining_256_kernel(
     }
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
-    //copy(tCrC, tCgC);
+    copy(tCrC, tCgC);
 
     #if 0
         if(thread0()) {
