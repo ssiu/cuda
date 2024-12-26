@@ -157,10 +157,10 @@ void gemm_register_pipelining_256_kernel(
     #if 1
         if(thread0()) {
             for (int i=0; i<32; i++) {
-                printf("sA : %f\n", static_cast<float>(sA_1[i]));
+                printf("sA : %f\n", static_cast<float>(sA[i]));
             }
             for (int i=0; i<32; i++) {
-                printf("sB : %f\n", static_cast<float>(sB_1[i]));
+                printf("sB : %f\n", static_cast<float>(sB[i]));
             }
         }
     #endif
