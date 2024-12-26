@@ -78,13 +78,13 @@ void gemm_register_pipelining_256_kernel(
 
 
     // prologue
-//     copy(copy_a, tAgA(_,_,_,0), tAsA);
-//     copy(copy_b, tBgB(_,_,_,0), tBsB);
-    copy(copy_a, tAgA(_,_,_,0), tArA);
-    copy(copy_b, tBgB(_,_,_,0), tBrB);
-
-    copy(copy_a, tArA, tAsA);
-    copy(copy_b, tBrB, tBsB);
+    copy(copy_a, tAgA(_,_,_,0), tAsA);
+    copy(copy_b, tBgB(_,_,_,0), tBsB);
+//     copy(copy_a, tAgA(_,_,_,0), tArA);
+//     copy(copy_b, tBgB(_,_,_,0), tBrB);
+//
+//     copy(copy_a, tArA, tAsA);
+//     copy(copy_b, tBrB, tBsB);
 
     __syncthreads();
 
@@ -116,8 +116,8 @@ void gemm_register_pipelining_256_kernel(
             {
             // Copy gmem to rmem for k_tile+1
                 int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
-                copy(copy_a, tAgA(_,_,_,k_tile), tArA);
-                copy(copy_b, tBgB(_,_,_,k_tile), tBrB);
+                copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
+                copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
             }
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
