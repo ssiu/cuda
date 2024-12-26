@@ -34,17 +34,23 @@ void gemm_double_buffering_256_kernel(
     Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
     Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
-    __shared__ half_t smemA[cosize_v<ASmemLayout>];
-    __shared__ half_t smemA_1[cosize_v<ASmemLayout>];
-    __shared__ half_t smemC[cosize_v<ASmemLayout>];
+//     __shared__ half_t smemA[cosize_v<ASmemLayout>];
+//     __shared__ half_t smemA_1[cosize_v<ASmemLayout>];
+//
+//     __shared__ half_t smemB[cosize_v<BSmemLayout>];
+//     __shared__ half_t smemB_1[cosize_v<BSmemLayout>];
 
-    __shared__ half_t smemB[cosize_v<BSmemLayout>];
-    __shared__ half_t smemB_1[cosize_v<BSmemLayout>];
+    extern __shared__ char smem_[];
 
-    Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
-    Tensor sA_1 = make_tensor(make_smem_ptr(smemA_1), sA_layout);
-    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
-    Tensor sB_1 = make_tensor(make_smem_ptr(smemB_1), sB_layout);
+    Tensor sA = make_tensor(make_smem_ptr(reinterpret_cast<TA*>(smem_)), sA_layout);
+    Tensor sA_1 = make_tensor(sA.data() + size(sA), sA_layout);
+    Tensor sB = make_tensor(sA_1.data() + size(sA_1), sB_layout);
+    Tensor sB_1 = make_tensor(sB.data() + size(sB), sB_layout);
+
+//     Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
+//     Tensor sA_1 = make_tensor(make_smem_ptr(smemA_1), sA_layout);
+//     Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+//     Tensor sB_1 = make_tensor(make_smem_ptr(smemB_1), sB_layout);
 
 
     ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
@@ -306,9 +312,23 @@ void gemm_double_buffering_256(half_t* A, half_t* B, float* C, int m, int n, int
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
-    gemm_double_buffering_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+    int maxbytes = 65536;
+
+    auto kernel = gemm_double_buffering_256_kernel<decltype(prob_shape), decltype(cta_tiler),
+                                                    half_t, decltype(dA), decltype(sA_layout), decltype(copyA),
+                                                    half_t, decltype(dB), decltype(sB_layout), decltype(copyB),
+                                                    float, decltype(dC), decltype(sC_layout), decltype(mmaC)>;
+
+    cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+    gemm_double_buffering_256_kernel<<<dimGrid, dimBlock, maxbytes>>>(prob_shape, cta_tiler,
                                                      A, dA, sA_layout, copyA,
                                                      B, dB, sB_layout, copyB,
                                                      C, dC, sC_layout, mmaC);
+//     gemm_double_buffering_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+//                                                      A, dA, sA_layout, copyA,
+//                                                      B, dB, sB_layout, copyB,
+//                                                      C, dC, sC_layout, mmaC);
+
+
 }
 
