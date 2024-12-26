@@ -121,7 +121,7 @@ void gemm_double_buffering_256_kernel(
                 if (k_block == K_BLOCK_MAX - 1)
                 {
                 // Copy rmem to smem
-                    __syncthreads();
+
                     copy(copy_a, tArA, tAsA_1);
                     copy(copy_b, tBrB, tBsB_1);
                     __syncthreads();
@@ -155,7 +155,7 @@ void gemm_double_buffering_256_kernel(
                 if (k_block == K_BLOCK_MAX - 1)
                 {
                 // Copy rmem to smem
-                    __syncthreads();
+
                     copy(copy_a, tArA, tAsA);
                     copy(copy_b, tBrB, tBsB);
                     __syncthreads();
