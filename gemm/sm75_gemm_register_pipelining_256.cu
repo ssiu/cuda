@@ -278,7 +278,7 @@ void gemm_register_pipelining_256(half_t* A, half_t* B, float* C, int m, int n, 
                                Layout<Shape< _1,_8>>{});
 
     TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                    Layout<Shape<_4, _2, _1>>{},
+                                    Layout<Shape<_2, _4, _1>>{},
                                     Tile<_128,_128,_8>{});
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
