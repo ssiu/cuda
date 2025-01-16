@@ -9,6 +9,6 @@ int main()
     print_tensor(a(_,0,_));
 
     Tensor b = local_tile(a(_, 0, _), Shape<Int<1>, Int<2>>{},
-                          make_coord(0, 0));  // (kBlockM, kHeadDim)
+                          make_coord(0, 1));  // (kBlockM, kHeadDim)
     print_tensor(b);
 }
