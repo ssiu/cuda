@@ -12,7 +12,7 @@ int main()
     Tensor b = local_tile(a(_, 0, _), Shape<Int<1>, Int<2>>{},
                           make_coord(_, 0));  // (1, 2, 2)
     print_tensor(b);
-    printf("%d\n", b(0,0,1));
+    printf("%d %d %d\n", b(0,0,1), b(0,1,0), b(0,0,1) + b(0,1,0));
 
 
 }
