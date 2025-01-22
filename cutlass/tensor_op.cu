@@ -12,6 +12,6 @@ int main()
     Tensor b = local_tile(a(_, 0, _), Shape<Int<1>, Int<2>>{},
                           make_coord(_, 0));  // (1, 2, 2)
     print_tensor(b);
-
+    print_tensor(b(0,0,1));
 
 }
