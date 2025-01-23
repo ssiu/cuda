@@ -9,7 +9,7 @@ int main()
     print_tensor(a); // (2, 2, 2)
     print_tensor(a(_,0,_)); // (2, 2)
 
-    Tensor b = make_tensor(&A[0], make_shape(Int<4>{}, Int<3>{}, Int<2>{}), make_stride(Int<1>{}, Int<2>{}, Int<6>{}));
+    Tensor b = make_tensor(&A[0], make_shape(Int<2>{}, Int<3>{}, Int<4>{}), make_stride(Int<1>{}, Int<2>{}, Int<6>{}));
     print_tensor(b); // (2, 2, 2)
     print_tensor(b(_,0,_)); // (2, 2)
 //     Tensor b = local_tile(a(_, 0, _), Shape<Int<1>, Int<2>>{},
