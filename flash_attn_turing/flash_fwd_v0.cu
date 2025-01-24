@@ -298,6 +298,7 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
                                                k, sK_layout, copy_K, mma_O,
                                                v, sV_layout, copy_V,
                                                   sS_layout,
-                                               o, sO_layout);
+                                               o, sO_layout,
+                                               batch_size, seq_len, num_heads, head_dim);
 
 }

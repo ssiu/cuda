@@ -34,10 +34,7 @@ int main(int argc, char** argv)
     thrust::host_vector<half_t> h_Q = generateRandomMatrix<half_t> (batch_size * seq_len * num_heads * head_dim);
     thrust::host_vector<half_t> h_K = generateRandomMatrix<half_t> (batch_size * seq_len * num_heads * head_dim);
     thrust::host_vector<half_t> h_V = generateRandomMatrix<half_t> (batch_size * seq_len * num_heads * head_dim);
-
     thrust::host_vector<float> h_O(batch_size * seq_len * num_heads * head_dim, 0.0f);
-
-
 
     thrust::device_vector<half_t> d_Q = h_Q;
     thrust::device_vector<half_t> d_K = h_K;
