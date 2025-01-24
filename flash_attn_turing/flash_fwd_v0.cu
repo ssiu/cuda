@@ -73,7 +73,7 @@ void flash_fwd_v0_kernel(
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
-    Tensor gO = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
+    Tensor gO = local_tile(mO(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
                            make_coord(blockIdx.z, 0));  // (16, 128)
 
     __shared__ half_t smemQ[16*128];
