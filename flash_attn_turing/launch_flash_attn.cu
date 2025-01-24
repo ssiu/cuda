@@ -45,7 +45,7 @@ int main(int argc, char** argv)
                  batch_size, seq_len, num_heads, head_dim);
 
     h_O = d_O;
-
+    print("%f\n", h_O[0]);
     return 0;
 }
 
