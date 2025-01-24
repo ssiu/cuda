@@ -122,11 +122,11 @@ void flash_fwd_v0_kernel(
     ThrMMA thr_mma_S = mma_S.get_slice(threadIdx.x);
     Tensor tSsQ = thr_mma_S.partition_A(sQ);
     Tensor tSsK = thr_mma_S.partition_B(sK);
-    Tensor tSgS = thr_mma_S.partition_C(gS);
+    Tensor tSsS = thr_mma_S.partition_C(sS);
 
 //     Tensor tSrQ = thr_mma_S.make_fragment_A(tSsQ);
 //     Tensor tSrK = thr_mma_S.make_fragment_B(tSsK);
-    Tensor tSrS = thr_mma_S.make_fragment_C(tSgS);
+    Tensor tSrS = thr_mma_S.make_fragment_C(tSsS);
 
 
     // mma for O = PV
@@ -146,7 +146,7 @@ void flash_fwd_v0_kernel(
     copy(copy_Q, tQgQ, tQsQ);
 
     // main loop
-    for (int kv_tile = 0; kv_tile < K_TILE_MAX; ++kv_tile) {
+    for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
