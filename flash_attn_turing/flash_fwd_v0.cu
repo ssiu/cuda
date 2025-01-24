@@ -228,7 +228,7 @@ void flash_fwd_v0_kernel(
 
     }
 
-    copy(tOsO, tOgO);
+    //copy(tOsO, tOgO);
 
 }
 
@@ -270,7 +270,7 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
 
 
 
-    // 64 threads loading a 16 * 128 tile
+    // 64 threads loading a 16 x 128 tile
     TiledCopy copy_Q = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
@@ -278,10 +278,11 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
-
+    // 64 threads loading a 128 x 16 tile
     TiledCopy copy_V = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_16,_4>, Stride<_1,_16>>{},
                                 Layout<Shape< _8,_1>>{});
+
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_1, _2, _1>>{},
