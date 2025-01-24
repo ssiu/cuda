@@ -44,7 +44,8 @@ int main(int argc, char** argv)
     thrust::device_vector<half_t> d_V = h_V;
     thrust::device_vector<float> d_O = h_O;
 
-    flash_fwd_v0(d_Q, d_K, d_V, d_O, batch_size, seq_len, num_heads, head_dim);
+    flash_fwd_v0(d_Q.data().get(), d_K.data().get(), d_V.data().get(), d_O.data().get(),
+                 batch_size, seq_len, num_heads, head_dim);
 
     h_O = d_O;
 
