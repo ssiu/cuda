@@ -236,7 +236,7 @@ void flash_fwd_v0_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
+void flash_fwd_v0(half_t* q, half_t* k, half_t* v, float* o,
                   int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
