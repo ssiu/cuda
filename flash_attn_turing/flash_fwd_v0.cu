@@ -24,7 +24,7 @@ void flash_fwd_v0_kernel(
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
                      SmemLayoutS sS_layout,
-    float* o,        SmemLayoutO sO_layout, TiledCopyV copy_O,
+    float* o,        SmemLayoutO sO_layout, TiledCopyO copy_O,
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
