@@ -295,7 +295,7 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimBlock(64);
     flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q, sQ_layout, copy_Q, mma_S,
-                                               k, sK_layout, copy_K, mma_O
+                                               k, sK_layout, copy_K, mma_O,
                                                v, sV_layout, copy_V,
                                                   sS_layout,
                                                o, sO_layout);
