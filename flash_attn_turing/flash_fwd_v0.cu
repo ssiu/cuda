@@ -11,7 +11,7 @@
 
 using namespace cute;
 
-#define HEAD_SIZE 128
+
 
 template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutK, class TiledCopyK, class TiledMmaO,
@@ -43,33 +43,33 @@ void flash_fwd_v0_kernel(
 // blockIdx.z (seq_len / 16)
 
     Tensor mQ = make_tensor(make_gmem_ptr(q),
-                            make_shape(batch_size, seq_len, num_heads, head_size),
-                            make_stride(seq_len * num_heads * head_size, num_heads * head_size, head_size, Int<1>{}));
+                            make_shape(batch_size, seq_len, num_heads, head_dim),
+                            make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
     Tensor gQ = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
                            make_coord(blockIdx.z, 0));  // (16, 128)
 
     Tensor mK = make_tensor(make_gmem_ptr(k),
-                            make_shape(batch_size, seq_len, num_heads, head_size),
-                            make_stride(seq_len * num_heads * head_size, num_heads * head_size, head_size, Int<1>{}));
+                            make_shape(batch_size, seq_len, num_heads, head_dim),
+                            make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
     Tensor gK = local_tile(mK(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
                            make_coord(_, 0));  // (16, 128, seq_len / 16)
 
-    // this is a (seq_len, head_size) column major matrix, so its V^T in row major
+    // this is a (seq_len, head_dim) column major matrix, so its V^T in row major
     // for gmem -> smem copy, view it as 16 x 128
     // for gemm, view it as 128 x 16
     Tensor mV = make_tensor(make_gmem_ptr(v),
-                            make_shape(batch_size, head_size, num_heads, seq_len),
-                            make_stride(seq_len * num_heads * head_size, Int<1>{}, head_size, num_heads * head_size));
+                            make_shape(batch_size, head_dim, num_heads, seq_len),
+                            make_stride(seq_len * num_heads * head_dim, Int<1>{}, head_dim, num_heads * head_dim));
 
     // load V as 16 x 128 matrix, perform matmul as 128 x 16 matrix
     Tensor gV = local_tile(mV(blockIdx.x, _, blockIdx.y, _), Shape<Int<128>, Int<16>>{},
                            make_coord(0, _));  // (128, 16, seq_len / 16)
 
     Tensor mO = make_tensor(make_gmem_ptr(o),
-                            make_shape(batch_size, seq_len, num_heads, head_size),
-                            make_stride(seq_len * num_heads * head_size, num_heads * head_size, head_size, Int<1>{}));
+                            make_shape(batch_size, seq_len, num_heads, head_dim),
+                            make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
     Tensor gO = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
                            make_coord(blockIdx.z, 0));  // (16, 128)
