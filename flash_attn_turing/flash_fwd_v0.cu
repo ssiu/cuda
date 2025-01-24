@@ -16,13 +16,15 @@ using namespace cute;
 template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutK, class TiledCopyK, class TiledMmaO,
           class SmemLayoutV, class TiledCopyV,
-          class SmemLayoutS>
+          class SmemLayoutS,
+          class SmemLayoutO>
 __global__ __launch_bounds__(64)
 void flash_fwd_v0_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
-    float* o,        SmemLayoutV sS_layout,
+                     SmemLayoutV sS_layout,
+    float* o,        SmemLayoutV sO_layout,
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
@@ -117,7 +119,7 @@ void flash_fwd_v0_kernel(
     Tensor tVsV = thr_copy_V.partition_D(sV);
 
     // mma for S = QK^T
-    ThrMMA thr_mma_S = TiledMmaS.get_slice(threadIdx.x);
+    ThrMMA thr_mma_S = mma_S.get_slice(threadIdx.x);
     Tensor tSsQ = thr_mma_S.partition_A(sQ);
     Tensor tSsK = thr_mma_S.partition_B(sK);
     Tensor tSgS = thr_mma_S.partition_C(gS);
@@ -128,7 +130,7 @@ void flash_fwd_v0_kernel(
 
 
     // mma for O = PV
-    ThrMMA thr_mma_O = TiledMmaO.get_slice(threadIdx.x);
+    ThrMMA thr_mma_O = mma_O.get_slice(threadIdx.x);
     Tensor tOsP = thr_mma_O.partition_A(sP);
     Tensor tOsV = thr_mma_O.partition_B(sV);
     Tensor tOgO = thr_mma_O.partition_C(gO);
@@ -295,6 +297,7 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
     flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q, sQ_layout, copy_Q, mma_S,
                                                k, sK_layout, copy_K, mma_O
                                                v, sV_layout, copy_V,
-                                               o, sS_layout);
+                                                  sS_layout,
+                                               o, sO_layout);
 
 }
