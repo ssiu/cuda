@@ -17,14 +17,14 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutK, class TiledCopyK, class TiledMmaO,
           class SmemLayoutV, class TiledCopyV,
           class SmemLayoutS,
-          class SmemLayoutO>
+          class SmemLayoutO, class TiledCopyO>
 __global__ __launch_bounds__(64)
 void flash_fwd_v0_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
                      SmemLayoutS sS_layout,
-    float* o,        SmemLayoutO sO_layout,
+    float* o,        SmemLayoutO sO_layout, TiledCopyV copy_O,
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
@@ -117,6 +117,12 @@ void flash_fwd_v0_kernel(
     ThrCopy thr_copy_V = copy_V.get_slice(threadIdx.x);
     Tensor tVgV = thr_copy_V.partition_S(gV);
     Tensor tVsV = thr_copy_V.partition_D(sV);
+
+
+    // smem -> gmem for O
+    ThrCopy thr_copy_O = copy_O.get_slice(threadIdx.x);
+    Tensor tOsO_copy = thr_copy_O.partition_S(sO);
+    Tensor tOgO_copy = thr_copy_O.partition_D(gO);
 
     // mma for S = QK^T
     ThrMMA thr_mma_S = mma_S.get_slice(threadIdx.x);
@@ -228,7 +234,7 @@ void flash_fwd_v0_kernel(
 
     }
 
-    //copy(tOsO, tOgO);
+    copy(copy_O, tOsO_copy, tOgO_copy);
 
 }
 
@@ -283,6 +289,10 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
                                 Layout<Shape<_16,_4>, Stride<_1,_16>>{},
                                 Layout<Shape< _8,_1>>{});
 
+    TiledCopy copy_O = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
+                                Layout<Shape<_2,_32>, Stride<_32,_1>>{},
+                                Layout<Shape< _1,_4>>{});
+
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_1, _2, _1>>{},
@@ -299,7 +309,7 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
                                                k, sK_layout, copy_K, mma_O,
                                                v, sV_layout, copy_V,
                                                   sS_layout,
-                                               o, sO_layout,
+                                               o, sO_layout, copy_O,
                                                batch_size, seq_len, num_heads, head_dim);
 
 }
