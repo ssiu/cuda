@@ -1,6 +1,6 @@
 #include <iostream>
 #include <torch/extension.h>
-
+#include <pybind11/pybind11.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
 
@@ -157,7 +157,7 @@ at::Tensor mm_new_8(const at::Tensor& a, const at::Tensor& b) {
 }
 
 
-TORCH_LIBRARY_IMPL(TORCH_EXTENSION_NAME, CUDA, m) {
-  m.impl("mm_new_8", &mm_new_8);
+PYBIND11_MODULE(TORCH_EXTENSION_NAME,  m) {
+  m.def("mm_new_8", &mm_new_8, "test gemm");
 }
 
