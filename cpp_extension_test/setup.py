@@ -9,5 +9,6 @@ setup(
             ["my_extension.cpp", "my_kernel.cu"]
         )
     ],
+    install_requires=["torch"],
     cmdclass={"build_ext": BuildExtension}
 )
