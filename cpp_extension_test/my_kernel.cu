@@ -305,9 +305,9 @@ void gemm_register_pipelining_256_kernel(
 // column major matrices
 torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
 
-    m = A.size(0);
-    n = B.size(1);
-    k = A.size(1);
+    int m = A.size(0);
+    int n = B.size(1);
+    int k = A.size(1);
 
     auto prob_shape = make_shape(m, n, k);
 
