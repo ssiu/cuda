@@ -170,6 +170,17 @@ torch::Tensor mm_new_8(torch::Tensor a, torch::Tensor b) {
   return c;
 }
 
+#undef A
+#undef B
+#undef C
+#undef sA
+#undef sB
+#undef TILE_WIDTH
+#undef BLOCK_WIDTH
+#undef FLOAT_4
+
+
+
 #include <cute/tensor.hpp>
 
 using namespace cute;
