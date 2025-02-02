@@ -35,3 +35,7 @@ for i in range(1024):
         lse += (c[i,j] - c_cublas[i,j])**2
 
 print(lse)
+
+for i in range(100):
+    print(c[777,865+i], c_cublas[777, 865+i])
+
