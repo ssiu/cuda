@@ -17,7 +17,7 @@ c_cublas = torch.matmul(a,b)
 lse = 0
 for i in range(1024):
     for j in range(1024):
-        lse += (c[i,j] - c_cublas[i,j])^2
+        lse += (c[i,j] - c_cublas[i,j])**2
 
 print(lse)
 
