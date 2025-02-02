@@ -358,7 +358,7 @@ torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
 
     torch::Tensor a_contig = a.contiguous();
     torch::Tensor b_contig = b.contiguous();
-    torch::Tensor c = torch::empty(a_contig.sizes(), a_contig.options());
+    torch::Tensor c = torch::empty(a_contig.sizes(), a_contig.options().dtype(torch::kFloat32));
 //     half_t* a_ptr = a_contig.data_ptr<at::Half>();
 //     half_t* b_ptr = b_contig.data_ptr<at::Half>();
 
