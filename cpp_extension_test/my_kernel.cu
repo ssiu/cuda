@@ -356,16 +356,16 @@ torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
                                     Layout<Shape<_2, _4, _1>>{},
                                     Tile<_256,_128,_8>{});
 
-    torch::Tensor a_contig = a.contiguous();
-    torch::Tensor b_contig = b.contiguous();
-    torch::Tensor c = torch::empty(a_contig.sizes(), a_contig.options().dtype(torch::kFloat32));
+//     torch::Tensor a_contig = a.contiguous();
+//     torch::Tensor b_contig = b.contiguous();
+    torch::Tensor c = torch::empty(a.sizes(), a.options().dtype(torch::kFloat32));
 //     half_t* a_ptr = a_contig.data_ptr<at::Half>();
 //     half_t* b_ptr = b_contig.data_ptr<at::Half>();
 
 //     half_t* a_ptr = reinterpret_cast<half_t*>(a_contig.data_ptr<at::Half>());
 //     half_t* b_ptr = reinterpret_cast<half_t*>(b_contig.data_ptr<at::Half>());
-    half_t* a_ptr = reinterpret_cast<half_t*>(a_contig.data_ptr());
-    half_t* b_ptr = reinterpret_cast<half_t*>(b_contig.data_ptr());
+    half_t* a_ptr = reinterpret_cast<half_t*>(a.data_ptr());
+    half_t* b_ptr = reinterpret_cast<half_t*>(b.data_ptr());
 
     float* c_ptr = c.data_ptr<float>();
 //     for (int i=0;i<10;i++) {

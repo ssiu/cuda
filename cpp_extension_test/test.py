@@ -31,5 +31,5 @@ for i in range(10):
 
 c_cublas = torch.matmul(a,b)
 
-# for i in range(10):
-#     print(c[0,i], c_cublas[0,i])
+for i in range(10):
+    print(c[0,i], c_cublas[0,i])
