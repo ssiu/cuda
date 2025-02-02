@@ -368,9 +368,9 @@ torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
     half_t* b_ptr = reinterpret_cast<half_t*>(b_contig.data_ptr());
 
     float* c_ptr = c.data_ptr<float>();
-    for (int i=0;i<10;i++) {
-        printf("%f\n", (float)a_ptr[i]);
-    }
+//     for (int i=0;i<10;i++) {
+//         printf("%f\n", (float)a_ptr[i]);
+//     }
 
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
