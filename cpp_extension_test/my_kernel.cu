@@ -374,4 +374,5 @@ torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
                                                      a, dA, sA_layout, copyA,
                                                      b, dB, sB_layout, copyB,
                                                      c, dC, sC_layout, mmaC);
+    return c;
 }
