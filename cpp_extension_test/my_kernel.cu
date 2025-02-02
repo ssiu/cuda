@@ -292,7 +292,7 @@ void gemm_register_pipelining_256_kernel(
 }
 
 // column major matrices
-torch::Tensor void gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
+torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
 
     m = A.size(0);
     n = B.size(1);
