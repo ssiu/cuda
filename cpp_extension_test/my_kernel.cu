@@ -169,3 +169,194 @@ torch::Tensor mm_new_8(torch::Tensor a, torch::Tensor b) {
 
   return c;
 }
+
+#include <cute/tensor.hpp>
+
+using namespace cute;
+
+template <class ProblemShape, class CtaTiler,
+          class TA, class AStride, class ASmemLayout, class TiledCopyA,
+          class TB, class BStride, class BSmemLayout, class TiledCopyB,
+          class TC, class CStride, class CSmemLayout, class TiledMma>
+__global__ __launch_bounds__(256)
+void gemm_register_pipelining_256_kernel(
+            ProblemShape shape_MNK, CtaTiler cta_tiler,
+            TA const* A, AStride dA, ASmemLayout sA_layout, TiledCopyA copy_a,
+            TB const* B, BStride dB, BSmemLayout sB_layout, TiledCopyB copy_b,
+            TC      * C, CStride dC, CSmemLayout          , TiledMma mma
+)
+{
+
+    Tensor mA = make_tensor(make_gmem_ptr(A), select<0,2>(shape_MNK), dA); // (M,K)
+    Tensor mB = make_tensor(make_gmem_ptr(B), select<1,2>(shape_MNK), dB); // (N,K)
+    Tensor mC = make_tensor(make_gmem_ptr(C), select<0,1>(shape_MNK), dC); // (M,N)
+
+    // Get the appropriate blocks for this thread block
+    auto cta_coord = make_coord(blockIdx.x, blockIdx.y, _);              // (m,n,k)
+    Tensor gA = local_tile(mA, cta_tiler, cta_coord, Step<_1, X,_1>{});  // (BLK_M,BLK_K,k)
+    Tensor gB = local_tile(mB, cta_tiler, cta_coord, Step< X,_1,_1>{});  // (BLK_N,BLK_K,k)
+    Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
+
+    __shared__ half_t smemA[cosize_v<ASmemLayout>];
+    __shared__ half_t smemB[cosize_v<BSmemLayout>];
+
+    Tensor sA = make_tensor(make_smem_ptr(smemA), sA_layout);
+    Tensor sB = make_tensor(make_smem_ptr(smemB), sB_layout);
+
+    ThrCopy thr_copy_a = copy_a.get_slice(threadIdx.x);
+    Tensor tAgA = thr_copy_a.partition_S(gA);                            // (CPY,CPY_M,CPY_K,k)
+    Tensor tAsA = thr_copy_a.partition_D(sA);                            // (CPY,CPY_M,CPY_K)
+    Tensor tArA = make_fragment_like(tAsA);
+
+
+    ThrCopy thr_copy_b = copy_b.get_slice(threadIdx.x);
+    Tensor tBgB = thr_copy_b.partition_S(gB);                            // (CPY,CPY_N,CPY_K,k)
+    Tensor tBsB = thr_copy_b.partition_D(sB);                            // (CPY,CPY_N,CPY_K)
+    Tensor tBrB = make_fragment_like(tBsB);
+
+    ThrMMA thr_mma = mma.get_slice(threadIdx.x);
+    Tensor tCsA = thr_mma.partition_A(sA);                               // (MMA,MMA_M,MMA_K)
+    Tensor tCsB = thr_mma.partition_B(sB);                               // (MMA,MMA_N,MMA_K)
+    Tensor tCgC = thr_mma.partition_C(gC);                               // (MMA,MMA_M,MMA_N)
+
+    // Allocate the accumulators -- same size as the projected data
+    Tensor tCrA = thr_mma.make_fragment_A(tCsA);
+    Tensor tCrB = thr_mma.make_fragment_B(tCsB);
+    Tensor tCrC = thr_mma.make_fragment_C(tCgC);
+
+
+    auto s2r_tiled_copy_a = make_tiled_copy_A(Copy_Atom<SM75_U16x8_LDSM_T, half_t>{}, mma);
+    auto s2r_thr_copy_a = s2r_tiled_copy_a.get_slice(threadIdx.x);
+    auto s2r_tCsA = s2r_thr_copy_a.partition_S(sA);
+    auto tCrA_copy_view = s2r_thr_copy_a.retile_D(tCrA);
+
+    auto s2r_tiled_copy_b = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma);
+    auto s2r_thr_copy_b = s2r_tiled_copy_b.get_slice(threadIdx.x);
+    auto s2r_tCsB = s2r_thr_copy_b.partition_S(sB);
+    auto tCrB_copy_view = s2r_thr_copy_b.retile_D(tCrB);
+
+
+    //printf("tCrC: %f\n", tCrC[0]);
+    clear(tCrC);
+
+
+    // prologue
+    copy(copy_a, tAgA(_,_,_,0), tAsA);
+    copy(copy_b, tBgB(_,_,_,0), tBsB);
+
+    __syncthreads();
+
+    copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
+    copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
+
+    auto K_TILE_MAX = size<3>(tAgA);
+    auto K_BLOCK_MAX = size<2>(tCsA);
+    CUTE_NO_UNROLL
+    for (int k_tile = 0; k_tile < K_TILE_MAX; k_tile++)
+    {
+        CUTE_UNROLL
+        for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
+
+            if (k_block == K_BLOCK_MAX - 1)
+            {
+            // Copy rmem to smem
+                __syncthreads();
+                copy(copy_a, tArA, tAsA);
+                copy(copy_b, tBrB, tBsB);
+                __syncthreads();
+            }
+
+            int k_block_next = (k_block + 1) % K_BLOCK_MAX;
+            copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
+            copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
+
+            if (k_block == 0)
+            {
+            // Copy gmem to rmem for k_tile+1
+                int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
+                copy(copy_a, tAgA(_,_,_,k_tile_next), tArA);
+                copy(copy_b, tBgB(_,_,_,k_tile_next), tBrB);
+            }
+
+            gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
+        }
+
+
+    }
+
+
+    //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
+    copy(tCrC, tCgC);
+
+
+}
+
+// column major matrices
+torch::Tensor void gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
+
+    m = A.size(0);
+    n = B.size(1);
+    k = A.size(1);
+
+    auto prob_shape = make_shape(m, n, k);
+
+    auto dA = make_stride(Int<1>{}, m);                      // (dM, dK)
+    auto dB = make_stride(k, Int<1>{});                      // (dN, dK)
+    auto dC = make_stride(Int<1>{}, m);                      // (dM, dN)
+//     printf("%d\n", prob_shape[1]);
+//     printf("%d\n", prob_shape[2]);
+    auto bM = Int<256>{};
+    auto bN = Int<128>{};
+    auto bK = Int< 32>{};
+    auto cta_tiler = make_shape(bM, bN, bK);
+
+    using SmemLayoutAtomA = decltype(composition(
+        Swizzle<3, 3, 3>{},
+        make_layout(make_shape(Int<64>{}, Int<16>{}),
+                    make_stride(Int<1>{}, Int<64>{}))));
+    using SmemLayoutA = decltype(tile_to_shape(SmemLayoutAtomA{},
+                                               make_shape(Int<256>{}, Int<32>{})));
+
+    SmemLayoutA sA_layout;
+
+
+    using SmemLayoutAtomB = decltype(composition(
+        Swizzle<3, 3, 3>{},
+        make_layout(make_shape(Int<32>{}, Int<32>{}),
+                    make_stride(Int<32>{}, Int<1>{}))));
+    using SmemLayoutB = decltype(tile_to_shape(SmemLayoutAtomB{},
+                                               make_shape(Int<128>{}, Int<32>{})));
+    SmemLayoutB sB_layout;
+
+
+
+    auto sC_layout = make_layout(make_shape (Int<256>{}, Int<128>{}),
+                        make_stride(Int<1>{}, Int<256>{}));
+
+
+    TiledCopy copyA = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+                               Layout<Shape<_16,_16>, Stride<_1,_16>>{},
+                               Layout<Shape< _8,_1>>{});
+    TiledCopy copyB = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+                               Layout<Shape<_64,_4>, Stride<_4,_1>>{},
+                               Layout<Shape< _1,_8>>{});
+
+    TiledMMA mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
+                                    Layout<Shape<_2, _4, _1>>{},
+                                    Tile<_256,_128,_8>{});
+
+    torch::Tensor a_contig = a.contiguous();
+    torch::Tensor b_contig = b.contiguous();
+    torch::Tensor c = torch::empty(a_contig.sizes(), a_contig.options());
+    float* a_ptr = a_contig.data_ptr<at::Half>();
+    float* b_ptr = b_contig.data_ptr<at::Half>();
+    float* c_ptr = c.data_ptr<float>();
+
+
+    dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
+    dim3 dimBlock(256);
+    gemm_register_pipelining_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
+                                                     a, dA, sA_layout, copyA,
+                                                     b, dB, sB_layout, copyB,
+                                                     c, dC, sC_layout, mmaC);
+}

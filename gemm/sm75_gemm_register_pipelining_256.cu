@@ -80,11 +80,7 @@ void gemm_register_pipelining_256_kernel(
     // prologue
     copy(copy_a, tAgA(_,_,_,0), tAsA);
     copy(copy_b, tBgB(_,_,_,0), tBsB);
-//     copy(copy_a, tAgA(_,_,_,0), tArA);
-//     copy(copy_b, tBgB(_,_,_,0), tBrB);
-//
-//     copy(copy_a, tArA, tAsA);
-//     copy(copy_b, tBrB, tBsB);
+
 
     __syncthreads();
 
@@ -122,121 +118,13 @@ void gemm_register_pipelining_256_kernel(
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
-//         if (k_tile < K_TILE_MAX - 1) {
-//             copy(copy_a, tAgA(_,_,_,k_tile + 1), tArA);
-//             copy(copy_b, tBgB(_,_,_,k_tile + 1), tBrB);
-//         }
-//
-//
-//         copy(s2r_tiled_copy_a, s2r_tCsA(_,_,0), tCrA_copy_view(_,_,0));
-//         copy(s2r_tiled_copy_b, s2r_tCsB(_,_,0), tCrB_copy_view(_,_,0));
-//         CUTE_UNROLL
-//         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
-//             if (k_block < K_BLOCK_MAX - 1) {
-//                 int k_block_next = k_block + 1;
-//                 copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-//                 copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
-//             }
-// //             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
-// //             copy(tCsB(_,_,k_block), tCrB(_,_,k_block));
-//
-//             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
-//         }
-//
-//         __syncthreads();
-//
-//         if (k_tile < K_TILE_MAX - 1) {
-//             copy(copy_a, tArA, tAsA);
-//             copy(copy_b, tBrB, tBsB);
-//         }
-//
-//
-//         __syncthreads();
 
     }
-    #if 0
-        if(thread0()) {
-            for (int i=0; i<32; i++) {
-                printf("sA : %f\n", static_cast<float>(sA[i]));
-            }
-            for (int i=0; i<32; i++) {
-                printf("sB : %f\n", static_cast<float>(sB[i]));
-            }
-        }
-    #endif
+
 
     //axpby(1.0f, tCrC, 0.0f, tCgC); //vectorized_load
     copy(tCrC, tCgC);
 
-    #if 0
-        if(thread0()) {
-
-            print("  mA : "); print(  mA); print("\n");
-            print("  gA : "); print(  gA); print("\n");
-            print("  sA : "); print(  sA); print("\n");
-            print("tAgA : "); print(tAgA); print("\n");
-            print("tAsA : "); print(tAsA); print("\n");
-
-        }
-    #endif
-
-    #if 0
-        if(thread0()) {
-            print("  mB : "); print(  mB); print("\n");
-            print("  gB : "); print(  gB); print("\n");
-            print("  sB : "); print(  sB); print("\n");
-            print("tBgB : "); print(tBgB); print("\n");
-            print("tBsB : "); print(tBsB); print("\n");
-        }
-    #endif
-
-    #if 0
-        if(thread(1)) {
-            print("  mC : "); print(  mC); print("\n");
-            print("  gC : "); print(  gC); print("\n");
-            print("tCsA : "); print(tCsA); print("\n");
-            print("tCsB : "); print(tCsB); print("\n");
-            print("tCrA : "); print(tCrA); print("\n");
-            print("tCrB : "); print(tCrB); print("\n");
-            print("tCgC : "); print(tCgC); print("\n");
-            print("tCrC : "); print(tCrC); print("\n");
-            print("tCrA(0) : "); print(tCrA(_,_,0)); print("\n");
-        }
-    #endif
-
-    #if 0
-        if(thread(1)) {
-            printf("tCsA[0], sA[0]: %f %f\n", static_cast<float>(tCsA[0]),static_cast<float>(sA[0]));
-            printf("tCsA[1], sA[16]: %f %f\n", static_cast<float>(tCsA[1]),static_cast<float>(sA[16]));
-            printf("tCsA[2], sA[8]: %f %f\n", static_cast<float>(tCsA[2]),static_cast<float>(sA[8]));
-            printf("tCsA[3], sA[24]: %f %f\n", static_cast<float>(tCsA[3]),static_cast<float>(sA[24]));
-            printf("tCsB[0], sB[0]: %f %f\n", static_cast<float>(tCsB[0]),static_cast<float>(sB[0]));
-            printf("tCsB[1], sB[1]: %f %f\n", static_cast<float>(tCsB[1]),static_cast<float>(sB[1]));
-            //             for (int i=0;i< 16; i++) {
-            //                 for (int j=0;j<8;j++) {
-            //                     printf("%f ", static_cast<float>(sA[i  + 16 * j]));
-            //                 }
-            //                 printf("\n");
-            //             }
-        }
-    #endif
-
-
-    #if 0
-        printf("thread = %d, tCsB[0] = %f\n", threadIdx.x, static_cast<float>(tCsB[0]));
-        printf("thread = %d, tCsB[1] = %f\n", threadIdx.x, static_cast<float>(tCsB[1]));
-    #endif
-
-    #if 0
-        if(thread0()) {
-            for (int i=0; i<128; i++){
-                printf("i = %d, gA = %f, sA = %f,\n", i, static_cast<float>(gA[i]), static_cast<float>(sA[i]));
-            }
-            for (int i=0; i<64; i++){
-                printf("i = %d, gB = %f, sB = %f,\n", i, static_cast<float>(gB[i]), static_cast<float>(sB[i]));
-            }
-        }
-    #endif
 
 
 }
