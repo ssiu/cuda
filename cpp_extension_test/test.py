@@ -24,7 +24,7 @@ print(lse)
 a = torch.randn(1024, 1024, dtype=torch.float16, device=device)
 b = torch.randn(1024, 1024, dtype=torch.float16, device=device)
 
-c = my_cuda_extension.gemm_register_pipelining_256(b.T, a.T)
+c = my_cuda_extension.gemm_register_pipelining_256(a, b)
 c_cublas = torch.matmul(a,b)
 
 for i in range(10):
