@@ -371,8 +371,8 @@ torch::Tensor gemm_register_pipelining_256(torch::Tensor a, torch::Tensor b) {
     dim3 dimGrid(size(ceil_div(m, bM)), size(ceil_div(n, bN)));
     dim3 dimBlock(256);
     gemm_register_pipelining_256_kernel<<<dimGrid, dimBlock>>>(prob_shape, cta_tiler,
-                                                     a, dA, sA_layout, copyA,
-                                                     b, dB, sB_layout, copyB,
-                                                     c, dC, sC_layout, mmaC);
+                                                     a_ptr, dA, sA_layout, copyA,
+                                                     b_ptr, dB, sB_layout, copyB,
+                                                     c_ptr, dC, sC_layout, mmaC);
     return c;
 }
