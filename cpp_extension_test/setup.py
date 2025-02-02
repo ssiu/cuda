@@ -1,7 +1,7 @@
 from setuptools import setup
 from torch.utils.cpp_extension import CUDAExtension, BuildExtension
 
-from cpp_extension.setup import nvcc_flags
+#from cpp_extension.setup import nvcc_flags
 
 cutlass_include_dirs = ["/cutlass/include", "/cutlass/tools/util/include"]
 
