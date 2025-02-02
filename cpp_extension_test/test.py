@@ -14,6 +14,10 @@ b = torch.randn(1024, 1024, dtype=torch.float32, device=device)
 c = my_cuda_extension.mm_new_8(a, b)
 c_cublas = torch.matmul(a,b)
 
+lse = 0
+for i in range(1024):
+    for j in range(1024):
+        lse += (c[i,j] - c_cublas[i,j])^2
 
-print(c[0,1])
-print(c_cublas[0,1])
+print(lse)
+
