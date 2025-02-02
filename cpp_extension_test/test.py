@@ -11,4 +11,6 @@ print("After:", x)  # Each element should be multiplied by 2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 a = torch.randn(1024, 1024, dtype=torch.float32, device=device)
 b = torch.randn(1024, 1024, dtype=torch.float32, device=device)
-result = my_cuda_extension.mm_new_8(a, b)
+c = my_cuda_extension.mm_new_8(a, b)
+
+print(c[0,1])
