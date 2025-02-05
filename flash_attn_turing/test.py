@@ -3,9 +3,9 @@ import torch.nn.functional as F
 import flash_attn_turing
 
 
-batch_size = 32
-seqlen = 1024
-nheads = 8
+batch_size = 1
+seqlen = 16
+nheads = 1
 headdim = 128
 
 (batch_size, seqlen, nheads, headdim)
