@@ -37,7 +37,7 @@ for i in range(batch_size):
         for k in range(nheads):
             for l in range(headdim):
                 if count < 100:
-                    print(output[i,j,k,l], output_torch[i,j,k,l])
+                    print(count, i, j, k, l, output[i,j,k,l], output_torch[i,j,k,l])
                 lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
 
 print(lse)
