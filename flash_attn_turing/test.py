@@ -30,7 +30,14 @@ output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
 print(output[0,0,0,0])
 print(output_torch[0,0,0,0])
 
+lse = 0
+for i in range(batch_size):
+    for j in range(seqlen):
+        for k in range(nheads):
+            for l in range(headdim):
+                lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
 
+print(lse)
 
 # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
 #     # with sdpa_kernel(backends=[SDPBackend.EFFICIENT_ATTENTION]):
