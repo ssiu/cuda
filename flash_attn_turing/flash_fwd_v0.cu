@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cassert>
 #include <float.h>
+#include <torch/extension.h>
 #include <cute/tensor.hpp>
 #include "cutlass/util/print_error.hpp"
 #include "cutlass/util/GPU_Clock.hpp"
