@@ -31,10 +31,13 @@ print(output[0,0,0,0])
 print(output_torch[0,0,0,0])
 
 lse = 0
+count = 0
 for i in range(batch_size):
     for j in range(seqlen):
         for k in range(nheads):
             for l in range(headdim):
+                if count < 100:
+                    print(output[i,j,k,l], output_torch[i,j,k,l])
                 lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
 
 print(lse)
