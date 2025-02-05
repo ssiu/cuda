@@ -243,7 +243,7 @@ void flash_fwd_v0_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-torch::Tensor void flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+torch::Tensor flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                 int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
