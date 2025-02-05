@@ -32,6 +32,8 @@ print(output_torch[0,0,0,0])
 
 lse = 0
 count = 0
+print(f"batch size = {batch_size}, seqlen = {seqlen}, nheads = {nheads}, headdim = {headdim}")
+
 for i in range(batch_size):
     for j in range(seqlen):
         for k in range(nheads):
