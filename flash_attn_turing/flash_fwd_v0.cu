@@ -242,8 +242,8 @@ void flash_fwd_v0_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
-                  int batch_size, int seq_len, int num_heads, int head_dim)
+torch::Tensor void flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+                                int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
     // output : (B, S, NH, HD)
@@ -303,13 +303,22 @@ void flash_fwd_v0(half_t const* q, half_t const* k, half_t const* v, float* o,
                                         Tile<_16,_128,_8>{});
 
 
+    torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
+
+    half_t* q_ptr = reinterpret_cast<half_t*>(q.data_ptr());
+    half_t* k_ptr = reinterpret_cast<half_t*>(k.data_ptr());
+    half_t* v_ptr = reinterpret_cast<half_t*>(v.data_ptr());
+    float* o_ptr = o.data_ptr<float>();
+
+
     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimBlock(64);
-    flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q, sQ_layout, copy_Q, mma_S,
-                                               k, sK_layout, copy_K, mma_O,
-                                               v, sV_layout, copy_V,
+    flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q_ptr, sQ_layout, copy_Q, mma_S,
+                                               k_ptr, sK_layout, copy_K, mma_O,
+                                               v_ptr, sV_layout, copy_V,
                                                   sS_layout,
-                                               o, sO_layout, copy_O,
+                                               o_ptr, sO_layout, copy_O,
                                                batch_size, seq_len, num_heads, head_dim);
+    return o;
 
 }
