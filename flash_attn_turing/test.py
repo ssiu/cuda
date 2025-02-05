@@ -27,7 +27,8 @@ output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torc
 # (batch_size, seqlen, nheads, headdim)
 output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
 
-
+print(output[0,0,0,0])
+print(output_torch[0,0,0,0])
 
 
 
