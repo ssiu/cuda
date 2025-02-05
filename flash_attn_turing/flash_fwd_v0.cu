@@ -316,7 +316,7 @@ torch::Tensor void flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor 
     flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                k_ptr, sK_layout, copy_K, mma_O,
                                                v_ptr, sV_layout, copy_V,
-                                                  sS_layout,
+                                                      sS_layout,
                                                o_ptr, sO_layout, copy_O,
                                                batch_size, seq_len, num_heads, head_dim);
     return o;
