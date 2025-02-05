@@ -38,8 +38,8 @@ for i in range(batch_size):
     for j in range(seqlen):
         for k in range(nheads):
             for l in range(headdim):
-                if count < 100:
-                    print(count, i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
+
+                print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
                 lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
 
 print(lse)
