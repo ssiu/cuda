@@ -162,8 +162,18 @@ void flash_fwd_v0_kernel(
         // compute S = QK^T
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
+
+
+
         copy(tSrS, tSsS);
         __syncthreads();
+
+        // rescale S by 1/sqrt(128)
+        for (int i = 0; i < 16; i++) {
+            for (int j=0; j < 16; j++) {
+                sS(i,j) *= 1.0f / sqrtf(128);
+            }
+        }
 
         // compute m = rowsum(S)
         for (int i = 0; i < 16; i++) {
