@@ -163,8 +163,6 @@ void flash_fwd_v0_kernel(
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
 
-
-
         copy(tSrS, tSsS);
         __syncthreads();
 
@@ -200,7 +198,7 @@ void flash_fwd_v0_kernel(
 
         // compute sum(sP)
         for (int i = 0; i < 16; i++) {
-            for (int j=0; j< 16; j++) {
+            for (int j=0; j < 16; j++) {
                 rD[i] += sP_float(i, j);
             }
         }
@@ -238,7 +236,7 @@ void flash_fwd_v0_kernel(
     __syncthreads();
 
     for (int i=0;i<16;i++) {
-        for (int j=0; j<16; j++) {
+        for (int j=0; j<128; j++) {
             sO(i,j) /= rL[i];
 
         }
