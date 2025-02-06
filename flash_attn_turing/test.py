@@ -4,9 +4,9 @@ from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
 
 
-batch_size = 1
-seqlen = 16
-nheads = 1
+batch_size = 16
+seqlen = 1024
+nheads = 16
 headdim = 128
 
 (batch_size, seqlen, nheads, headdim)
@@ -31,9 +31,10 @@ value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
 with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
     # with sdpa_kernel(backends=[SDPBackend.EFFICIENT_ATTENTION]):
     #     output =  F.scaled_dot_product_attention(query, key, value)
-    output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
     output = flash_attn_turing.flash_fwd_v0(query, key, value,
                                             batch_size, seqlen, nheads, headdim)
+    output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
+
 
 
 
