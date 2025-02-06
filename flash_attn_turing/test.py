@@ -31,7 +31,7 @@ value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
 with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
     # with sdpa_kernel(backends=[SDPBackend.EFFICIENT_ATTENTION]):
     #     output =  F.scaled_dot_product_attention(query, key, value)
-    output = flash_attn_turing.flash_fwd_v0(query, key, value,
+    output = flash_attn_turing.flash_fwd_v1(query, key, value,
                                             batch_size, seqlen, nheads, headdim)
     output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
 
