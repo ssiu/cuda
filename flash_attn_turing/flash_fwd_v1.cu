@@ -20,7 +20,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
 __global__ __launch_bounds__(64)
-void flash_fwd_v0_kernel(
+void flash_fwd_v1_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
@@ -251,7 +251,7 @@ void flash_fwd_v0_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-torch::Tensor flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                 int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
