@@ -39,10 +39,10 @@ for i in range(batch_size):
         for k in range(nheads):
             for l in range(headdim):
 
-                print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
+                #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
                 lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
 
-print(lse)
+print(f"lse is {lse}")
 
 # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
 #     # with sdpa_kernel(backends=[SDPBackend.EFFICIENT_ATTENTION]):
