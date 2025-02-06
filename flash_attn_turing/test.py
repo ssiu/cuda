@@ -4,9 +4,9 @@ from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
 
 
-batch_size = 1
-seqlen = 16
-nheads = 1
+batch_size = 4
+seqlen = 1024
+nheads = 4
 headdim = 128
 
 (batch_size, seqlen, nheads, headdim)
