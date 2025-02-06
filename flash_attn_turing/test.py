@@ -16,7 +16,7 @@ query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to
 key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 #output = flash_attn_turing.flash_fwd_v0(query, key, value,
-                                        batch_size, seqlen, nheads, headdim)
+#                                        batch_size, seqlen, nheads, headdim)
 
 # for pytorch function
 # (batch_size, nheads, seqlen, headdim)
