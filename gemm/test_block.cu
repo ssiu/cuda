@@ -6,7 +6,7 @@
 
 __global__ void my_test_kernel() {
 
-    printf("blockIdx.z = %d, gridIdx.z = %d\n", blockIdx.z, gridIdx.z);
+    printf("blockIdx.z = %d\n", blockIdx.z);
 
 }
 
