@@ -153,6 +153,13 @@ void flash_fwd_v0_kernel(
     // load Q into smem
     copy(copy_Q, tQgQ, tQsQ);
 
+    // clear sO_accum
+    for (int i=0;i<16;i++) {
+        for (int j=0; j<128; j++) {
+            sO_accum(i,j) = 0.0f;
+        }
+    }
+
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
