@@ -160,6 +160,7 @@ void flash_fwd_v0_kernel(
 
         __syncthreads();
         // compute S = QK^T
+        clear(tSrS);
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
 
@@ -218,6 +219,7 @@ void flash_fwd_v0_kernel(
 
         __syncthreads();
         // compute O = PV
+        clear(tOrO);
         gemm(mma_O, tOsP, tOsV, tOrO);
 
 
