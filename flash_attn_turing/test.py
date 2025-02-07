@@ -33,8 +33,8 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
     return lse
 
-lse_16 = get_lse(batch_size=8, seqlen=16, nheads=64, headdim=128)
-lse_32 = get_lse(batch_size=8, seqlen=32, nheads=64, headdim=128)
+lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
+lse_32 = get_lse(batch_size=2, seqlen=16, nheads=1, headdim=128)
 
 print(f"lse_16 = {lse_16}, lse_32 = {lse_32}")
 
