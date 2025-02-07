@@ -44,7 +44,9 @@ void flash_fwd_v0_kernel(
 // blockIdx.x batch_size
 // blockIdx.y num_heads
 // blockIdx.z (seq_len / 16)
-
+    if (thread0()) {
+        printf("blockIdx.z = %d\n", blockIdx.z);
+    }
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
