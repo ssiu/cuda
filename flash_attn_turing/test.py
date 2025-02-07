@@ -28,15 +28,16 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
         for j in range(seqlen):
             for k in range(nheads):
                 for l in range(headdim):
-                    if count < 10:
-                        print(output[i,j,k,l], output_torch[i,j,k,l])
+                    if count < 1024:
+                        print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
                         count += 1
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
                     lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
     print("=====")
     return lse
 
-lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
+lse_16=0
+#lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
 lse_32 = get_lse(batch_size=1, seqlen=32, nheads=1, headdim=128)
 
 print(f"lse_16 = {lse_16}, lse_32 = {lse_32}")
