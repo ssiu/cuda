@@ -164,6 +164,12 @@ void flash_fwd_v0_kernel(
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
 
+        for (int i = 0; i < 16; i++) {
+            for (int j=0; j < 16; j++) {
+                sS(i,j) = 0.0f;
+            }
+        }
+
         copy(tSrS, tSsS);
         __syncthreads();
 
