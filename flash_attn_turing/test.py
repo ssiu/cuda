@@ -5,7 +5,7 @@ import flash_attn_turing
 
 
 batch_size = 1
-seqlen = 16
+seqlen = 32
 nheads = 1
 headdim = 128
 
