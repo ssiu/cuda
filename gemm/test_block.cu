@@ -5,9 +5,9 @@
 
 
 __global__ void my_test_kernel() {
-    if (threadIdx.x == 0 && threadIdx.y == 0 && threadIdx.z == 0) {
-        printf("gridDim.z = %d\n", gridDim.z);
-    }
+
+    printf("blockIdx.z = %d, gridIdx.z = %d\n", blockIdx.z, gridIdx.z);
+
 }
 
 
