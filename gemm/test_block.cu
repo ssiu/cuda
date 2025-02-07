@@ -15,6 +15,6 @@ void my_test() {
     dim3 dimBlock(1); // Example block size
     dim3 dimGrid(1, 1, 2);    // Only using Z-dimension
 
-    my_kernel<<<dimGrid, dimBlock>>>();
+    my_test_kernel<<<dimGrid, dimBlock>>>();
 
 }
