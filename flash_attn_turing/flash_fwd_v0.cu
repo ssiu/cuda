@@ -171,22 +171,30 @@ void flash_fwd_v0_kernel(
         clear(tSrS);
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
-
-        for (int i = 0; i < 16; i++) {
-            for (int j=0; j < 16; j++) {
-                sS(i,j) = 0.0f;
+        if (thread0()) {
+            for (int i = 0; i < 16; i++) {
+                for (int j=0; j < 16; j++) {
+                    sS(i,j) = 0.0f;
+                }
             }
+
         }
+        __syncthreads();
 
         copy(tSrS, tSsS);
         __syncthreads();
 
         // rescale S by 1/sqrt(128)
-        for (int i = 0; i < 16; i++) {
-            for (int j=0; j < 16; j++) {
-                sS(i,j) *= 1.0f / sqrtf(128);
+        if (thread0()) {
+            for (int i = 0; i < 16; i++) {
+                for (int j=0; j < 16; j++) {
+                    sS(i,j) *= 1.0f / sqrtf(128);
+                }
             }
         }
+        __syncthreads();
+
+
 
         // compute m = rowsum(S)
         for (int i = 0; i < 16; i++) {
@@ -197,11 +205,15 @@ void flash_fwd_v0_kernel(
         }
 
         // compute P = softmax(S)
-        for (int i=0;i<16;i++) {
-            for (int j=0;j<16;j++){
-                sP_float(i,j) = expf(sS(i,j) - rM[i]);
+        if (thread0()) {
+            for (int i=0;i<16;i++) {
+                for (int j=0;j<16;j++){
+                    sP_float(i,j) = expf(sS(i,j) - rM[i]);
+                }
             }
         }
+
+        __syncthreads();
 
 
         // rescale l and also reset rD to 0
@@ -212,11 +224,14 @@ void flash_fwd_v0_kernel(
 
 
         // compute sum(sP)
+
         for (int i = 0; i < 16; i++) {
             for (int j=0; j < 16; j++) {
                 rD[i] += sP_float(i, j);
             }
         }
+
+
 
         // compute l
         for (int i=0; i<16; i++) {
@@ -225,36 +240,45 @@ void flash_fwd_v0_kernel(
 
 
         // cast sP from float to half_t
-        for (int i=0;i<16;i++) {
-            for (int j=0;j<16;j++){
-                sP(i, j) = __float2half(sP_float(i, j));
+        if (thread0()) {
+            for (int i=0;i<16;i++) {
+                for (int j=0;j<16;j++){
+                    sP(i, j) = __float2half(sP_float(i, j));
+                }
             }
         }
+        __syncthreads();
 
 
         // rescale O
-        for (int i=0;i<16;i++) {
-            for (int j=0; j<128; j++) {
-                sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
+
+        if (thread0()){
+            for (int i=0;i<16;i++) {
+                for (int j=0; j<128; j++) {
+                    sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
+                }
             }
         }
 
         __syncthreads();
 
-
         // compute O = PV
+        clear(tOrO);
         gemm(mma_O, tOsP, tOsV, tOrO);
 
         copy(tOrO, tOsO);
         __syncthreads();
 
-        for (int i=0;i<16;i++) {
-            for (int j=0; j<128; j++) {
-                sO_accum(i,j) += sO(i,j);
-                //clear sO
-                sO(i,j) = 0.0f;
+        if (thread0()) {
+            for (int i=0;i<16;i++) {
+                for (int j=0; j<128; j++) {
+                    sO_accum(i,j) += sO(i,j);
+                    //clear sO
+                    sO(i,j) = 0.0f;
+                }
             }
         }
+
 
         __syncthreads();
 
@@ -264,17 +288,21 @@ void flash_fwd_v0_kernel(
             rL_old[i] = rL[i];
         }
 
+        __syncthreads();
     }
     // end of KV loop
 
+
     // rescale rO
-    for (int i=0;i<16;i++) {
-        for (int j=0; j<128; j++) {
-            sO_accum(i,j) /= rL[i];
+    if (thread0()){
 
+        for (int i=0;i<16;i++) {
+            for (int j=0; j<128; j++) {
+                sO_accum(i,j) /= rL[i];
+            }
         }
-
     }
+    __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
 
