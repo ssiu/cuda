@@ -45,7 +45,8 @@ void flash_fwd_v0_kernel(
 // blockIdx.y num_heads
 // blockIdx.z (seq_len / 16)
     if (thread0()) {
-        printf("blockIdx.z = %d\n", blockIdx.z);
+        printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
+        printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
     }
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
