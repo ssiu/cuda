@@ -31,7 +31,7 @@ void launch_my_cuda_kernel(torch::Tensor x) {
 __global__ __launch_bounds__(256)
 void mm_new_8_kernel(float* A, float* B, float* C, int N){
 
-    if (thread0()) {
+    if (threadIdx.x == 0) {
         printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
         printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
     }
