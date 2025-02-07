@@ -393,6 +393,7 @@ torch::Tensor flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                                       sS_layout,
                                                o_ptr, sO_layout, copy_O,
                                                batch_size, seq_len, num_heads, head_dim);
+    cudaDeviceSynchronize();
     return o;
 
 }
