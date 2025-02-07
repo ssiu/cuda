@@ -223,10 +223,21 @@ void flash_fwd_v0_kernel(
             }
         }
 
+
+        // rescale O
+        for (int i=0;i<16;i++) {
+            for (int j=0; j<128; j++) {
+                sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
+            }
+        }
+
         __syncthreads();
+
+
         // compute O = PV
         gemm(mma_O, tOsP, tOsV, tOrO);
 
+        copy(tOrO, tOsO);
 
         __syncthreads();
 
@@ -238,10 +249,6 @@ void flash_fwd_v0_kernel(
 
     }
     // rescale rO
-
-    copy(tOrO, tOsO);
-    __syncthreads();
-
     for (int i=0;i<16;i++) {
         for (int j=0; j<128; j++) {
             sO(i,j) /= rL[i];
