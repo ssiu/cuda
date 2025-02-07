@@ -84,7 +84,7 @@ void flash_fwd_v0_kernel(
     __shared__ float smemP_float[16*16];
     __shared__ half_t smemP[16*16];
     __shared__ float smemO[16*128];
-
+    __shared__ float smemO_accum[16*128];
 
     float rM_old[16] = {-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX,
                        -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX};
@@ -101,6 +101,7 @@ void flash_fwd_v0_kernel(
     Tensor sP = make_tensor(make_smem_ptr(smemP), sS_layout);
     Tensor sP_float = make_tensor(make_smem_ptr(smemP_float), sS_layout);
     Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
+    Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
 
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
@@ -122,7 +123,7 @@ void flash_fwd_v0_kernel(
 
     // smem -> gmem for O
     ThrCopy thr_copy_O = copy_O.get_slice(threadIdx.x);
-    Tensor tOsO_copy = thr_copy_O.partition_S(sO);
+    Tensor tOsO_copy = thr_copy_O.partition_S(sO_accum);
     Tensor tOgO_copy = thr_copy_O.partition_D(gO);
 
     // mma for S = QK^T
@@ -227,7 +228,7 @@ void flash_fwd_v0_kernel(
         // rescale O
         for (int i=0;i<16;i++) {
             for (int j=0; j<128; j++) {
-                sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
+                sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
             }
         }
 
@@ -239,6 +240,14 @@ void flash_fwd_v0_kernel(
 
         copy(tOrO, tOsO);
 
+        for (int i=0;i<16;i++) {
+            for (int j=0; j<128; j++) {
+                sO_accum(i,j) += sO(i,j);
+                //clear sO
+                sO(i,j) = 0.0f;
+            }
+        }
+
         __syncthreads();
 
         // update m and l
@@ -248,10 +257,12 @@ void flash_fwd_v0_kernel(
         }
 
     }
+    // end of KV loop
+
     // rescale rO
     for (int i=0;i<16;i++) {
         for (int j=0; j<128; j++) {
-            sO(i,j) /= rL[i];
+            sO_accum(i,j) /= rL[i];
 
         }
 
