@@ -20,6 +20,8 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
     # (batch_size, nheads, seqlen, headdim)
     output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
+    output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
+
     lse = 0
     for i in range(batch_size):
         for j in range(seqlen):
