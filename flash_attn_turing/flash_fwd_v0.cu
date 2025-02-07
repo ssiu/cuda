@@ -44,10 +44,10 @@ void flash_fwd_v0_kernel(
 // blockIdx.x batch_size
 // blockIdx.y num_heads
 // blockIdx.z (seq_len / 16)
-    if (thread0()) {
-        printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
-        printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
-    }
+//     if (threadIdx.x == 0) {
+//         printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
+//         printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
+//     }
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
@@ -174,7 +174,7 @@ void flash_fwd_v0_kernel(
         clear(tSrS);
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
-        if (thread0()) {
+        if (threadIdx.x == 0) {
             for (int i = 0; i < 16; i++) {
                 for (int j=0; j < 16; j++) {
                     sS(i,j) = 0.0f;
@@ -188,7 +188,7 @@ void flash_fwd_v0_kernel(
         __syncthreads();
 
         // rescale S by 1/sqrt(128)
-        if (thread0()) {
+        if (threadIdx.x == 0) {
             for (int i = 0; i < 16; i++) {
                 for (int j=0; j < 16; j++) {
                     sS(i,j) *= 1.0f / sqrtf(128);
@@ -208,7 +208,7 @@ void flash_fwd_v0_kernel(
         }
 
         // compute P = softmax(S)
-        if (thread0()) {
+        if (threadIdx.x == 0) {
             for (int i=0;i<16;i++) {
                 for (int j=0;j<16;j++){
                     sP_float(i,j) = expf(sS(i,j) - rM[i]);
@@ -243,7 +243,7 @@ void flash_fwd_v0_kernel(
 
 
         // cast sP from float to half_t
-        if (thread0()) {
+        if (threadIdx.x == 0) {
             for (int i=0;i<16;i++) {
                 for (int j=0;j<16;j++){
                     sP(i, j) = __float2half(sP_float(i, j));
@@ -255,7 +255,7 @@ void flash_fwd_v0_kernel(
 
         // rescale O
 
-        if (thread0()){
+        if (threadIdx.x == 0){
             for (int i=0;i<16;i++) {
                 for (int j=0; j<128; j++) {
                     sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
@@ -272,7 +272,7 @@ void flash_fwd_v0_kernel(
         copy(tOrO, tOsO);
         __syncthreads();
 
-        if (thread0()) {
+        if (threadIdx.x == 0) {
             for (int i=0;i<16;i++) {
                 for (int j=0; j<128; j++) {
                     sO_accum(i,j) += sO(i,j);
@@ -297,7 +297,7 @@ void flash_fwd_v0_kernel(
 
 
     // rescale rO
-    if (thread0()){
+    if (threadIdx.x == 0){
 
         for (int i=0;i<16;i++) {
             for (int j=0; j<128; j++) {
