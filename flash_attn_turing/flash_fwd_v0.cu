@@ -239,6 +239,7 @@ void flash_fwd_v0_kernel(
         gemm(mma_O, tOsP, tOsV, tOrO);
 
         copy(tOrO, tOsO);
+        __syncthreads();
 
         for (int i=0;i<16;i++) {
             for (int j=0; j<128; j++) {
