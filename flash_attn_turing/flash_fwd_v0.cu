@@ -50,7 +50,7 @@ void flash_fwd_v0_kernel(
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
     Tensor gQ = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
-                           make_coord(1, 0));  // (16, 128)
+                           make_coord(blockIdx.z, 0));  // (16, 128)
 
     Tensor mK = make_tensor(make_gmem_ptr(k),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
@@ -75,7 +75,7 @@ void flash_fwd_v0_kernel(
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
     Tensor gO = local_tile(mO(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
-                           make_coord(1, 0));  // (16, 128)
+                           make_coord(blockIdx.z, 0));  // (16, 128)
 
     __shared__ half_t smemQ[16*128];
     __shared__ half_t smemK[16*128];
@@ -381,7 +381,8 @@ torch::Tensor flash_fwd_v0(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     float* o_ptr = o.data_ptr<float>();
 
 
-    dim3 dimGrid(batch_size, num_heads, seq_len / 16);
+//     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
+    dim3 dimGrid(batch_size, num_heads, 2);
     dim3 dimBlock(64);
     flash_fwd_v0_kernel<<<dimGrid, dimBlock>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                k_ptr, sK_layout, copy_K, mma_O,
