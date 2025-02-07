@@ -36,13 +36,13 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
     print("=====")
     return lse
 
-lse_16=0
+
 lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
 lse_32 = get_lse(batch_size=1, seqlen=32, nheads=1, headdim=128)
-lse_32 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
+lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
 
 
-print(f"lse_16 = {lse_16}, lse_32 = {lse_32}")
+print(f"lse_16 = {lse_16}, lse_32 = {lse_32}, lse_1024 = {lse_1024}")
 
 
 # batch_size = 1
