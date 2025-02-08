@@ -60,12 +60,14 @@ query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to
 key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 
-output = flash_attn_turing.flash_fwd_v1(query, key, value,
-                                        batch_size, seqlen, nheads, headdim)
-
 query_torch = query.clone().permute(0, 2, 1, 3).contiguous()
 key_torch = key.clone().permute(0, 2, 1, 3).contiguous()
 value_torch = value.clone().permute(0, 2, 1, 3).contiguous()
+
+output = flash_attn_turing.flash_fwd_v1(query, key, value,
+                                        batch_size, seqlen, nheads, headdim)
+
+
 
 
 
