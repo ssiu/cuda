@@ -8,6 +8,6 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("flash_fwd_v0", &flash_fwd_v0, "flash fwd v0");
-//    m.def("flash_fwd_v1", &flash_fwd_v1, "flash fwd v1");
+ //   m.def("flash_fwd_v0", &flash_fwd_v0, "flash fwd v0");
+    m.def("flash_fwd_v1", &flash_fwd_v1, "flash fwd v1");
 }
