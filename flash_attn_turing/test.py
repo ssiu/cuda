@@ -2,75 +2,78 @@ import torch
 import torch.nn.functional as F
 from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
-import os
-
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-
-# def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
-#     pass
-#
-# def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
-#     # for custom flash attention
-#     # (batch_size, seqlen, nheads, headdim)
-#     query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-#     key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-#     value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-#
-#     # for pytorch function
-#     # (batch_size, nheads, seqlen, headdim)
-#     query_torch = query.permute(0, 2, 1, 3).contiguous().clone()
-#     key_torch = key.permute(0, 2, 1, 3).contiguous().clone()
-#     value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
-#
-#
-#     output = flash_attn_turing.flash_fwd_v1(query, key, value,
-#                                            batch_size, seqlen, nheads, headdim)
-#
-#
-#     # (batch_size, nheads, seqlen, headdim)
-#     output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
-#     output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
-#
-#     lse = 0
-#     count = 0
-#     for i in range(batch_size):
-#         for j in range(seqlen):
-#             for k in range(nheads):
-#                 for l in range(headdim):
-#                     if count < 0:
-#                         print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
-#                         count += 1
-#                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
-#                     lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
-#     print("=====")
-#     return lse
-#
-#
-# lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
-# lse_32 = get_lse(batch_size=1, seqlen=32, nheads=1, headdim=128)
-# lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
-#
-#
-# print(f"lse_16 = {lse_16}, lse_32 = {lse_32}, lse_1024 = {lse_1024}")
 
 
-batch_size=1
-seqlen=1024
-nheads=1
-headdim=128
 
-query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 
-query_torch = query.clone().permute(0, 2, 1, 3).contiguous()
-key_torch = key.clone().permute(0, 2, 1, 3).contiguous()
-value_torch = value.clone().permute(0, 2, 1, 3).contiguous()
+def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
+    pass
 
-#output = flash_attn_turing.flash_fwd_v1(query, key, value,
-#                                        batch_size, seqlen, nheads, headdim)
 
-output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
+def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
+    # for custom flash attention
+    # (batch_size, seqlen, nheads, headdim)
+    query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+
+    # for pytorch function
+    # (batch_size, nheads, seqlen, headdim)
+    query_torch = query.permute(0, 2, 1, 3).contiguous().clone()
+    key_torch = key.permute(0, 2, 1, 3).contiguous().clone()
+    value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
+
+
+    output = flash_attn_turing.flash_fwd_v1(query, key, value,
+                                           batch_size, seqlen, nheads, headdim)
+
+
+    # (batch_size, nheads, seqlen, headdim)
+    output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
+    output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
+
+    lse = 0
+    count = 0
+    for i in range(batch_size):
+        for j in range(seqlen):
+            for k in range(nheads):
+                for l in range(headdim):
+                    if count < 0:
+                        print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
+                        count += 1
+                    #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
+                    lse += (output[i,j,k,l] - output_torch[i,j,k,l])**2
+    print("=====")
+    return lse
+
+
+lse_16 = get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128)
+lse_32 = get_lse(batch_size=1, seqlen=32, nheads=1, headdim=128)
+lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
+
+
+print(f"lse_16 = {lse_16}, lse_32 = {lse_32}, lse_1024 = {lse_1024}")
+
+
+
+# #debug
+# batch_size=1
+# seqlen=1024
+# nheads=1
+# headdim=128
+#
+# query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+# key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+# value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+#
+# query_torch = query.clone().permute(0, 2, 1, 3).contiguous()
+# key_torch = key.clone().permute(0, 2, 1, 3).contiguous()
+# value_torch = value.clone().permute(0, 2, 1, 3).contiguous()
+#
+# #output = flash_attn_turing.flash_fwd_v1(query, key, value,
+# #                                        batch_size, seqlen, nheads, headdim)
+#
+# output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
 
 
 
