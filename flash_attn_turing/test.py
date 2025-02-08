@@ -68,7 +68,7 @@ key_torch = key.clone().permute(0, 2, 1, 3).contiguous()
 value_torch = value.clone().permute(0, 2, 1, 3).contiguous()
 
 #output = flash_attn_turing.flash_fwd_v1(query, key, value,
-                                        batch_size, seqlen, nheads, headdim)
+#                                        batch_size, seqlen, nheads, headdim)
 
 output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
 
