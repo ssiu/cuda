@@ -2,6 +2,9 @@ import torch
 import torch.nn.functional as F
 from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
+import os
+
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 # def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
 #     pass
