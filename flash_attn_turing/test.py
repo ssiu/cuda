@@ -12,14 +12,17 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
     query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    output = flash_attn_turing.flash_fwd_v1(query, key, value,
-                                           batch_size, seqlen, nheads, headdim)
 
     # for pytorch function
     # (batch_size, nheads, seqlen, headdim)
     query_torch = query.permute(0, 2, 1, 3).contiguous().clone()
     key_torch = key.permute(0, 2, 1, 3).contiguous().clone()
     value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
+
+
+    output = flash_attn_turing.flash_fwd_v1(query, key, value,
+                                           batch_size, seqlen, nheads, headdim)
+
 
     # (batch_size, nheads, seqlen, headdim)
     output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
