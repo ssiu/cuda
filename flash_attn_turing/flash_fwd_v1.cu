@@ -44,7 +44,10 @@ void flash_fwd_v1_kernel(
 // blockIdx.x batch_size
 // blockIdx.y num_heads
 // blockIdx.z (seq_len / 16)
-
+//     if (threadIdx.x == 0) {
+//         printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
+//         printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
+//     }
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
@@ -77,6 +80,9 @@ void flash_fwd_v1_kernel(
     Tensor gO = local_tile(mO(blockIdx.x, _, blockIdx.y, _), Shape<Int<16>, Int<128>>{},
                            make_coord(blockIdx.z, 0));  // (16, 128)
 
+
+    extern __shared__ char smem_[];
+
     __shared__ half_t smemQ[16*128];
     __shared__ half_t smemK[16*128];
     __shared__ half_t smemV[16*128];
@@ -84,7 +90,7 @@ void flash_fwd_v1_kernel(
     __shared__ float smemP_float[16*16];
     __shared__ half_t smemP[16*16];
     __shared__ float smemO[16*128];
-
+    __shared__ float smemO_accum[16*128];
 
     float rM_old[16] = {-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX,
                        -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX};
@@ -101,6 +107,7 @@ void flash_fwd_v1_kernel(
     Tensor sP = make_tensor(make_smem_ptr(smemP), sS_layout);
     Tensor sP_float = make_tensor(make_smem_ptr(smemP_float), sS_layout);
     Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
+    Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
 
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
@@ -122,7 +129,7 @@ void flash_fwd_v1_kernel(
 
     // smem -> gmem for O
     ThrCopy thr_copy_O = copy_O.get_slice(threadIdx.x);
-    Tensor tOsO_copy = thr_copy_O.partition_S(sO);
+    Tensor tOsO_copy = thr_copy_O.partition_S(sO_accum);
     Tensor tOgO_copy = thr_copy_O.partition_D(gO);
 
     // mma for S = QK^T
@@ -152,6 +159,13 @@ void flash_fwd_v1_kernel(
     // load Q into smem
     copy(copy_Q, tQgQ, tQsQ);
 
+    // clear sO_accum
+    for (int i=0;i<16;i++) {
+        for (int j=0; j<128; j++) {
+            sO_accum(i,j) = 0.0f;
+        }
+    }
+
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
@@ -160,18 +174,33 @@ void flash_fwd_v1_kernel(
 
         __syncthreads();
         // compute S = QK^T
+        clear(tSrS);
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
+        if (threadIdx.x == 0) {
+            for (int i = 0; i < 16; i++) {
+                for (int j=0; j < 16; j++) {
+                    sS(i,j) = 0.0f;
+                }
+            }
+
+        }
+        __syncthreads();
 
         copy(tSrS, tSsS);
         __syncthreads();
 
         // rescale S by 1/sqrt(128)
-        for (int i = 0; i < 16; i++) {
-            for (int j=0; j < 16; j++) {
-                sS(i,j) *= 1.0f / sqrtf(128);
+        if (threadIdx.x == 0) {
+            for (int i = 0; i < 16; i++) {
+                for (int j=0; j < 16; j++) {
+                    sS(i,j) *= 1.0f / sqrtf(128);
+                }
             }
         }
+        __syncthreads();
+
+
 
         // compute m = rowsum(S)
         for (int i = 0; i < 16; i++) {
@@ -182,11 +211,15 @@ void flash_fwd_v1_kernel(
         }
 
         // compute P = softmax(S)
-        for (int i=0;i<16;i++) {
-            for (int j=0;j<16;j++){
-                sP_float(i,j) = expf(sS(i,j) - rM[i]);
+        if (threadIdx.x == 0) {
+            for (int i=0;i<16;i++) {
+                for (int j=0;j<16;j++){
+                    sP_float(i,j) = expf(sS(i,j) - rM[i]);
+                }
             }
         }
+
+        __syncthreads();
 
 
         // rescale l and also reset rD to 0
@@ -197,11 +230,14 @@ void flash_fwd_v1_kernel(
 
 
         // compute sum(sP)
+
         for (int i = 0; i < 16; i++) {
             for (int j=0; j < 16; j++) {
                 rD[i] += sP_float(i, j);
             }
         }
+
+
 
         // compute l
         for (int i=0; i<16; i++) {
@@ -210,15 +246,44 @@ void flash_fwd_v1_kernel(
 
 
         // cast sP from float to half_t
-        for (int i=0;i<16;i++) {
-            for (int j=0;j<16;j++){
-                sP(i, j) = __float2half(sP_float(i, j));
+        if (threadIdx.x == 0) {
+            for (int i=0;i<16;i++) {
+                for (int j=0;j<16;j++){
+                    sP(i, j) = __float2half(sP_float(i, j));
+                }
+            }
+        }
+        __syncthreads();
+
+
+        // rescale O
+
+        if (threadIdx.x == 0){
+            for (int i=0;i<16;i++) {
+                for (int j=0; j<128; j++) {
+                    sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
+                }
             }
         }
 
         __syncthreads();
+
         // compute O = PV
+        clear(tOrO);
         gemm(mma_O, tOsP, tOsV, tOrO);
+
+        copy(tOrO, tOsO);
+        __syncthreads();
+
+        if (threadIdx.x == 0) {
+            for (int i=0;i<16;i++) {
+                for (int j=0; j<128; j++) {
+                    sO_accum(i,j) += sO(i,j);
+                    //clear sO
+                    sO(i,j) = 0.0f;
+                }
+            }
+        }
 
 
         __syncthreads();
@@ -229,19 +294,21 @@ void flash_fwd_v1_kernel(
             rL_old[i] = rL[i];
         }
 
+        __syncthreads();
     }
+    // end of KV loop
+
+
     // rescale rO
+    if (threadIdx.x == 0){
 
-    copy(tOrO, tOsO);
-    __syncthreads();
-
-    for (int i=0;i<16;i++) {
-        for (int j=0; j<128; j++) {
-            sO(i,j) /= rL[i];
-
+        for (int i=0;i<16;i++) {
+            for (int j=0; j<128; j++) {
+                sO_accum(i,j) /= rL[i];
+            }
         }
-
     }
+    __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
 
@@ -286,19 +353,19 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
     // 64 threads loading a 16 x 128 tile
-    TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+    TiledCopy copy_Q = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
-    TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+    TiledCopy copy_K = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     // 64 threads loading a 128 x 16 tile
-    TiledCopy copy_V = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
+    TiledCopy copy_V = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
                                 Layout<Shape<_16,_4>, Stride<_1,_16>>{},
                                 Layout<Shape< _8,_1>>{});
 
-    TiledCopy copy_O = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, float>{},
+    TiledCopy copy_O = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
                                 Layout<Shape<_2,_32>, Stride<_32,_1>>{},
                                 Layout<Shape< _1,_4>>{});
 
@@ -320,6 +387,7 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     float* o_ptr = o.data_ptr<float>();
 
 
+//     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimBlock(64);
     flash_fwd_v1_kernel<<<dimGrid, dimBlock>>>(q_ptr, sQ_layout, copy_Q, mma_S,
@@ -328,6 +396,7 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                                       sS_layout,
                                                o_ptr, sO_layout, copy_O,
                                                batch_size, seq_len, num_heads, head_dim);
+
     return o;
 
 }

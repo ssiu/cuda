@@ -3,13 +3,16 @@ import torch.nn.functional as F
 from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
 
+def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
+
+
 def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
     # for custom flash attention
     # (batch_size, seqlen, nheads, headdim)
     query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    output = flash_attn_turing.flash_fwd_v0(query, key, value,
+    output = flash_attn_turing.flash_fwd_v1(query, key, value,
                                            batch_size, seqlen, nheads, headdim)
 
     # for pytorch function
@@ -28,7 +31,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
         for j in range(seqlen):
             for k in range(nheads):
                 for l in range(headdim):
-                    if count < 1:
+                    if count < 0:
                         print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
                         count += 1
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
