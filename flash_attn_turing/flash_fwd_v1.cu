@@ -393,14 +393,14 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     int maxbytes = 65536;
 
 
-//     auto kernel = flash_fwd_v1_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
-//                                       decltype(sK_layout), decltype(copy_K), decltype(mma_O),
-//                                       decltype(sV_layout), decltype(copy_V),
-//                                       decltype(sS_layout),
-//                                       decltype(sO_layout), decltype(copy_O)>;
-//
-//     cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-    flash_fwd_v1_kernel<<<dimGrid, dimBlock/*, maxbytes*/>>>(q_ptr, sQ_layout, copy_Q, mma_S,
+    auto kernel = flash_fwd_v1_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
+                                      decltype(sK_layout), decltype(copy_K), decltype(mma_O),
+                                      decltype(sV_layout), decltype(copy_V),
+                                      decltype(sS_layout),
+                                      decltype(sO_layout), decltype(copy_O)>;
+
+    cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+    flash_fwd_v1_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                          k_ptr, sK_layout, copy_K, mma_O,
                                                          v_ptr, sV_layout, copy_V,
                                                                 sS_layout,
