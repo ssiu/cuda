@@ -394,7 +394,7 @@ torch::Tensor flash_fwd_v1(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
     auto kernel = flash_fwd_v1_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
-                                      decltype(sK_layout), decltype(copy_K), decltype(mma_O),,
+                                      decltype(sK_layout), decltype(copy_K), decltype(mma_O),
                                       decltype(sV_layout), decltype(copy_V),
                                       decltype(sS_layout),
                                       decltype(sO_layout), decltype(copy_O)>;
