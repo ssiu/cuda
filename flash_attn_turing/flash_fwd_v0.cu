@@ -106,6 +106,8 @@ void flash_fwd_v0_kernel(
     Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
     Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
 
+    printf("size of sQ is %d\n", size(sQ));
+
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
     // further partition k, v to (seq_len / 16) x 16 x 128 tensor
