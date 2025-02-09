@@ -83,31 +83,36 @@ void flash_fwd_v1_kernel(
 
     extern __shared__ char smem_[];
 
-    __shared__ half_t smemQ[16*128];
-    __shared__ half_t smemK[16*128];
-    __shared__ half_t smemV[16*128];
-    __shared__ float smemS[16*16];
-    __shared__ float smemP_float[16*16];
-    __shared__ half_t smemP[16*16];
-    __shared__ float smemO[16*128];
-    __shared__ float smemO_accum[16*128];
+//     __shared__ half_t smemQ[16*128];
+//     __shared__ half_t smemK[16*128];
+//     __shared__ half_t smemV[16*128];
+//     __shared__ half_t smemP[16*16];
+//
+//     __shared__ float smemS[16*16];
+//     __shared__ float smemP_float[16*16];
+//     __shared__ float smemO[16*128];
+//     __shared__ float smemO_accum[16*128];
+//
+//     Tensor sQ = make_tensor(make_smem_ptr(smemQ), sQ_layout);
+//     Tensor sK = make_tensor(make_smem_ptr(smemK), sK_layout);
+//     Tensor sV = make_tensor(make_smem_ptr(smemV), sV_layout);
+//     Tensor sP = make_tensor(make_smem_ptr(smemP), sS_layout);
+//
+//     Tensor sS = make_tensor(make_smem_ptr(smemS), sS_layout);
+//     Tensor sP_float = make_tensor(make_smem_ptr(smemP_float), sS_layout);
+//     Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
+//     Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
+//     printf("size of sQ is %d\n", size(sQ));
 
-    Tensor sQ = make_tensor(make_smem_ptr(smemQ), sQ_layout);
-    Tensor sK = make_tensor(make_smem_ptr(smemK), sK_layout);
-    Tensor sV = make_tensor(make_smem_ptr(smemV), sV_layout);
-    Tensor sP = make_tensor(make_smem_ptr(smemP), sS_layout);
+    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout);
+    Tensor sK = make_tensor(sQ.data() + 16*128, sK_layout);
+    Tensor sV = make_tensor(sK.data() + 16*128, sV_layout);
+    Tensor sP = make_tensor(sV.data() + 16*128, sS_layout);
 
-    Tensor sS = make_tensor(make_smem_ptr(smemS), sS_layout);
-    Tensor sP_float = make_tensor(make_smem_ptr(smemP_float), sS_layout);
-    Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
-    Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
-    printf("size of sQ is %d\n", size(sQ));
-
-//     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout);
-//     Tensor sK = make_tensor(sQ.data() + size(sQ), sK_layout);
-//     Tensor sV = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
-
-
+    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(sP.data() + 16*16), sS_layout);
+    Tensor sP_float = make_tensor(sS.data() + 16*16, sS_layout);
+    Tensor sO = make_tensor(sP_float.data() + 16*16, sO_layout);
+    Tensor sO_accum = make_tensor(sO.data() + 16*128, sO_layout);
 
     float rM_old[16] = {-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX,
                        -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX};
