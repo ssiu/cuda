@@ -109,7 +109,8 @@ void flash_fwd_v1_kernel(
     Tensor sV = make_tensor(sK.data() + 16*128, sV_layout);
     Tensor sP = make_tensor(sV.data() + 16*128, sS_layout);
 
-    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(sP.data() + 16*16)), sS_layout);
+    int array_offset = (16*128*3 + 16*16) * sizeof(half_t);
+    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0] + array_offset)), sS_layout);
     Tensor sP_float = make_tensor(sS.data() + 16*16, sS_layout);
     Tensor sO = make_tensor(sP_float.data() + 16*16, sO_layout);
     Tensor sO_accum = make_tensor(sO.data() + 16*128, sO_layout);
