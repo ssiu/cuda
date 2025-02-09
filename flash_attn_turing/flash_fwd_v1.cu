@@ -101,11 +101,11 @@ void flash_fwd_v1_kernel(
     Tensor sP_float = make_tensor(make_smem_ptr(smemP_float), sS_layout);
     Tensor sO = make_tensor(make_smem_ptr(smemO), sO_layout);
     Tensor sO_accum  = make_tensor(make_smem_ptr(smemO_accum), sO_layout);
+    printf("size of sQ is %d\n", size(sQ));
 
-
-    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(smem_)), sQ_layout);
-    Tensor sK = make_tensor(sQ.data() + size(sQ), sK_layout);
-    Tensor sV = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
+//     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout);
+//     Tensor sK = make_tensor(sQ.data() + size(sQ), sK_layout);
+//     Tensor sV = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(smem_)), sC_layout);
 
 
 
