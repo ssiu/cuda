@@ -372,19 +372,19 @@ torch::Tensor flash_fwd_v2(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
     // 64 threads loading a 16 x 128 tile
-    TiledCopy copy_Q = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
-    TiledCopy copy_K = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                 Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     // 64 threads loading a 128 x 16 tile
-    TiledCopy copy_V = make_tiled_copy(Copy_Atom<DefaultCopy, half_t>{},
+    TiledCopy copy_V = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                 Layout<Shape<_16,_4>, Stride<_1,_16>>{},
                                 Layout<Shape< _8,_1>>{});
 
-    TiledCopy copy_O = make_tiled_copy(Copy_Atom<DefaultCopy, float>{},
+    TiledCopy copy_O = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, float>{},
                                 Layout<Shape<_2,_32>, Stride<_32,_1>>{},
                                 Layout<Shape< _1,_4>>{});
 
