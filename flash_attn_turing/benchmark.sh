@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+git clone https://github.com/NVIDIA/cutlass.git
+
 export CXX=g++
 export CC=gcc
 
