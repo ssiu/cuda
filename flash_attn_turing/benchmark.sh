@@ -8,8 +8,14 @@ export CC=gcc
 
 pip install .
 
-#python test.py
+python test.py
 
-ncu -f --target-processes all --set full \
---import-source on \
--o profile_flash_attn python test.py
+#ncu -f --target-processes all --set full \
+#--import-source on \
+#-o profile_flash_attn python test.py
+
+# google cloud
+#sudo -s
+#/usr/local/cuda/bin/ncu -f --target-processes all --set full \
+#                        --import-source on \
+#                        -o profile_flash_attn python test.py
