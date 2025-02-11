@@ -25,7 +25,8 @@ setup(
             name="flash_attn_turing",
             sources=["flash_attn_turing.cpp",
                      #"flash_fwd_v0.cu",
-                     "flash_fwd_v1.cu"
+                     #"flash_fwd_v1.cu",
+                     "flash_fwd_v2.cu"
                      ],
             include_dirs=cutlass_include_dirs,
             extra_compile_args={'nvcc': nvcc_flags}
