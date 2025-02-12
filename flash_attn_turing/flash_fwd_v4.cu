@@ -297,7 +297,7 @@ void flash_fwd_v4_kernel(
 
         __syncthreads();
     
-        copy(tVrV, tVsV):
+        copy(tVrV, tVsV);
         
         __syncthreads();        
         
