@@ -142,7 +142,7 @@ void flash_fwd_v4_kernel(
 
     // smem -> gmem for O
     ThrCopy thr_copy_O = copy_O.get_slice(threadIdx.x);
-    Tensor tOsO_copy = thr_copy_O.partition_S(sO_accum);
+    Tensor tOsO_copy = thr_copy_O.partition_S(sO);
     Tensor tOgO_copy = thr_copy_O.partition_D(gO);
 
     // mma for S = QK^T
