@@ -326,7 +326,8 @@ void flash_fwd_v3_kernel(
     }
     // end of KV loop
 
-
+    copy(tOrO, tOsO);
+    __syncthreads();
     // rescale rO
     if (threadIdx.x == 0){
 
