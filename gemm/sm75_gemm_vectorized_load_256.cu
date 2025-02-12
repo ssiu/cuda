@@ -86,6 +86,8 @@ void gemm_vectorized_load_256_kernel(
 
         __syncthreads();
         CUTE_UNROLL
+
+
         for (int k_block = 0; k_block < K_BLOCK_MAX; k_block++) {
 
             copy(tCsA(_,_,k_block), tCrA(_,_,k_block));
@@ -93,11 +95,7 @@ void gemm_vectorized_load_256_kernel(
 
             gemm(mma, tCrA(_,_,k_block), tCrB(_,_,k_block), tCrC);
         }
-        // Compute gemm on mma-partitioned smem
-//         copy(tCsA, tCrA);
-//         copy(tCsB, tCrB);
-//
-//         gemm(mma, tCrA(_,_,0), tCrB(_,_,0), tCrC);
+
 
         __syncthreads();
 
