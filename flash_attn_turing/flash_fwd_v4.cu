@@ -100,12 +100,14 @@ void flash_fwd_v4_kernel(
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); //16KB
     Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); //32KB
     Tensor sV = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sV_layout); //32KB
-    //Tensor sP = make_tensor(sV.data() + KV_TILE_SIZE*HEAD_SIZE, sS_layout);
 
-    //int array_offset = (Q_TILE_SIZE * HEAD_SIZE + KV_TILE_SIZE * HEAD_SIZE * 2 + Q_TILE_SIZE * KV_TILE_SIZE) * sizeof(half_t);
+
+
     Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 32KB
     Tensor sP_float = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 32KB
-    Tensor sP = make_tensor(sQ.data() + KV_TILE_SIZE * HEAD_SIZE, sS_layout);    // 16KB
+
+    //Tensor sP = make_tensor(sV.data() + KV_TILE_SIZE * HEAD_SIZE, sS_layout);    // 16KB
+    Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);    // 16KB
     Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 32KB
 
     //Tensor sO_accum = make_tensor(sO.data() + Q_TILE_SIZE * HEAD_SIZE, sO_layout);
