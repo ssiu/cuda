@@ -179,7 +179,7 @@ void flash_fwd_v3_kernel(
     // load Q into smem
     copy(copy_Q, tQgQ, tQsQ);
 
-    // clear sO_accum
+    // clear sO and rO
     clear(tOrO);
     for (int i=0;i<Q_TILE_SIZE;i++) {
         for (int j=0; j<HEAD_SIZE; j++) {
@@ -299,20 +299,6 @@ void flash_fwd_v3_kernel(
         // compute O = PV
         // clear(tOrO);
         gemm(mma_O, tOsP, tOsV, tOrO);
-
-        //copy(tOrO, tOsO);
-        //__syncthreads();
-
-//         if (threadIdx.x == 0) {
-//             for (int i=0;i < Q_TILE_SIZE;i++) {
-//                 for (int j=0; j < HEAD_SIZE; j++) {
-//                     sO_accum(i,j) += sO(i,j);
-//                     //clear sO
-//                     sO(i,j) = 0.0f;
-//                 }
-//             }
-//         }
-
 
         __syncthreads();
 
