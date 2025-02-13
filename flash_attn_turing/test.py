@@ -16,7 +16,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
     # for custom flash attention
     # (batch_size, seqlen, nheads, headdim)
-    N = 128
+    N = 256
     #identity = torch.eye(N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
     #identity = identity.view(1, N, 1, N)  # Reshape to (1, N, 1, N)
     # query = identity
