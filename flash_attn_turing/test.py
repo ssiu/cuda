@@ -22,7 +22,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
     # query = identity
     # key = identity
     # value = identity
-    ones = torch.ones(N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
+    ones = torch.ones(N, N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
     ones = ones.view(1, N, 1, N)  # Reshape to (1, N, 1, N)
     query = ones
     key = ones
