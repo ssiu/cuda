@@ -11,11 +11,21 @@ def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 
 def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
+
+
+
     # for custom flash attention
     # (batch_size, seqlen, nheads, headdim)
-    query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    N = 64
+    identity = torch.eye(N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
+    identity = identity.view(1, N, 1, N)  # Reshape to (1, N, 1, N)
+    query = identity
+    key = identity
+    value = identity
+
+    # query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    # key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    # value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 
     # for pytorch function
     # (batch_size, nheads, seqlen, headdim)
