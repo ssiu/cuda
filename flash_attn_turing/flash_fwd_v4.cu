@@ -213,6 +213,19 @@ void flash_fwd_v4_kernel(
         copy(tSrS, tSsS);
         __syncthreads();
 
+        if (thread0()) {
+            if (threadIdx.x == 0) {
+                for (int i = 0; i < Q_TILE_SIZE; i++) {
+                    printf("%2d ", i);
+                    for (int j=0; j < KV_TILE_SIZE; j++) {
+                        printf("%8.4f ", sS(i,j));
+
+                    }
+                    print("\n");
+                }
+            }
+        }
+
         // rescale S by 1/sqrt(128)
         if (threadIdx.x == 0) {
             for (int i = 0; i < Q_TILE_SIZE; i++) {
