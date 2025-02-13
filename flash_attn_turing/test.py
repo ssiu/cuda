@@ -16,14 +16,13 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
     # for custom flash attention
     # (batch_size, seqlen, nheads, headdim)
-    N = 256
+
     #identity = torch.eye(N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
     #identity = identity.view(1, N, 1, N)  # Reshape to (1, N, 1, N)
     # query = identity
     # key = identity
     # value = identity
-    ones = torch.ones(N, N, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
-    ones = ones.view(1, N, 1, N)  # Reshape to (1, N, 1, N)
+    ones = torch.ones(1, seqlen, 1, headdim, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
     query = ones
     key = ones
     value = ones
@@ -69,7 +68,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_32 = {lse_32}")
 # lse_64 = get_lse(batch_size=1, seqlen=64, nheads=1, headdim=128)
 # print(f"lse_64 = {lse_64}")
-lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
+lse_128 = get_lse(batch_size=1, seqlen=256, nheads=1, headdim=128)
 print(f"lse_128 = {lse_128}")
 # lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
 # print(f"lse_1024 = {lse_1024}")
