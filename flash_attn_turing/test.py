@@ -22,14 +22,14 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
     # query = identity
     # key = identity
     # value = identity
-    ones = torch.ones(1, seqlen, 1, headdim, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
-    query = ones
-    key = ones
-    value = ones
+    # ones = torch.ones(1, seqlen, 1, headdim, dtype=torch.float16).to("cuda")  # Create an NxN identity matrix
+    # query = ones
+    # key = ones
+    # value = ones
 
-    # query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    # key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
-    # value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
+    value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
 
     # for pytorch function
     # (batch_size, nheads, seqlen, headdim)
