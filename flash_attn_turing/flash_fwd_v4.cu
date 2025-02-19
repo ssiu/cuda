@@ -222,9 +222,9 @@ void flash_fwd_v4_kernel(
 //         }
 
 
-//         for (int i=0; i<4; i++) {
-//             sS(thread_row,thread_col + i) = 0.0f;
-//         }
+        for (int i=0; i<4; i++) {
+            sS(thread_row,thread_col + i) = 0.0f;
+        }
         __syncthreads();
 
         copy(tSrS, tSsS);
