@@ -114,7 +114,7 @@ void flash_fwd_v4_kernel(
     int warp_id = thread_id / 32;
     int warp_row = warp_id * 4;
     int thread_row = warp_row + (lane_id / 8);
-    int thread_col = (lane id % 8) * 4;
+    int thread_col = (lane_id % 8) * 4;
 
     float rM_old = -FLT_MAX;
     float rM = 0.0f;
@@ -265,7 +265,7 @@ void flash_fwd_v4_kernel(
         rM = rM_old;
 
         // intra-thread reduction
-        for (i=0; i< 4; i++) {
+        for (int i=0; i< 4; i++) {
             rM = fmaxf(rM, sS(thread_row, thread_col + i));
         }
 
@@ -287,7 +287,7 @@ void flash_fwd_v4_kernel(
 
         // compute P = softmax(S)
 
-        for (i=0; i< 4; i++) {
+        for (int i=0; i< 4; i++) {
             sP_float(thread_row,thread_col + i) = expf(sS(thread_row, thread_col+ i) - rM);
         }
 
@@ -314,7 +314,7 @@ void flash_fwd_v4_kernel(
         // compute sum(sP)
 
         // thread reduction
-        for (i=0; i< 4; i++) {
+        for (int i=0; i< 4; i++) {
             rD += sP_float(thread_row, thread_col + i);
         }
 
@@ -345,7 +345,7 @@ void flash_fwd_v4_kernel(
 
 
         // cast sP from float to half_t
-        for (i=0; i< 4; i++) {
+        for (int i=0; i< 4; i++) {
             sP(thread_row, thread_col + i) = __float2half(sP_float(thread_row, thread_col + i));
         }
 
