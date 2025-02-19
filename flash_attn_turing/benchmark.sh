@@ -5,6 +5,7 @@ git clone https://github.com/NVIDIA/cutlass.git
 
 export CXX=g++
 export CC=gcc
+
 pip install torch
 pip install setuptools
 pip install ninja
