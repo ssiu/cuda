@@ -364,8 +364,8 @@ void flash_fwd_v4_kernel(
         copy(tOrO, tOsO);
         __syncthreads();
 
-        for (i = 0; i< 4;i++) {
-            for (j = 0; j< 4;j++) {
+        for (int i = 0; i< 4;i++) {
+            for (int j = 0; j< 4;j++) {
                 sO(thread_row, thread_col + j + 32 * i) = expf(rM_old - rM) * sO(thread_row, thread_col + j + 32 * i);
             }
         }
@@ -406,8 +406,8 @@ void flash_fwd_v4_kernel(
     __syncthreads();
     // rescale rO
 
-    for (i = 0; i< 4;i++) {
-        for (j = 0; j< 4;j++) {
+    for (int i = 0; i< 4;i++) {
+        for (int j = 0; j< 4;j++) {
             sO(thread_row, thread_col + j + 32 * i) /= rL;
         }
     }
