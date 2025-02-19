@@ -97,6 +97,8 @@ void flash_fwd_v4_kernel(
 // store V to smem
 // compute O
 
+
+    // smem total = 50KB
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 8KB
     Tensor sK = make_tensor(sQ.data() + Q_TILE_SIZE*HEAD_SIZE, sK_layout);                   // 8KB
     Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 8KB
@@ -107,17 +109,31 @@ void flash_fwd_v4_kernel(
     Tensor sP_float = make_tensor(sS.data() + Q_TILE_SIZE * KV_TILE_SIZE, sS_layout);   // 4KB
     Tensor sO = make_tensor(sP_float.data() + Q_TILE_SIZE * KV_TILE_SIZE, sO_layout);  // 16KB
 
-    //Tensor sO_accum = make_tensor(sO.data() + Q_TILE_SIZE * HEAD_SIZE, sO_layout);
+    int thread_id = threadIdx.x;
+    int lane_id = thread_id % 32;
+    int warp_id = thread_id / 32;
+    int warp_row = warp_id * 4;
+    int thread_row = warp_row + (lane_id / 8);
+    int thread_col = (lane id % 8) * 4;
 
-    float rM_old[Q_TILE_SIZE];
-    for (int i=0;i<Q_TILE_SIZE;i++) {
-        rM_old[i] = -FLT_MAX;
-    }                                           ;
-    float rM[Q_TILE_SIZE] = {0.0f};
-    float rL_old[Q_TILE_SIZE] = {0.0f};
-    float rL[Q_TILE_SIZE] = {0.0f};
+    float rM_old = -FLT_MAX;
+    float rM = 0.0f;
+    float rL_old = 0.0f;
+    float rL = 0.0f;
     // for storing rowsum(P)
-    float rD[Q_TILE_SIZE] = {0.0f};
+    float rD = 0.0f;
+
+    unsigned mask;
+    if (lane_id < 8)       mask = 0x000000FF;  // Lanes 0-7
+    else if (lane_id < 16) mask = 0x0000FF00;  // Lanes 8-15
+    else if (lane_id < 24) mask = 0x00FF0000;  // Lanes 16-23
+    else                   mask = 0xFF000000;  // Lanes 24-31
+
+    int lane_id_to_read_from;
+    if (lane_id < 8)       lane_id_to_read_from = 0;  // Lanes 0-7
+    else if (lane_id < 16) lane_id_to_read_from = 8;  // Lanes 8-15
+    else if (lane_id < 24) lane_id_to_read_from = 16;  // Lanes 16-23
+    else                   lane_id_to_read_from = 24;  // Lanes 24-31
 
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
@@ -197,13 +213,17 @@ void flash_fwd_v4_kernel(
         copy(tSsK, tSrK);
         gemm(mma_S, tSrQ, tSrK, tSrS);
 
-        if (threadIdx.x == 0) {
-            for (int i = 0; i < Q_TILE_SIZE; i++) {
-                for (int j=0; j < KV_TILE_SIZE; j++) {
-                    sS(i,j) = 0.0f;
-                }
-            }
+//         if (threadIdx.x == 0) {
+//             for (int i = 0; i < Q_TILE_SIZE; i++) {
+//                 for (int j=0; j < KV_TILE_SIZE; j++) {
+//                     sS(i,j) = 0.0f;
+//                 }
+//             }
+//         }
 
+
+        for (int i=0; i<4; i++) {
+            sS(thread_row,thread_col + i) = 0.0f;
         }
         __syncthreads();
 
@@ -223,69 +243,119 @@ void flash_fwd_v4_kernel(
 //             }
 //         }
 
+        // to do: just rescale tSrS instead
         // rescale S by 1/sqrt(128)
-        if (threadIdx.x == 0) {
-            for (int i = 0; i < Q_TILE_SIZE; i++) {
-                for (int j=0; j < KV_TILE_SIZE; j++) {
-                    sS(i,j) *= 1.0f / sqrtf(HEAD_SIZE);
-                }
-            }
+
+//         if (threadIdx.x == 0) {
+//             for (int i = 0; i < Q_TILE_SIZE; i++) {
+//                 for (int j=0; j < KV_TILE_SIZE; j++) {
+//                     sS(i,j) *= 1.0f / sqrtf(HEAD_SIZE);
+//                 }
+//             }
+//         }
+
+        for (int i = 0; i < 4; i++) {
+            sS(thread_row, thread_col + i) *= 1.0f / sqrtf(HEAD_SIZE);
         }
         __syncthreads();
 
 
 
-        // compute m = rowsum(S)
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rM[i] = rM_old[i];
-            for (int j=0; j < KV_TILE_SIZE; j++) {
-                rM[i] = fmaxf(rM[i], sS(i,j));
-            }
+        // compute m = rowmax(S)
+        rM = rM_old;
+
+        // intra-thread reduction
+        for (i=0; i< 4; i++) {
+            rM = fmaxf(rM, sS(thread_row, thread_col + i));
         }
 
-        // compute P = softmax(S)
-        if (threadIdx.x == 0) {
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0; j < KV_TILE_SIZE;j++){
-                    sP_float(i,j) = expf(sS(i,j) - rM[i]);
-                }
-            }
+
+        // inter-warp reduction
+        for (int offset = 4; offset > 0; offset /= 2) {
+           rM = fmaxf(rM, __shfl_down_sync(mask, rM, offset));
         }
+
+        // sync rM
+        rM = __shfl_sync(mask, rM, lane_id_to_read_from);
+
+//         for (int i = 0; i < Q_TILE_SIZE; i++) {
+//             rM[i] = rM_old[i];
+//             for (int j=0; j < KV_TILE_SIZE; j++) {
+//                 rM[i] = fmaxf(rM[i], sS(i,j));
+//             }
+//         }
+
+        // compute P = softmax(S)
+
+        for (i=0; i< 4; i++) {
+            sP_float(thread_row,thread_col + i) = expf(sS(thread_row, thread_col+ i) - rM);
+        }
+
+//         if (threadIdx.x == 0) {
+//             for (int i=0;i < Q_TILE_SIZE;i++) {
+//                 for (int j=0; j < KV_TILE_SIZE;j++){
+//                     sP_float(i,j) = expf(sS(i,j) - rM[i]);
+//                 }
+//             }
+//         }
 
         __syncthreads();
 
 
         // rescale l and also reset rD to 0
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
-            rD[i] = 0;
-        }
+        rL = expf(rM_old - rM) * rL_old;
+        rD = 0.0f;
+//         for (int i = 0; i < Q_TILE_SIZE; i++) {
+//             rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
+//             rD[i] = 0;
+//         }
 
 
         // compute sum(sP)
 
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            for (int j=0; j < KV_TILE_SIZE; j++) {
-                rD[i] += sP_float(i, j);
-            }
+        // thread reduction
+        for (i=0; i< 4; i++) {
+            rD += sP_float(thread_row, thread_col + i);
         }
+
+
+        // warp reduction
+        for (int offset = 4; offset > 0; offset /= 2) {
+           rD +=  __shfl_down_sync(mask, rD, offset);
+        }
+
+
+        // can just keep the correct rL to lane 0
+        rL += rD;
+        // sync rL
+        rL = __shfl_sync(mask, rL, lane_id_to_read_from);
+
+//         for (int i = 0; i < Q_TILE_SIZE; i++) {
+//             for (int j=0; j < KV_TILE_SIZE; j++) {
+//                 rD[i] += sP_float(i, j);
+//             }
+//         }
 
 
 
         // compute l
-        for (int i=0; i < Q_TILE_SIZE; i++) {
-            rL[i] += rD[i];
-        }
+//         for (int i=0; i < Q_TILE_SIZE; i++) {
+//             rL[i] += rD[i];
+//         }
 
 
         // cast sP from float to half_t
-        if (threadIdx.x == 0) {
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0;j < KV_TILE_SIZE;j++){
-                    sP(i, j) = __float2half(sP_float(i, j));
-                }
-            }
+        for (i=0; i< 4; i++) {
+            sP(thread_row, thread_col + i) = __float2half(sP_float(thread_row, thread_col + i));
         }
+
+//         if (threadIdx.x == 0) {
+//             for (int i=0;i < Q_TILE_SIZE;i++) {
+//                 for (int j=0;j < KV_TILE_SIZE;j++){
+//                     sP(i, j) = __float2half(sP_float(i, j));
+//                 }
+//             }
+//         }
         __syncthreads();
 
 
@@ -294,14 +364,20 @@ void flash_fwd_v4_kernel(
         copy(tOrO, tOsO);
         __syncthreads();
 
-        if (threadIdx.x == 0){
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0; j < HEAD_SIZE; j++) {
-                    //sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
-                    sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
-                }
+        for (i = 0; i< 4;i++) {
+            for (j = 0; j< 4;j++) {
+                sO(thread_row, thread_col + j + 32 * i) = expf(rM_old - rM) * sO(thread_row, thread_col + j + 32 * i);
             }
         }
+
+//         if (threadIdx.x == 0){
+//             for (int i=0;i < Q_TILE_SIZE;i++) {
+//                 for (int j=0; j < HEAD_SIZE; j++) {
+//                     //sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
+//                     sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
+//                 }
+//             }
+//         }
 
         __syncthreads();
 
@@ -315,10 +391,12 @@ void flash_fwd_v4_kernel(
         __syncthreads();
 
         // update m and l
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rM_old[i] = rM[i];
-            rL_old[i] = rL[i];
-        }
+        rM_old = rM;
+        rL_old = rL;
+//         for (int i = 0; i < Q_TILE_SIZE; i++) {
+//             rM_old[i] = rM[i];
+//             rL_old[i] = rL[i];
+//         }
 
         __syncthreads();
     }
@@ -327,14 +405,20 @@ void flash_fwd_v4_kernel(
     copy(tOrO, tOsO);
     __syncthreads();
     // rescale rO
-    if (threadIdx.x == 0){
 
-        for (int i=0;i < Q_TILE_SIZE;i++) {
-            for (int j=0; j<HEAD_SIZE; j++) {
-                sO(i,j) /= rL[i];
-            }
+    for (i = 0; i< 4;i++) {
+        for (j = 0; j< 4;j++) {
+            sO(thread_row, thread_col + j + 32 * i) /= rL;
         }
     }
+//     if (threadIdx.x == 0){
+//
+//         for (int i=0;i < Q_TILE_SIZE;i++) {
+//             for (int j=0; j<HEAD_SIZE; j++) {
+//                 sO(i,j) /= rL[i];
+//             }
+//         }
+//     }
     __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
