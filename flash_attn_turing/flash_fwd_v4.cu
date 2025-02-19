@@ -34,6 +34,8 @@ void flash_fwd_v4_kernel(
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
+//todo: do everything in registers from sS -> sP
+
 
 // q : (batch_size, seq_len, num_heads, head_dim)
 // k : (batch_size, seq_len, num_heads, head_dim)
@@ -188,9 +190,6 @@ void flash_fwd_v4_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    __syncthreads();
-    copy(tSsQ, tSrQ);
-   __syncthreads();
 
     // clear sO and rO
     clear(tOrO);
@@ -210,6 +209,7 @@ void flash_fwd_v4_kernel(
         __syncthreads();
         // compute S = QK^T
         clear(tSrS);
+        copy(tSsQ, tSrQ);
         copy(tSsK, tSrK);
         gemm(mma_S, tSrQ, tSrK, tSrS);
 
@@ -222,9 +222,9 @@ void flash_fwd_v4_kernel(
 //         }
 
 
-        for (int i=0; i<4; i++) {
-            sS(thread_row,thread_col + i) = 0.0f;
-        }
+//         for (int i=0; i<4; i++) {
+//             sS(thread_row,thread_col + i) = 0.0f;
+//         }
         __syncthreads();
 
         copy(tSrS, tSsS);
