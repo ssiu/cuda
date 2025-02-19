@@ -194,12 +194,12 @@ void flash_fwd_v4_kernel(
 
     // clear sO and rO
     clear(tOrO);
-    for (int i=0;i<Q_TILE_SIZE;i++) {
-        for (int j=0; j<HEAD_SIZE; j++) {
-            //sO_accum(i,j) = 0.0f;
-            sO(i,j) = 0.0f;
-        }
-    }
+//     for (int i=0;i<Q_TILE_SIZE;i++) {
+//         for (int j=0; j<HEAD_SIZE; j++) {
+//             //sO_accum(i,j) = 0.0f;
+//             sO(i,j) = 0.0f;
+//         }
+//     }
 
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
