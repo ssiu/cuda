@@ -213,53 +213,10 @@ void flash_fwd_v4_kernel(
         copy(tSsK, tSrK);
         gemm(mma_S, tSrQ, tSrK, tSrS);
 
-//         if (threadIdx.x == 0) {
-//             for (int i = 0; i < Q_TILE_SIZE; i++) {
-//                 for (int j=0; j < KV_TILE_SIZE; j++) {
-//                     sS(i,j) = 0.0f;
-//                 }
-//             }
-//         }
-
-//         if (thread0()) {
-//             for (int i=0; i<4; i++) {
-//                 print("%f ", sS(thread_row,thread_col + i));
-//             }
-//             print("\n");
-//         }
-
-
-//        for (int i=0; i<4; i++) {
-//             sS(thread_row,thread_col + i) = 0.0f;
-//         }
-//         __syncthreads();
 
         copy(tSrS, tSsS);
         __syncthreads();
 
-//         if (thread0()) {
-//             if (threadIdx.x == 0) {
-//                 for (int i = 0; i < Q_TILE_SIZE; i++) {
-//                     printf("%2d ", i);
-//                     for (int j=0; j < KV_TILE_SIZE; j++) {
-//                         printf("%8.4f ", sS(i,j));
-//
-//                     }
-//                     print("\n");
-//                 }
-//             }
-//         }
-
-        // to do: just rescale tSrS instead
-        // rescale S by 1/sqrt(128)
-
-//         if (threadIdx.x == 0) {
-//             for (int i = 0; i < Q_TILE_SIZE; i++) {
-//                 for (int j=0; j < KV_TILE_SIZE; j++) {
-//                     sS(i,j) *= 1.0f / sqrtf(HEAD_SIZE);
-//                 }
-//             }
-//         }
 
         for (int i = 0; i < 4; i++) {
             sS(thread_row, thread_col + i) *= 1.0f / sqrtf(HEAD_SIZE);
@@ -284,13 +241,6 @@ void flash_fwd_v4_kernel(
 
         // sync rM
         rM = __shfl_sync(mask, rM, lane_id_to_read_from);
-
-//         for (int i = 0; i < Q_TILE_SIZE; i++) {
-//             rM[i] = rM_old[i];
-//             for (int j=0; j < KV_TILE_SIZE; j++) {
-//                 rM[i] = fmaxf(rM[i], sS(i,j));
-//             }
-//         }
 
         // compute P = softmax(S)
 
@@ -334,6 +284,7 @@ void flash_fwd_v4_kernel(
         // rescale O
 
         copy(tOrO, tOsO);
+
         __syncthreads();
 
         for (int i = 0; i< 4;i++) {
@@ -353,8 +304,6 @@ void flash_fwd_v4_kernel(
         // update m and l
         rM_old = rM;
         rL_old = rL;
-
-        __syncthreads();
     }
     // end of KV loop
 
