@@ -223,7 +223,7 @@ void flash_fwd_v4_kernel(
 
         if (thread0()) {
             for (int i=0; i<4; i++) {
-                print("%d ", sS(thread_row,thread_col + i));
+                print("%f ", sS(thread_row,thread_col + i));
             }
             print("\n");
         }
