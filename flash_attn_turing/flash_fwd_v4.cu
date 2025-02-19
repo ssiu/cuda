@@ -229,10 +229,10 @@ void flash_fwd_v4_kernel(
 //         }
 
 
-       for (int i=0; i<4; i++) {
-            sS(thread_row,thread_col + i) = 0.0f;
-        }
-        __syncthreads();
+//        for (int i=0; i<4; i++) {
+//             sS(thread_row,thread_col + i) = 0.0f;
+//         }
+//         __syncthreads();
 
         copy(tSrS, tSsS);
         __syncthreads();
@@ -298,24 +298,12 @@ void flash_fwd_v4_kernel(
             sP_float(thread_row,thread_col + i) = expf(sS(thread_row, thread_col+ i) - rM);
         }
 
-//         if (threadIdx.x == 0) {
-//             for (int i=0;i < Q_TILE_SIZE;i++) {
-//                 for (int j=0; j < KV_TILE_SIZE;j++){
-//                     sP_float(i,j) = expf(sS(i,j) - rM[i]);
-//                 }
-//             }
-//         }
-
         __syncthreads();
 
 
         // rescale l and also reset rD to 0
         rL = expf(rM_old - rM) * rL_old;
         rD = 0.0f;
-//         for (int i = 0; i < Q_TILE_SIZE; i++) {
-//             rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
-//             rD[i] = 0;
-//         }
 
 
         // compute sum(sP)
@@ -337,34 +325,11 @@ void flash_fwd_v4_kernel(
         // sync rL
         rL = __shfl_sync(mask, rL, lane_id_to_read_from);
 
-//         for (int i = 0; i < Q_TILE_SIZE; i++) {
-//             for (int j=0; j < KV_TILE_SIZE; j++) {
-//                 rD[i] += sP_float(i, j);
-//             }
-//         }
-
-
-
-        // compute l
-//         for (int i=0; i < Q_TILE_SIZE; i++) {
-//             rL[i] += rD[i];
-//         }
-
 
         // cast sP from float to half_t
         for (int i=0; i< 4; i++) {
             sP(thread_row, thread_col + i) = __float2half(sP_float(thread_row, thread_col + i));
         }
-
-//         if (threadIdx.x == 0) {
-//             for (int i=0;i < Q_TILE_SIZE;i++) {
-//                 for (int j=0;j < KV_TILE_SIZE;j++){
-//                     sP(i, j) = __float2half(sP_float(i, j));
-//                 }
-//             }
-//         }
-        __syncthreads();
-
 
         // rescale O
 
@@ -377,15 +342,6 @@ void flash_fwd_v4_kernel(
             }
         }
 
-//         if (threadIdx.x == 0){
-//             for (int i=0;i < Q_TILE_SIZE;i++) {
-//                 for (int j=0; j < HEAD_SIZE; j++) {
-//                     //sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
-//                     sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
-//                 }
-//             }
-//         }
-
         __syncthreads();
 
         copy(tOsO, tOrO);
@@ -394,16 +350,9 @@ void flash_fwd_v4_kernel(
 
         gemm(mma_O, tOsP, tOsV, tOrO);
 
-
-        __syncthreads();
-
         // update m and l
         rM_old = rM;
         rL_old = rL;
-//         for (int i = 0; i < Q_TILE_SIZE; i++) {
-//             rM_old[i] = rM[i];
-//             rL_old[i] = rL[i];
-//         }
 
         __syncthreads();
     }
