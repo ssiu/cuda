@@ -34,8 +34,9 @@ void flash_fwd_v4_kernel(
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
-//todo: do everything in registers from sS -> sP
-
+//  todo:
+//  do everything in registers from sS -> sP
+//  test tensors are initialized to 0
 
 // q : (batch_size, seq_len, num_heads, head_dim)
 // k : (batch_size, seq_len, num_heads, head_dim)
@@ -193,12 +194,11 @@ void flash_fwd_v4_kernel(
 
     // clear sO and rO
     clear(tOrO);
-//     for (int i=0;i<Q_TILE_SIZE;i++) {
-//         for (int j=0; j<HEAD_SIZE; j++) {
-//             //sO_accum(i,j) = 0.0f;
-//             sO(i,j) = 0.0f;
-//         }
-//     }
+    for (int i = 0; i< 4;i++) {
+        for (int j = 0; j< 4;j++) {
+            sO(thread_row, thread_col + j + 32 * i) = 0.0f;
+        }
+    }
 
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
