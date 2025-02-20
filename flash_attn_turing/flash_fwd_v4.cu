@@ -37,6 +37,7 @@ void flash_fwd_v4_kernel(
 //  todo:
 //  do everything in registers from sS -> sP
 //  test tensors are initialized to 0
+//  remove bank conflicts
 
 // q : (batch_size, seq_len, num_heads, head_dim)
 // k : (batch_size, seq_len, num_heads, head_dim)

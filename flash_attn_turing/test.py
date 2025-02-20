@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
 
-
+torch.set_printoptions(precision=8)
 
 
 def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
