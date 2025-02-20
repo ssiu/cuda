@@ -101,7 +101,7 @@ void flash_fwd_v5_kernel(
     int thread_id = threadIdx.x;
     int lane_id = thread_id % 32;
     int warp_id = thread_id / 32;
-    int warp_row = warp_id * 4;
+    int warp_row = warp_id * 32;
     int thread_row = warp_row + (lane_id / 8);
     int thread_col = (lane_id % 8) * 4;
 
