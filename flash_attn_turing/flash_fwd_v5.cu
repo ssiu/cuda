@@ -24,7 +24,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutV, class TiledCopyV,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
-__global__ __launch_bounds__(256)
+__global__ __launch_bounds__(64)
 void flash_fwd_v5_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
@@ -37,26 +37,11 @@ void flash_fwd_v5_kernel(
 //  todo:
 //  do everything in registers from sS -> sP
 //  test tensors are initialized to 0
-//  remove bank conflicts
 
-// q : (batch_size, seq_len, num_heads, head_dim)
-// k : (batch_size, seq_len, num_heads, head_dim)
-// v : (batch_size, seq_len, num_heads, head_dim)
-// o : (batch_size, seq_len, num_heads, head_dim)
-// m :
-// we load a 32 x 64 tile of q, k, v into shared memory and compute 32x64 of o
-// each thread loads 8 numbers
-// qk^T = s 32 x 32 -> softmax
-// define mma
+// 64 threads
+// S -> P in registers
 
-// we launch a 3d grid with batch_size * num_heads * (seq_len / 16)
-// blockIdx.x batch_size
-// blockIdx.y num_heads
-// blockIdx.z (seq_len / 16)
-//     if (threadIdx.x == 0) {
-//         printf("gridDim.x = %d, gridDim.y = %d, gridDim.z = %d\n", gridDim.x, gridDim.y, gridDim.z);
-//         printf("blockIdx.x = %d, blockIdx.y = %d, blockIdx.z = %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
-//     }
+
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
@@ -120,12 +105,12 @@ void flash_fwd_v5_kernel(
     int thread_row = warp_row + (lane_id / 8);
     int thread_col = (lane_id % 8) * 4;
 
-    float rM_old = -FLT_MAX;
-    float rM = 0.0f;
-    float rL_old = 0.0f;
-    float rL = 0.0f;
+    float rM_old[4] = {-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX};
+    float rM[4] = {0.0f};
+    float rL_old[4] = {0.0f};
+    float rL[4] = {0.0f};
     // for storing rowsum(P)
-    float rD = 0.0f;
+    float rD[4] = {0.0f};
 
     unsigned mask;
     if (lane_id < 8)       mask = 0x000000FF;  // Lanes 0-7
@@ -195,9 +180,12 @@ void flash_fwd_v5_kernel(
 
     // clear sO and rO
     clear(tOrO);
-    for (int i = 0; i< 4;i++) {
-        for (int j = 0; j< 4;j++) {
-            sO(thread_row, thread_col + j + 32 * i) = 0.0f;
+    for (int k = 0; k < 4; k++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j< 4; j++) {
+                sO(thread_row + 4 * i , thread_col + j + 32 * k) = 0.0f;
+            }
+
         }
     }
 
@@ -210,9 +198,7 @@ void flash_fwd_v5_kernel(
         __syncthreads();
         // compute S = QK^T
         clear(tSrS);
-        copy(tSsQ, tSrQ);
-        copy(tSsK, tSrK);
-        gemm(mma_S, tSrQ, tSrK, tSrS);
+        gemm(mma_S, tSsQ, tSsK, tSrS);
 
 
         copy(tSrS, tSsS);
@@ -220,66 +206,102 @@ void flash_fwd_v5_kernel(
 
 
         for (int i = 0; i < 4; i++) {
-            sS(thread_row, thread_col + i) *= 1.0f / sqrtf(HEAD_SIZE);
+            for (int j = 0; j < 4; j++) {
+                sS(thread_row + 4 * i, thread_col + j) *= 1.0f / sqrtf(HEAD_SIZE);
+            }
+
         }
         __syncthreads();
 
 
 
         // compute m = rowmax(S)
-        rM = rM_old;
+        for (int i=0; i< 4; i++) {
+            rM[i] = rM_old[i];
+        }
+
 
         // intra-thread reduction
+
         for (int i=0; i< 4; i++) {
-            rM = fmaxf(rM, sS(thread_row, thread_col + i));
+            for (int j = 0; j < 4; j++) {
+                rM[i] = fmaxf(rM[i], sS(thread_row + 4 * i, thread_col + j));
+            }
         }
 
 
         // inter-warp reduction
-        for (int offset = 4; offset > 0; offset /= 2) {
-           rM = fmaxf(rM, __shfl_down_sync(mask, rM, offset));
+        for (int i=0; i<4; i++) {
+            for (int offset = 4; offset > 0; offset /= 2) {
+               rM[i] = fmaxf(rM[i], __shfl_down_sync(mask, rM[i], offset));
+            }
         }
+
 
         // sync rM
-        rM = __shfl_sync(mask, rM, lane_id_to_read_from);
+
+        for (int i =0; i<4; i++) {
+            rM[i] = __shfl_sync(mask, rM[i], lane_id_to_read_from);
+        }
+
 
         // compute P = softmax(S)
-
-        for (int i=0; i< 4; i++) {
-            sP_float(thread_row,thread_col + i) = expf(sS(thread_row, thread_col+ i) - rM);
+        for (int i =0; i<4; i++) {
+            for (int j=0; j< 4; j++) {
+                sP_float(thread_row + 4 * i,thread_col + j) = expf(sS(thread_row + 4 * i, thread_col+ j) - rM[i]);
+            }
         }
+
 
         __syncthreads();
 
 
         // rescale l and also reset rD to 0
-        rL = expf(rM_old - rM) * rL_old;
-        rD = 0.0f;
+        for (int i =0; i<4; i++) {
+            rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
+            rD[i] = 0.0f;
+        }
+
 
 
         // compute sum(sP)
 
         // thread reduction
-        for (int i=0; i< 4; i++) {
-            rD += sP_float(thread_row, thread_col + i);
+        for (int i =0; i<4; i++) {
+            for (int j=0; j< 4; j++) {
+                rD[i] += sP_float(thread_row + 4 * i, thread_col + j);
+            }
         }
+
 
 
         // warp reduction
-        for (int offset = 4; offset > 0; offset /= 2) {
-           rD +=  __shfl_down_sync(mask, rD, offset);
+        for (int i =0; i<4; i++) {
+            for (int offset = 4; offset > 0; offset /= 2) {
+               rD[i] +=  __shfl_down_sync(mask, rD[i], offset);
+            }
         }
 
 
+
         // can just keep the correct rL to lane 0
-        rL += rD;
+        for (int i =0; i<4; i++) {
+            rL[i] += rD[i];
+        }
+
         // sync rL
-        rL = __shfl_sync(mask, rL, lane_id_to_read_from);
+        for (int i =0; i<4; i++) {
+            rL[i] = __shfl_sync(mask, rL[i], lane_id_to_read_from);
+        }
+
 
 
         // cast sP from float to half_t
         for (int i=0; i< 4; i++) {
-            sP(thread_row, thread_col + i) = __float2half(sP_float(thread_row, thread_col + i));
+            for (int j=0; j< 4; j++) {
+                sP(thread_row + 4 * i, thread_col + j) = __float2half(sP_float(thread_row + 4 * i, thread_col + j));
+            }
+
         }
 
         // rescale O
@@ -287,10 +309,11 @@ void flash_fwd_v5_kernel(
         copy(tOrO, tOsO);
 
         __syncthreads();
-
-        for (int i = 0; i< 4;i++) {
-            for (int j = 0; j< 4;j++) {
-                sO(thread_row, thread_col + j + 32 * i) = expf(rM_old - rM) * sO(thread_row, thread_col + j + 32 * i);
+        for (int k = 0; k< 4;k++) {
+            for (int i = 0; i< 4;i++) {
+                for (int j = 0; j< 4;j++) {
+                    sO(thread_row + 4*i, thread_col + j + 32 * k) = expf(rM_old[i] - rM[i]) * sO(thread_row + 4*i, thread_col + j + 32 * k);
+                }
             }
         }
 
@@ -303,20 +326,25 @@ void flash_fwd_v5_kernel(
         gemm(mma_O, tOsP, tOsV, tOrO);
 
         // update m and l
-        rM_old = rM;
-        rL_old = rL;
+        for (int i = 0; i< 4;i++) {
+            rM_old[i] = rM[i];
+            rL_old[i] = rL[i];
+        }
+
     }
     // end of KV loop
 
     copy(tOrO, tOsO);
     __syncthreads();
     // rescale rO
-
-    for (int i = 0; i< 4;i++) {
-        for (int j = 0; j< 4;j++) {
-            sO(thread_row, thread_col + j + 32 * i) /= rL;
+    for (int k = 0; k< 4;k++) {
+        for (int i = 0; i< 4;i++) {
+            for (int j = 0; j< 4;j++) {
+                sO(thread_row + 4 * i, thread_col + j + 32 * k) /= rL[i];
+            }
         }
     }
+
 //     if (threadIdx.x == 0){
 //
 //         for (int i=0;i < Q_TILE_SIZE;i++) {
@@ -369,31 +397,31 @@ torch::Tensor flash_fwd_v5(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
 
-    // 64 threads loading a 16 x 128 tile
+    // 64 threads loading a 32 x 128 tile
     TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_16,_1>>{},
+                                Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_16,_1>>{},
+                                Layout<Shape<_4,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
-    // 64 threads loading a 128 x 16 tile
+    // 64 threads loading a 128 x 32 tile
     TiledCopy copy_V = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_1,_16>>{},
+                                Layout<Shape<_16,_4>, Stride<_1,_16>>{},
                                 Layout<Shape< _8,_1>>{});
 
     TiledCopy copy_O = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, float>{},
-                                Layout<Shape<_8,_32>, Stride<_32,_1>>{},
+                                Layout<Shape<_2,_32>, Stride<_32,_1>>{},
                                 Layout<Shape< _1,_4>>{});
 
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                        Layout<Shape<_2, _4, _1>>{},
+                                        Layout<Shape<_2, _1, _1>>{},
                                         Tile<_32,_32,_8>{});
 
     TiledMMA mma_O = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                        Layout<Shape<_2, _4, _1>>{},
+                                        Layout<Shape<_2, _1, _1>>{},
                                         Tile<_32,_128,_8>{});
 
 
@@ -407,7 +435,7 @@ torch::Tensor flash_fwd_v5(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 //     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimGrid(batch_size, num_heads, seq_len / Q_TILE_SIZE);
-    dim3 dimBlock(256);
+    dim3 dimBlock(64);
     int maxbytes = 65536;
 
 
