@@ -14,8 +14,8 @@ using namespace cute;
 
 
 #define HEAD_SIZE 128
-#define Q_TILE_SIZE 64
-#define KV_TILE_SIZE 128
+#define Q_TILE_SIZE 32
+#define KV_TILE_SIZE 32
 
 
 
@@ -34,6 +34,10 @@ void flash_fwd_v5_kernel(
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
+//  todo:
+//  do everything in registers from sS -> sP
+//  test tensors are initialized to 0
+//  remove bank conflicts
 
 // q : (batch_size, seq_len, num_heads, head_dim)
 // k : (batch_size, seq_len, num_heads, head_dim)
@@ -97,30 +101,43 @@ void flash_fwd_v5_kernel(
 // store V to smem
 // compute O
 
-    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); //16KB
-    Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); //32KB
-    Tensor sV = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sV_layout); //32KB
 
+    // smem total = 50KB
+    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 8KB
+    Tensor sK = make_tensor(sQ.data() + Q_TILE_SIZE*HEAD_SIZE, sK_layout);                   // 8KB
+    Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 8KB
+    Tensor sP = make_tensor(sV.data() + KV_TILE_SIZE*HEAD_SIZE, sS_layout);                  // 2KB
 
+    int array_offset = (Q_TILE_SIZE * HEAD_SIZE + KV_TILE_SIZE * HEAD_SIZE * 2 + Q_TILE_SIZE * KV_TILE_SIZE) * sizeof(half_t);
+    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0] + array_offset)), sS_layout); // 4KB
+    Tensor sP_float = make_tensor(sS.data() + Q_TILE_SIZE * KV_TILE_SIZE, sS_layout);   // 4KB
+    Tensor sO = make_tensor(sP_float.data() + Q_TILE_SIZE * KV_TILE_SIZE, sO_layout);  // 16KB
 
-    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 32KB
-    Tensor sP_float = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 32KB
+    int thread_id = threadIdx.x;
+    int lane_id = thread_id % 32;
+    int warp_id = thread_id / 32;
+    int warp_row = warp_id * 4;
+    int thread_row = warp_row + (lane_id / 8);
+    int thread_col = (lane_id % 8) * 4;
 
-    Tensor sP = make_tensor(sV.data() + KV_TILE_SIZE * HEAD_SIZE, sS_layout);    // 16KB
-    //Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);    // 16KB
-    Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 32KB
-
-    //Tensor sO_accum = make_tensor(sO.data() + Q_TILE_SIZE * HEAD_SIZE, sO_layout);
-
-    float rM_old[Q_TILE_SIZE];
-    for (int i=0;i<Q_TILE_SIZE;i++) {
-        rM_old[i] = -FLT_MAX;
-    }                                           ;
-    float rM[Q_TILE_SIZE] = {0.0f};
-    float rL_old[Q_TILE_SIZE] = {0.0f};
-    float rL[Q_TILE_SIZE] = {0.0f};
+    float rM_old = -FLT_MAX;
+    float rM = 0.0f;
+    float rL_old = 0.0f;
+    float rL = 0.0f;
     // for storing rowsum(P)
-    float rD[Q_TILE_SIZE] = {0.0f};
+    float rD = 0.0f;
+
+    unsigned mask;
+    if (lane_id < 8)       mask = 0x000000FF;  // Lanes 0-7
+    else if (lane_id < 16) mask = 0x0000FF00;  // Lanes 8-15
+    else if (lane_id < 24) mask = 0x00FF0000;  // Lanes 16-23
+    else                   mask = 0xFF000000;  // Lanes 24-31
+
+    int lane_id_to_read_from;
+    if (lane_id < 8)       lane_id_to_read_from = 0;  // Lanes 0-7
+    else if (lane_id < 16) lane_id_to_read_from = 8;  // Lanes 8-15
+    else if (lane_id < 24) lane_id_to_read_from = 16;  // Lanes 16-23
+    else                   lane_id_to_read_from = 24;  // Lanes 24-31
 
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
@@ -175,16 +192,12 @@ void flash_fwd_v5_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    __syncthreads();
-    copy(tSsQ, tSrQ);
-   __syncthreads();
 
     // clear sO and rO
     clear(tOrO);
-    for (int i=0;i<Q_TILE_SIZE;i++) {
-        for (int j=0; j<HEAD_SIZE; j++) {
-            //sO_accum(i,j) = 0.0f;
-            sO(i,j) = 0.0f;
+    for (int i = 0; i< 4;i++) {
+        for (int j = 0; j< 4;j++) {
+            sO(thread_row, thread_col + j + 32 * i) = 0.0f;
         }
     }
 
@@ -192,117 +205,92 @@ void flash_fwd_v5_kernel(
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 
         __syncthreads();
         // compute S = QK^T
         clear(tSrS);
+        copy(tSsQ, tSrQ);
         copy(tSsK, tSrK);
         gemm(mma_S, tSrQ, tSrK, tSrS);
 
-        if (threadIdx.x == 0) {
-            for (int i = 0; i < Q_TILE_SIZE; i++) {
-                for (int j=0; j < KV_TILE_SIZE; j++) {
-                    sS(i,j) = 0.0f;
-                }
-            }
-
-        }
-        __syncthreads();
 
         copy(tSrS, tSsS);
         __syncthreads();
 
-        if (thread0()) {
-            if (threadIdx.x == 0) {
-                for (int i = 0; i < Q_TILE_SIZE; i++) {
-                    printf("%2d ", i);
-                    for (int j=0; j < KV_TILE_SIZE; j++) {
-                        printf("%8.4f ", sS(i,j));
 
-                    }
-                    print("\n");
-                }
-            }
-        }
-
-        // rescale S by 1/sqrt(128)
-        if (threadIdx.x == 0) {
-            for (int i = 0; i < Q_TILE_SIZE; i++) {
-                for (int j=0; j < KV_TILE_SIZE; j++) {
-                    sS(i,j) *= 1.0f / sqrtf(HEAD_SIZE);
-                }
-            }
+        for (int i = 0; i < 4; i++) {
+            sS(thread_row, thread_col + i) *= 1.0f / sqrtf(HEAD_SIZE);
         }
         __syncthreads();
 
 
 
-        // compute m = rowsum(S)
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rM[i] = rM_old[i];
-            for (int j=0; j < KV_TILE_SIZE; j++) {
-                rM[i] = fmaxf(rM[i], sS(i,j));
-            }
+        // compute m = rowmax(S)
+        rM = rM_old;
+
+        // intra-thread reduction
+        for (int i=0; i< 4; i++) {
+            rM = fmaxf(rM, sS(thread_row, thread_col + i));
         }
 
+
+        // inter-warp reduction
+        for (int offset = 4; offset > 0; offset /= 2) {
+           rM = fmaxf(rM, __shfl_down_sync(mask, rM, offset));
+        }
+
+        // sync rM
+        rM = __shfl_sync(mask, rM, lane_id_to_read_from);
+
         // compute P = softmax(S)
-        if (threadIdx.x == 0) {
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0; j < KV_TILE_SIZE;j++){
-                    sP_float(i,j) = expf(sS(i,j) - rM[i]);
-                }
-            }
+
+        for (int i=0; i< 4; i++) {
+            sP_float(thread_row,thread_col + i) = expf(sS(thread_row, thread_col+ i) - rM);
         }
 
         __syncthreads();
 
 
         // rescale l and also reset rD to 0
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
-            rD[i] = 0;
-        }
+        rL = expf(rM_old - rM) * rL_old;
+        rD = 0.0f;
 
 
         // compute sum(sP)
 
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            for (int j=0; j < KV_TILE_SIZE; j++) {
-                rD[i] += sP_float(i, j);
-            }
+        // thread reduction
+        for (int i=0; i< 4; i++) {
+            rD += sP_float(thread_row, thread_col + i);
         }
 
 
-
-        // compute l
-        for (int i=0; i < Q_TILE_SIZE; i++) {
-            rL[i] += rD[i];
+        // warp reduction
+        for (int offset = 4; offset > 0; offset /= 2) {
+           rD +=  __shfl_down_sync(mask, rD, offset);
         }
+
+
+        // can just keep the correct rL to lane 0
+        rL += rD;
+        // sync rL
+        rL = __shfl_sync(mask, rL, lane_id_to_read_from);
 
 
         // cast sP from float to half_t
-        if (threadIdx.x == 0) {
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0;j < KV_TILE_SIZE;j++){
-                    sP(i, j) = __float2half(sP_float(i, j));
-                }
-            }
+        for (int i=0; i< 4; i++) {
+            sP(thread_row, thread_col + i) = __float2half(sP_float(thread_row, thread_col + i));
         }
-        __syncthreads();
-
 
         // rescale O
 
         copy(tOrO, tOsO);
+
         __syncthreads();
 
-        if (threadIdx.x == 0){
-            for (int i=0;i < Q_TILE_SIZE;i++) {
-                for (int j=0; j < HEAD_SIZE; j++) {
-                    //sO_accum(i,j) = expf(rM_old[i] - rM[i]) * sO_accum(i,j);
-                    sO(i,j) = expf(rM_old[i] - rM[i]) * sO(i,j);
-                }
+        for (int i = 0; i< 4;i++) {
+            for (int j = 0; j< 4;j++) {
+                sO(thread_row, thread_col + j + 32 * i) = expf(rM_old - rM) * sO(thread_row, thread_col + j + 32 * i);
             }
         }
 
@@ -311,37 +299,32 @@ void flash_fwd_v5_kernel(
         copy(tOsO, tOrO);
 
         __syncthreads();
-    
-        copy(tVrV, tVsV);
-        
-        __syncthreads();        
-        
+
         gemm(mma_O, tOsP, tOsV, tOrO);
 
-
-        __syncthreads();
-
         // update m and l
-        for (int i = 0; i < Q_TILE_SIZE; i++) {
-            rM_old[i] = rM[i];
-            rL_old[i] = rL[i];
-        }
-
-        __syncthreads();
+        rM_old = rM;
+        rL_old = rL;
     }
     // end of KV loop
 
     copy(tOrO, tOsO);
     __syncthreads();
     // rescale rO
-    if (threadIdx.x == 0){
 
-        for (int i=0;i < Q_TILE_SIZE;i++) {
-            for (int j=0; j<HEAD_SIZE; j++) {
-                sO(i,j) /= rL[i];
-            }
+    for (int i = 0; i< 4;i++) {
+        for (int j = 0; j< 4;j++) {
+            sO(thread_row, thread_col + j + 32 * i) /= rL;
         }
     }
+//     if (threadIdx.x == 0){
+//
+//         for (int i=0;i < Q_TILE_SIZE;i++) {
+//             for (int j=0; j<HEAD_SIZE; j++) {
+//                 sO(i,j) /= rL[i];
+//             }
+//         }
+//     }
     __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
@@ -390,7 +373,7 @@ torch::Tensor flash_fwd_v5(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                 Layout<Shape<_16,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
-                                
+
     TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
                                 Layout<Shape<_16,_16>, Stride<_16,_1>>{},
                                 Layout<Shape< _1,_8>>{});
@@ -407,11 +390,11 @@ torch::Tensor flash_fwd_v5(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_2, _4, _1>>{},
-                                        Tile<_64,_128,_8>{});
+                                        Tile<_32,_32,_8>{});
 
     TiledMMA mma_O = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_2, _4, _1>>{},
-                                        Tile<_64,_128,_8>{});
+                                        Tile<_32,_128,_8>{});
 
 
     torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
