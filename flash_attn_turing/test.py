@@ -56,7 +56,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
                         print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
                         count += 1
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
-                    lse += output[i,j,k,l] - output_torch[i,j,k,l]
+                    lse += abs(output[i,j,k,l] - output_torch[i,j,k,l])
     print("=====")
     return lse
 
