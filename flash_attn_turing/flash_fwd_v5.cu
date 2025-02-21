@@ -40,6 +40,7 @@ void flash_fwd_v5_kernel(
 
 // 64 threads
 // S -> P in registers
+// tSrS warp shuffling to get M and L
 
 
     Tensor mQ = make_tensor(make_gmem_ptr(q),

@@ -4,7 +4,7 @@ using namespace cute;
 
 int main()
 {
-    half_t A[16*8] = {0};
+    int A[16*8] = {0};
     auto layout_A = make_layout(make_shape (Int<16>{}, Int<8>{}),
                             make_stride(Int<8>{}, Int<1>{}));
 
