@@ -19,4 +19,6 @@ int main()
     Tensor ta = thr_mma.partition_A(a);
 
     print(ta);
+    print_tensor(ta);
+    printf("%d %d %d\n", size<0,0>(ta), size<0,1>(ta), size<1>(ta), size<2>(ta))
 }
