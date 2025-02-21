@@ -5,7 +5,7 @@ using namespace cute;
 int main()
 {
     // need to understand how to call the elements in a register tensor on partition_C when we tile the tensor core multiple times
-    int C[16*16] = {0};
+    int C[16*16] = {1};
     auto layout_C = make_layout(make_shape (Int<16>{}, Int<16>{}),
                             make_stride(Int<8>{}, Int<1>{}));
 
