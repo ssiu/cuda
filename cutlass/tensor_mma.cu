@@ -18,13 +18,17 @@ int main()
 
     Tensor tc = thr_mma.partition_C(c);
 
+    for (int i = 0; i < tc.size(); ++i)
+        c[i] = i;
+
     print(tc);
     print_tensor(tc);
     printf("%d %d %d %d\n", int(size<0,0>(tc)), int(size<0,1>(tc)), int(size<1>(tc)), int(size<2>(tc)));
 
     printf("%d\n", tc(make_coord(0,0),0,0));
 
-    print(tc(make_coord(0,_),_,_));
-    print_tensor(tc(make_coord(0,_),_,_));
+    print(tc(make_coord(_,0),_,_));
+    print_tensor(tc(make_coord(_,0),_,_));
+
 
 }
