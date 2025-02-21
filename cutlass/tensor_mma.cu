@@ -21,6 +21,7 @@ int main()
     for (int i = 0; i < c.size(); ++i) {
         c[i] = i;
     }
+    print_tensor(c);
 
 
     print(tc);
