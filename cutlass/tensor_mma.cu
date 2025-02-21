@@ -18,8 +18,10 @@ int main()
 
     Tensor tc = thr_mma.partition_C(c);
 
-    for (int i = 0; i < tc.size(); ++i)
+    for (int i = 0; i < c.size(); ++i) {
         c[i] = i;
+    }
+
 
     print(tc);
     print_tensor(tc);
