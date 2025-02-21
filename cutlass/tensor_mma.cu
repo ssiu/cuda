@@ -22,7 +22,7 @@ int main()
     print_tensor(tc);
     printf("%d %d %d %d\n", int(size<0,0>(tc)), int(size<0,1>(tc)), int(size<1>(tc)), int(size<2>(tc)));
 
-    printf("%d\n", tc[make_coord(make_coord(0,0),0,0)]);
+    printf("%d\n", tc(make_coord(0,0),0,0));
 
 
 }
