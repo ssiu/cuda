@@ -13,7 +13,7 @@ int main()
     auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{});
     ThrMMA thr_mma = mma.get_slice(0);
 
-    Tensor ta = thr_mma_O.partition_A(a);
+    Tensor ta = thr_mma.partition_A(a);
 
     print(ta);
 }
