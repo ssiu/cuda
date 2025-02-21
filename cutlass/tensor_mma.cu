@@ -24,5 +24,7 @@ int main()
 
     printf("%d\n", tc(make_coord(0,0),0,0));
 
+    print(tc(make_coord(0,_),_,_));
+    print_tensor(tc(make_coord(0,_),_,_));
 
 }
