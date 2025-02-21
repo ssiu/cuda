@@ -202,16 +202,20 @@ void flash_fwd_v5_kernel(
         gemm(mma_S, tSsQ, tSsK, tSrS);
 
 
+        for (int i=0;i< tSrS.size();i ++ ) {
+            tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
+        }
+
         copy(tSrS, tSsS);
         __syncthreads();
 
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                sS(thread_row + 4 * i, thread_col + j) *= 1.0f / sqrtf(HEAD_SIZE);
-            }
-
-        }
+//         for (int i = 0; i < 4; i++) {
+//             for (int j = 0; j < 4; j++) {
+//                 sS(thread_row + 4 * i, thread_col + j) *= 1.0f / sqrtf(HEAD_SIZE);
+//             }
+//
+//         }
         __syncthreads();
 
 
