@@ -12,7 +12,7 @@ int main()
     Tensor a = make_tensor(&A[0], layout_A);
 
     auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                Layout<Shape<_1, _1, _1>>{}
+                                Layout<Shape<_1, _1, _1>>{},
                                 Tile<_16,_16,_8>{});
     ThrMMA thr_mma = mma.get_slice(0);
 
