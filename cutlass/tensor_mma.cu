@@ -16,9 +16,11 @@ int main()
                                 Tile<_16,_16,_8>{});
     ThrMMA thr_mma = mma.get_slice(0);
 
-    Tensor ta = thr_mma.partition_A(a);
+    Tensor ta = thr_mma.partition_C(a);
 
     print(ta);
     print_tensor(ta);
     printf("%d %d %d %d\n", int(size<0,0>(ta)), int(size<0,1>(ta)), int(size<1>(ta)), int(size<2>(ta)));
+
+
 }
