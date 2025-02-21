@@ -36,5 +36,8 @@ int main()
     print(tc(make_coord(_,0),_,_));
     print_tensor(tc(make_coord(_,0),_,_));
 
+    for (int i=0; i< tc(make_coord(_,0),_,_).size(); i++) {
+        printf("%d\n", tc[i]);
+    }
 
 }
