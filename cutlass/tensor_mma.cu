@@ -20,5 +20,5 @@ int main()
 
     print(ta);
     print_tensor(ta);
-    printf("%d %d %d %d\n", size<0,0>(ta), size<0,1>(ta), size<1>(ta), size<2>(ta));
+    printf("%d %d %d %d\n", int(size<0,0>(ta)), int(size<0,1>(ta)), int(size<1>(ta)), int(size<2>(ta)));
 }
