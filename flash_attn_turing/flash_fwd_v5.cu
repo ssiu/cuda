@@ -360,7 +360,7 @@ void flash_fwd_v5_kernel(
 
         __syncthreads();
 
-        copy(tOsO, tOrO);
+        //copy(tOsO, tOrO);
         copy(tOsV, tOrV);
         __syncthreads();
 
