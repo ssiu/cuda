@@ -339,16 +339,24 @@ void flash_fwd_v5_kernel(
 
         // rescale O
 
-        copy(tOrO, tOsO);
-
-        __syncthreads();
-        for (int k = 0; k< 4;k++) {
-            for (int i = 0; i< 4;i++) {
-                for (int j = 0; j< 4;j++) {
-                    sO(thread_row + 4*i, thread_col + j + 32 * k) = expf(rM_old[i] - rM[i]) * sO(thread_row + 4*i, thread_col + j + 32 * k);
-                }
+        for (int i =0; i<2; i++) {
+            for (int j=0; j < tOrO(make_coord(_,i),_,_).size(); j++) {
+                tOrO(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO(make_coord(_,i),_,_)[j];
             }
         }
+//         copy(tOrO, tOsO);
+//
+//         __syncthreads();
+//         for (int k = 0; k< 4;k++) {
+//             for (int i = 0; i< 4;i++) {
+//                 for (int j = 0; j< 4;j++) {
+//                     sO(thread_row + 4*i, thread_col + j + 32 * k) = expf(rM_old[i] - rM[i]) * sO(thread_row + 4*i, thread_col + j + 32 * k);
+//                 }
+//             }
+//         }
+
+
+
 
         __syncthreads();
 
@@ -367,16 +375,24 @@ void flash_fwd_v5_kernel(
     }
     // end of KV loop
 
-    copy(tOrO, tOsO);
-    __syncthreads();
-    // rescale rO
-    for (int k = 0; k< 4;k++) {
-        for (int i = 0; i< 4;i++) {
-            for (int j = 0; j< 4;j++) {
-                sO(thread_row + 4 * i, thread_col + j + 32 * k) /= rL[i];
-            }
+//     copy(tOrO, tOsO);
+//     __syncthreads();
+//     // rescale rO
+//     for (int k = 0; k< 4;k++) {
+//         for (int i = 0; i< 4;i++) {
+//             for (int j = 0; j< 4;j++) {
+//                 sO(thread_row + 4 * i, thread_col + j + 32 * k) /= rL[i];
+//             }
+//         }
+//     }
+
+    for (int i =0; i<2; i++) {
+        for (int j=0; j < tOrO(make_coord(_,i),_,_).size(); j++) {
+            tOrO(make_coord(_,i),_,_)[j] /= rL[i];
         }
     }
+
+    copy(tOrO, tOsO);
 
 //     if (threadIdx.x == 0){
 //
