@@ -224,7 +224,7 @@ void flash_fwd_v5_kernel(
 //             }
 //
 //         }
-        __syncthreads();
+        //__syncthreads();
 
 
 
@@ -273,7 +273,7 @@ void flash_fwd_v5_kernel(
         }
 
 
-        __syncthreads();
+        //__syncthreads();
 
 
         // rescale l and also reset rD to 0
@@ -358,7 +358,7 @@ void flash_fwd_v5_kernel(
 
 
 
-        __syncthreads();
+       // __syncthreads();
 
         //copy(tOsO, tOrO);
         copy(tOsV, tOrV);
