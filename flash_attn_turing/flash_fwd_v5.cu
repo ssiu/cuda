@@ -359,7 +359,7 @@ void flash_fwd_v5_kernel(
         gemm(mma_O, tOrP, tOrV, tOrO);
 
         // update m and l
-        for (int i = 0; i< 4;i++) {
+        for (int i = 0; i< 2;i++) {
             rM_old[i] = rM[i];
             rL_old[i] = rL[i];
         }
