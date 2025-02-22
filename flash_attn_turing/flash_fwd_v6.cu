@@ -92,9 +92,10 @@ void flash_fwd_v6_kernel(
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 32KB
     Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); // 32KB
     Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 32KB
-    Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sP_layout);
+    Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
-    Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 4KB
+    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 64KB
+    Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 64KB
 
 
     int thread_id = threadIdx.x;
@@ -184,8 +185,7 @@ void flash_fwd_v6_kernel(
 
     // prologue
 
-    copy(copy_Q, tQgQ, tQrQ);
-    copy(copy_Q, tQrQ, tQsQ);
+    copy(copy_Q, tQgQ, tQsQ);
     __syncthreads();
 
     copy(tSsQ, tSrQ);
@@ -441,7 +441,7 @@ torch::Tensor flash_fwd_v6(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                         make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
 
 
-    auto sP_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<KV_TILE_SIZE>{}),
+    auto sS_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<KV_TILE_SIZE>{}),
                         make_stride(Int<KV_TILE_SIZE>{}, Int<1>{}));
 
 
