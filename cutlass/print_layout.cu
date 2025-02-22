@@ -17,8 +17,8 @@ int main() {
 
 
         auto layout = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_32,_8>,
-                                    Stride<_1, _32>>{});
+                                    Layout<Shape<_32,_32>,
+                                    Stride<_32, _1>>{});
         print_layout(layout);
     }
     #endif
