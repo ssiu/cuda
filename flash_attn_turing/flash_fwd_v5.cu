@@ -356,7 +356,7 @@ void flash_fwd_v5_kernel(
         copy(tOsV, tOrV);
         __syncthreads();
 
-        gemm(mma_O, tOrP, tOsV, tOrO);
+        gemm(mma_O, tOrP, tOrV, tOrO);
 
         // update m and l
         for (int i = 0; i< 4;i++) {
