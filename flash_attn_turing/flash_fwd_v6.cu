@@ -24,7 +24,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutV, class TiledCopyV,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
-__global__ __launch_bounds__(64)
+__global__ __launch_bounds__(256)
 void flash_fwd_v6_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
