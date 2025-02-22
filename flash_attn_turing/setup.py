@@ -4,10 +4,10 @@ from torch.utils.cpp_extension import CUDAExtension, BuildExtension
 #from cpp_extension.setup import nvcc_flags
 
 #modal
-# cutlass_include_dirs = ["/root/cuda/flash_attn_turing/cutlass/include", "/root/cuda/flash_attn_turing/cutlass/tools/util/include"]
+cutlass_include_dirs = ["/root/cuda/flash_attn_turing/cutlass/include", "/root/cuda/flash_attn_turing/cutlass/tools/util/include"]
 
 # colab
-cutlass_include_dirs = ["/content/cuda/flash_attn_turing/cutlass/include", "/content/cuda/flash_attn_turing/cutlass/tools/util/include"]
+# cutlass_include_dirs = ["/content/cuda/flash_attn_turing/cutlass/include", "/content/cuda/flash_attn_turing/cutlass/tools/util/include"]
 
 # google cloud
 # cutlass_include_dirs = ["/home/stevesiu1013/cuda/flash_attn_turing/cutlass/include", "/home/stevesiu1013/cuda/flash_attn_turing/cutlass/tools/util/include"]
@@ -29,7 +29,8 @@ setup(
                      #"flash_fwd_v2.cu",
                      #"flash_fwd_v3.cu",
                      #"flash_fwd_v4.cu",
-                     "flash_fwd_v5.cu"
+                     #"flash_fwd_v5.cu",
+                     "flash_fwd_v6.cu"
                      ],
             include_dirs=cutlass_include_dirs,
             extra_compile_args={'nvcc': nvcc_flags}
