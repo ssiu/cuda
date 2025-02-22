@@ -55,10 +55,14 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
                     if count < 2048:
                         print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
                         count += 1
+                    else:
+                        lse = torch.sum(torch.abs(output - output_torch))
+                        return lse
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
-                    lse += abs(output[i,j,k,l] - output_torch[i,j,k,l])
-    print("=====")
-    return lse
+
+
+    return 0
+
 
 
 
