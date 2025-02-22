@@ -106,24 +106,33 @@ void flash_fwd_v5_kernel(
     int thread_row = warp_row + (lane_id / 8);
     int thread_col = (lane_id % 8) * 4;
 
-    float rM_old[4] = {-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX};
-    float rM[4] = {0.0f};
-    float rL_old[4] = {0.0f};
-    float rL[4] = {0.0f};
+    float rM_old[2] = {-FLT_MAX, -FLT_MAX};
+    float rM[2] = {0.0f};
+    float rL_old[2] = {0.0f};
+    float rL[2] = {0.0f};
     // for storing rowsum(P)
-    float rD[4] = {0.0f};
+    float rD[2] = {0.0f};
 
     unsigned mask;
-    if (lane_id < 8)       mask = 0x000000FF;  // Lanes 0-7
-    else if (lane_id < 16) mask = 0x0000FF00;  // Lanes 8-15
-    else if (lane_id < 24) mask = 0x00FF0000;  // Lanes 16-23
-    else                   mask = 0xFF000000;  // Lanes 24-31
+    if (lane_id < 4)       mask = 0x0000000F;  // Lanes  0 -  3
+    else if (lane_id < 8)  mask = 0x000000F0;  // Lanes  4 -  7
+    else if (lane_id < 12) mask = 0x00000F00;  // Lanes  8 - 11
+    else if (lane_id < 16) mask = 0x0000F000;  // Lanes 12 - 15
+    else if (lane_id < 20) mask = 0x000F0000;  // Lanes 16 - 19
+    else if (lane_id < 24) mask = 0x00F00000;  // Lanes 20 - 23
+    else if (lane_id < 28) mask = 0x0F000000;  // Lanes 24 - 27
+    else                   mask = 0xF0000000;  // Lanes 28 - 31
+
 
     int lane_id_to_read_from;
-    if (lane_id < 8)       lane_id_to_read_from = 0;  // Lanes 0-7
-    else if (lane_id < 16) lane_id_to_read_from = 8;  // Lanes 8-15
-    else if (lane_id < 24) lane_id_to_read_from = 16;  // Lanes 16-23
-    else                   lane_id_to_read_from = 24;  // Lanes 24-31
+    if (lane_id < 4)       lane_id_to_read_from = 0;   // Lanes  0 -  3
+    else if (lane_id < 8)  lane_id_to_read_from = 4;   // Lanes  4 -  7
+    else if (lane_id < 12) lane_id_to_read_from = 8;   // Lanes  8 - 11
+    else if (lane_id < 16) lane_id_to_read_from = 12;  // Lanes 12 - 15
+    else if (lane_id < 20) lane_id_to_read_from = 16;  // Lanes 16 - 19
+    else if (lane_id < 24) lane_id_to_read_from = 20;  // Lanes 20 - 23
+    else if (lane_id < 28) lane_id_to_read_from = 24;  // Lanes 24 - 27
+    else                   lane_id_to_read_from = 28;  // Lanes 28 - 31
 
     // q should be 16 x 128 tensor
     // k, v should be seq_len x 128 tensor
@@ -186,7 +195,6 @@ void flash_fwd_v5_kernel(
             for (int j = 0; j< 4; j++) {
                 sO(thread_row + 4 * i , thread_col + j + 32 * k) = 0.0f;
             }
-
         }
     }
 
@@ -206,8 +214,8 @@ void flash_fwd_v5_kernel(
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
         }
 
-        copy(tSrS, tSsS);
-        __syncthreads();
+        //copy(tSrS, tSsS);
+        //__syncthreads();
 
 
 //         for (int i = 0; i < 4; i++) {
@@ -221,23 +229,26 @@ void flash_fwd_v5_kernel(
 
 
         // compute m = rowmax(S)
-        for (int i=0; i< 4; i++) {
+        for (int i=0; i< 2; i++) {
             rM[i] = rM_old[i];
         }
 
 
         // intra-thread reduction
 
-        for (int i=0; i< 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                rM[i] = fmaxf(rM[i], sS(thread_row + 4 * i, thread_col + j));
+        for (int i=0; i< 2; i++) {
+            for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
+                rM[i] = fmaxf(rM[i], tSrS(make_coord(_,i),_,_)[j]);
             }
+//             for (int j = 0; j < 4; j++) {
+//                 rM[i] = fmaxf(rM[i], sS(thread_row + 4 * i, thread_col + j));
+//             }
         }
 
 
         // inter-warp reduction
-        for (int i=0; i<4; i++) {
-            for (int offset = 4; offset > 0; offset /= 2) {
+        for (int i=0; i<2; i++) {
+            for (int offset = 2; offset > 0; offset /= 2) {
                rM[i] = fmaxf(rM[i], __shfl_down_sync(mask, rM[i], offset));
             }
         }
@@ -245,16 +256,20 @@ void flash_fwd_v5_kernel(
 
         // sync rM
 
-        for (int i =0; i<4; i++) {
+        for (int i =0; i<2; i++) {
             rM[i] = __shfl_sync(mask, rM[i], lane_id_to_read_from);
         }
 
 
         // compute P = softmax(S)
-        for (int i =0; i<4; i++) {
-            for (int j=0; j< 4; j++) {
-                sP_float(thread_row + 4 * i,thread_col + j) = expf(sS(thread_row + 4 * i, thread_col+ j) - rM[i]);
+        for (int i =0; i<2; i++) {
+            for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
+                tSrS(make_coord(_,i),_,_)[j] = expf(tSrS(make_coord(_,i),_,_)[j] - rM[i]);
             }
+
+//             for (int j=0; j< 4; j++) {
+//                 sP_float(thread_row + 4 * i,thread_col + j) = expf(sS(thread_row + 4 * i, thread_col+ j) - rM[i]);
+//             }
         }
 
 
@@ -262,7 +277,7 @@ void flash_fwd_v5_kernel(
 
 
         // rescale l and also reset rD to 0
-        for (int i =0; i<4; i++) {
+        for (int i =0; i<2; i++) {
             rL[i] = expf(rM_old[i] - rM[i]) * rL_old[i];
             rD[i] = 0.0f;
         }
@@ -272,17 +287,22 @@ void flash_fwd_v5_kernel(
         // compute sum(sP)
 
         // thread reduction
-        for (int i =0; i<4; i++) {
-            for (int j=0; j< 4; j++) {
-                rD[i] += sP_float(thread_row + 4 * i, thread_col + j);
+
+        for (int i =0; i<2; i++) {
+            for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
+                rD[i] += tSrS(make_coord(_,i),_,_)[j];
             }
+
+//             for (int j=0; j< 4; j++) {
+//                 rD[i] += sP_float(thread_row + 4 * i, thread_col + j);
+//             }
         }
 
 
 
         // warp reduction
-        for (int i =0; i<4; i++) {
-            for (int offset = 4; offset > 0; offset /= 2) {
+        for (int i =0; i<2; i++) {
+            for (int offset = 2; offset > 0; offset /= 2) {
                rD[i] +=  __shfl_down_sync(mask, rD[i], offset);
             }
         }
@@ -290,24 +310,32 @@ void flash_fwd_v5_kernel(
 
 
         // can just keep the correct rL to lane 0
-        for (int i =0; i<4; i++) {
+        for (int i =0; i<2; i++) {
             rL[i] += rD[i];
         }
 
         // sync rL
-        for (int i =0; i<4; i++) {
+        for (int i =0; i<2; i++) {
             rL[i] = __shfl_sync(mask, rL[i], lane_id_to_read_from);
         }
 
 
 
         // cast sP from float to half_t
-        for (int i=0; i< 4; i++) {
-            for (int j=0; j< 4; j++) {
-                sP(thread_row + 4 * i, thread_col + j) = __float2half(sP_float(thread_row + 4 * i, thread_col + j));
-            }
-
+        for (int i=0; i < tSrS.size(); i++) {
+            tOrP[i] = __float2half(tSrS[i]);
         }
+
+//         for (int i=0; i< 4; i++) {
+//
+//             for (int j=0; j< 4; j++) {
+//                 sP(thread_row + 4 * i, thread_col + j) = __float2half(sP_float(thread_row + 4 * i, thread_col + j));
+//             }
+//
+//         }
+
+
+
 
         // rescale O
 
@@ -325,10 +353,10 @@ void flash_fwd_v5_kernel(
         __syncthreads();
 
         copy(tOsO, tOrO);
-
+        copy(tOsV, tOrV);
         __syncthreads();
 
-        gemm(mma_O, tOsP, tOsV, tOrO);
+        gemm(mma_O, tOrP, tOsV, tOrO);
 
         // update m and l
         for (int i = 0; i< 4;i++) {
