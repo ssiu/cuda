@@ -188,7 +188,7 @@ void flash_fwd_v8_kernel(
     copy(copy_Q, tQgQ, tQsQ);
     copy(copy_K, tKgK(_,_,_,0), tKrK);
     copy(copy_V, tVgV(_,_,_,0), tVrV);
-    //__syncthreads();
+    __syncthreads();
 
     copy(tSsQ, tSrQ);
 
