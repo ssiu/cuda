@@ -195,6 +195,10 @@ void flash_fwd_v8_kernel(
     // clear sO and rO
     clear(tOrO);
 
+    if (thread0()) {
+        print(tSrQ);
+    }
+
 
     // main loop
     CUTE_NO_UNROLL
