@@ -17,9 +17,12 @@ int main() {
 
 
         // column major
-        auto layout = composition(Swizzle<3, 3, 3>{},
+        auto layout_atom = composition(Swizzle<3, 3, 3>{},
                                     Layout<Shape<_64,_16>,
                                     Stride<_1, _64>>{});
+
+        auto layout = tile_to_shape(layout_atom,
+                                       make_shape(Int<64>{}, Int<16>{}));
 
         // row major
 //         auto layout = composition(Swizzle<3, 3, 3>{},
