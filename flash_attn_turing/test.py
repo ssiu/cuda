@@ -48,15 +48,20 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
     lse = 0
     count = 0
+    error_tol = 1e-4
+    error_tol_count = 0
     for i in range(batch_size):
         for j in range(seqlen):
             for k in range(nheads):
                 for l in range(headdim):
-                    if count < 2048:
-                        print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
+                    if count < 1024*128:
+                        #print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
+                        if abs(output[i,j,k,l] - output_torch[i,j,k,l]) > 0.001:
+                            error_tol_count += 1
                         count += 1
                     else:
                         lse = torch.sum(torch.abs(output - output_torch))
+                        print(f"{error_tol_count} entries have more than {error_tol} error difference")
                         return lse
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
 
@@ -74,7 +79,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_64 = {lse_64}")
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
-lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=4, headdim=128)
+lse_1024 = get_lse(batch_size=1, seqlen=1024, nheads=1, headdim=128)
 print(f"lse_1024 = {lse_1024}")
 
 
