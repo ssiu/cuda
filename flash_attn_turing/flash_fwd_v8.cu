@@ -218,19 +218,6 @@ void flash_fwd_v8_kernel(
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
         }
 
-        //copy(tSrS, tSsS);
-        //__syncthreads();
-
-
-//         for (int i = 0; i < 4; i++) {
-//             for (int j = 0; j < 4; j++) {
-//                 sS(thread_row + 4 * i, thread_col + j) *= 1.0f / sqrtf(HEAD_SIZE);
-//             }
-//
-//         }
-        //__syncthreads();
-
-
 
         // compute m = rowmax(S)
         for (int i=0; i< 2; i++) {
@@ -244,9 +231,6 @@ void flash_fwd_v8_kernel(
             for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
                 rM[i] = fmaxf(rM[i], tSrS(make_coord(_,i),_,_)[j]);
             }
-//             for (int j = 0; j < 4; j++) {
-//                 rM[i] = fmaxf(rM[i], sS(thread_row + 4 * i, thread_col + j));
-//             }
         }
 
 
@@ -270,10 +254,6 @@ void flash_fwd_v8_kernel(
             for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
                 tSrS(make_coord(_,i),_,_)[j] = expf(tSrS(make_coord(_,i),_,_)[j] - rM[i]);
             }
-
-//             for (int j=0; j< 4; j++) {
-//                 sP_float(thread_row + 4 * i,thread_col + j) = expf(sS(thread_row + 4 * i, thread_col+ j) - rM[i]);
-//             }
         }
 
 
@@ -287,7 +267,6 @@ void flash_fwd_v8_kernel(
         }
 
 
-
         // compute sum(sP)
 
         // thread reduction
@@ -296,10 +275,6 @@ void flash_fwd_v8_kernel(
             for (int j=0; j < tSrS(make_coord(_,i),_,_).size(); j++) {
                 rD[i] += tSrS(make_coord(_,i),_,_)[j];
             }
-
-//             for (int j=0; j< 4; j++) {
-//                 rD[i] += sP_float(thread_row + 4 * i, thread_col + j);
-//             }
         }
 
 
@@ -330,17 +305,6 @@ void flash_fwd_v8_kernel(
             tOrP[i] = __float2half(tSrS[i]);
         }
 
-//         for (int i=0; i< 4; i++) {
-//
-//             for (int j=0; j< 4; j++) {
-//                 sP(thread_row + 4 * i, thread_col + j) = __float2half(sP_float(thread_row + 4 * i, thread_col + j));
-//             }
-//
-//         }
-
-
-
-
         // rescale O
 
         for (int i =0; i<2; i++) {
@@ -350,12 +314,7 @@ void flash_fwd_v8_kernel(
         }
 
 
-       // __syncthreads();
-
-
         copy(tOsV, tOrV);
-        __syncthreads();
-
         gemm(mma_O, tOrP, tOrV, tOrO);
 
         // update m and l
@@ -374,16 +333,6 @@ void flash_fwd_v8_kernel(
     }
     // end of KV loop
 
-//     copy(tOrO, tOsO);
-//     __syncthreads();
-//     // rescale rO
-//     for (int k = 0; k< 4;k++) {
-//         for (int i = 0; i< 4;i++) {
-//             for (int j = 0; j< 4;j++) {
-//                 sO(thread_row + 4 * i, thread_col + j + 32 * k) /= rL[i];
-//             }
-//         }
-//     }
 
     for (int i =0; i<2; i++) {
         for (int j=0; j < tOrO(make_coord(_,i),_,_).size(); j++) {
@@ -392,15 +341,6 @@ void flash_fwd_v8_kernel(
     }
 
     copy(tOrO, tOsO);
-
-//     if (threadIdx.x == 0){
-//
-//         for (int i=0;i < Q_TILE_SIZE;i++) {
-//             for (int j=0; j<HEAD_SIZE; j++) {
-//                 sO(i,j) /= rL[i];
-//             }
-//         }
-//     }
     __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
