@@ -55,11 +55,13 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
             for k in range(nheads):
                 for l in range(headdim):
                     if count < 1024*128:
+                        print("hi")
                         #print(i,j,k,l,output[i,j,k,l], output_torch[i,j,k,l])
-                        if abs(output[i,j,k,l] - output_torch[i,j,k,l]) > 0.001:
+                        if abs(output[i,j,k,l] - output_torch[i,j,k,l]) > error_tol:
                             error_tol_count += 1
                         count += 1
                     else:
+                        print("ho")
                         lse = torch.sum(torch.abs(output - output_torch))
                         print(f"{error_tol_count} entries have more than {error_tol} error difference")
                         return lse
