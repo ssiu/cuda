@@ -430,43 +430,43 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     // p : 16 x 16
     // o : 16 x 128
 
-//     auto sQ_layout_atom = composition(Swizzle<3, 3, 3>{},
-//                                  Layout<Shape<_32,_32>,
-//                                  Stride<_32, _1>>{});
-//
-//     auto sK_layout_atom = composition(Swizzle<3, 3, 3>{},
-//                                Layout<Shape<_32,_32>,
-//                                Stride<_32, _1>>{});
-//
-//     auto sV_layout_atom = composition(Swizzle<3, 3, 3>{},
-//                              Layout<Shape<_64,_16>,
-//                              Stride<_1, _64>>{});
-//
-//
-//     auto sQ_layout = tile_to_shape(sQ_layout_atom,
-//                            make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
-//
-//
-//
-//     auto sK_layout = tile_to_shape(sK_layout_atom,
-//                            make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
-//
-//
-//     auto sV_layout = tile_to_shape(sV_layout_atom,
-//                             make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
+    auto sQ_layout_atom = composition(Swizzle<3, 3, 3>{},
+                                 Layout<Shape<_32,_32>,
+                                 Stride<_32, _1>>{});
+
+    auto sK_layout_atom = composition(Swizzle<3, 3, 3>{},
+                               Layout<Shape<_32,_32>,
+                               Stride<_32, _1>>{});
+
+    auto sV_layout_atom = composition(Swizzle<3, 3, 3>{},
+                             Layout<Shape<_64,_16>,
+                             Stride<_1, _64>>{});
+
+
+    auto sQ_layout = tile_to_shape(sQ_layout_atom,
+                           make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+
+
+
+    auto sK_layout = tile_to_shape(sK_layout_atom,
+                           make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+
+
+    auto sV_layout = tile_to_shape(sV_layout_atom,
+                            make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
     
 
-    auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-                        make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-
-    auto sK_layout = make_layout(make_shape (Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-                        make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-
-
-
-    // we should view sV as tranposed
-    auto sV_layout = make_layout(make_shape (Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}),
-                        make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
+//     auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
+//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+//
+//     auto sK_layout = make_layout(make_shape (Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
+//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+//
+//
+//
+//     // we should view sV as tranposed
+//     auto sV_layout = make_layout(make_shape (Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}),
+//                         make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
 
 
     auto sS_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<KV_TILE_SIZE>{}),
@@ -477,14 +477,13 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
 
 
-
-    // 64 threads loading a 32 x 128 tile
+    // these copy operations need to respect the swizzle layout
     TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_16,_1>>{},
+                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_16,_1>>{},
+                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     // 64 threads loading a 128 x 32 tile

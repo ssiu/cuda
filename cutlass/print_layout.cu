@@ -17,16 +17,16 @@ int main() {
 
 
         // column major
-//         auto layout_atom = composition(Swizzle<3, 3, 3>{},
-//                                     Layout<Shape<_64,_16>,
-//                                     Stride<_1, _64>>{});
+        auto layout_atom = composition(Swizzle<3, 3, 3>{},
+                                    Layout<Shape<_64,_16>,
+                                    Stride<_1, _64>>{});
 
 
 
         // row major
-        auto layout_atom = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_32,_32>,
-                                    Stride<_32, _1>>{});
+//         auto layout_atom = composition(Swizzle<3, 3, 3>{},
+//                                     Layout<Shape<_32,_32>,
+//                                     Stride<_32, _1>>{});
         print_layout(layout_atom);
 
 
