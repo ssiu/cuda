@@ -200,9 +200,7 @@ void flash_fwd_v8_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        if (thread0()) {
-            print_tensor(tKrK);
-        }
+
         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
         copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
         copy(copy_K, tKrK, tKsK);
@@ -472,6 +470,13 @@ torch::Tensor flash_fwd_v8(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                                                 sS_layout,
                                                          o_ptr, sO_layout, copy_O,
                                                          batch_size, seq_len, num_heads, head_dim);
+
+    // remove this when done I think?
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    }
+    cudaDeviceSynchronize();
 
     return o;
 
