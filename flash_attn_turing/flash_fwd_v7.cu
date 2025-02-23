@@ -488,7 +488,7 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     // 64 threads loading a 128 x 32 tile
     TiledCopy copy_V = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_16,_16>, Stride<_1,_16>>{},
+                                Layout<Shape<_8,_32>, Stride<_1,_8>>{},
                                 Layout<Shape< _8,_1>>{});
 
     TiledCopy copy_O = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, float>{},
