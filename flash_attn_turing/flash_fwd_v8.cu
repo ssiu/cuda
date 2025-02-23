@@ -207,9 +207,9 @@ void flash_fwd_v8_kernel(
         // load K, V into shared memory
 //         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 //         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-        int k_tile_next = (k_tile + 1 < K_TILE_MAX) ? k_tile + 1 : k_tile;
-        copy(copy_K, tKgK(_,_,_,k_tile_next), tKrK);
-        copy(copy_V, tVgV(_,_,_,k_tile_next), tVrV);
+        int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
+        copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
+        copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
         
         // compute S = QK^T
         copy(tSsK, tSrK);
