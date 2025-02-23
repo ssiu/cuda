@@ -195,9 +195,9 @@ void flash_fwd_v8_kernel(
     // clear sO and rO
     clear(tOrO);
 
-    if (thread0()) {
-        print(tSrQ);
-    }
+//     if (thread0()) {
+//         print(tSrQ);
+//     }
 
 
     // main loop
@@ -486,11 +486,11 @@ torch::Tensor flash_fwd_v8(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                                          batch_size, seq_len, num_heads, head_dim);
 
     // remove this when done I think?
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        printf("CUDA Error: %s\n", cudaGetErrorString(err));
-    }
-    cudaDeviceSynchronize();
+//     cudaError_t err = cudaGetLastError();
+//     if (err != cudaSuccess) {
+//         printf("CUDA Error: %s\n", cudaGetErrorString(err));
+//     }
+//     cudaDeviceSynchronize();
 
     return o;
 
