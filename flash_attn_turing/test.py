@@ -84,7 +84,7 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_64 = {lse_64}")
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
-lse_1024 = get_lse(batch_size=4, seqlen=1024, nheads=32, headdim=128)
+lse_1024 = get_lse(batch_size=4, seqlen=4096, nheads=32, headdim=128)
 print(f"lse_1024 = {lse_1024}")
 
 
