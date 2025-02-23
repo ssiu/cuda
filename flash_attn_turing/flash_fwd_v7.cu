@@ -453,7 +453,7 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
                              
     auto sV_layout = tile_to_shape(sV_layout_atom,
-                            make_shape(Int<HEAD_SIZE>{}, Int<>{KV_TILE_SIZE}));
+                            make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
     
 
 //     auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
