@@ -345,7 +345,7 @@ void flash_fwd_v8_kernel(
 //         copy(copy_K, tKrK, tKsK);
 //         copy(copy_V, tVrV, tVsV);
 //
-//         __syncthreads();
+        __syncthreads();
 
     }
     // end of KV loop
