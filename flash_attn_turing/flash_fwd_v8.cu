@@ -186,30 +186,24 @@ void flash_fwd_v8_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKsK);
-    copy(copy_V, tVgV(_,_,_,0), tVsV);
+//     copy(copy_K, tKgK(_,_,_,0), tKsK);
+//     copy(copy_V, tVgV(_,_,_,0), tVsV);
     __syncthreads();
 
     copy(tSsQ, tSrQ);
 
     // clear sO and rO
     clear(tOrO);
-//     for (int k = 0; k < 4; k++) {
-//         for (int i = 0; i < 4; i++) {
-//             for (int j = 0; j< 4; j++) {
-//                 sO(thread_row + 4 * i , thread_col + j + 32 * k) = 0.0f;
-//             }
-//         }
-//     }
+
 
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-//         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
-//         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-        int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-        copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
-        copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+//         int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
+//         copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
+//         copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
         
         // compute S = QK^T
         copy(tSsK, tSrK);
@@ -352,23 +346,11 @@ void flash_fwd_v8_kernel(
                 tOrO(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO(make_coord(_,i),_,_)[j];
             }
         }
-//         copy(tOrO, tOsO);
-//
-//         __syncthreads();
-//         for (int k = 0; k< 4;k++) {
-//             for (int i = 0; i< 4;i++) {
-//                 for (int j = 0; j< 4;j++) {
-//                     sO(thread_row + 4*i, thread_col + j + 32 * k) = expf(rM_old[i] - rM[i]) * sO(thread_row + 4*i, thread_col + j + 32 * k);
-//                 }
-//             }
-//         }
-
-
 
 
        // __syncthreads();
 
-        //copy(tOsO, tOrO);
+
         copy(tOsV, tOrV);
         __syncthreads();
 
@@ -382,10 +364,10 @@ void flash_fwd_v8_kernel(
         
         __syncthreads();
         
-        copy(copy_K, tKrK, tKsK);
-        copy(copy_V, tVrV, tVsV);
-        
-        __syncthreads();
+//         copy(copy_K, tKrK, tKsK);
+//         copy(copy_V, tVrV, tVsV);
+//
+//         __syncthreads();
 
     }
     // end of KV loop
