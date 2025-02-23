@@ -186,9 +186,9 @@ void flash_fwd_v8_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-//     copy(copy_K, tKgK(_,_,_,0), tKsK);
-//     copy(copy_V, tVgV(_,_,_,0), tVsV);
-    __syncthreads();
+    copy(copy_K, tKgK(_,_,_,0), tKrK);
+    copy(copy_V, tVgV(_,_,_,0), tVrV);
+    //__syncthreads();
 
     copy(tSsQ, tSrQ);
 
@@ -205,14 +205,24 @@ void flash_fwd_v8_kernel(
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
 
-        copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+//         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
+//         copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+//         copy(copy_K, tKrK, tKsK);
+//         copy(copy_V, tVrV, tVsV);
+
         copy(copy_K, tKrK, tKsK);
         copy(copy_V, tVrV, tVsV);
+
+       __syncthreads();
+
+        if (kv_tile + 1 < KV_TILE_MAX) {
+            copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
+            copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
+        }
 //         int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
 //         copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
 //         copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
-       __syncthreads();
+
 
         // compute S = QK^T
         copy(tSsK, tSrK);
