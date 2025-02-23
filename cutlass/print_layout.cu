@@ -16,9 +16,15 @@ int main() {
 //         SmemLayoutA sA_layout;
 
 
+        // column major
         auto layout = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_32,_32>,
-                                    Stride<_32, _1>>{});
+                                    Layout<Shape<_64,_16>,
+                                    Stride<_1, _64>>{});
+
+        // row major
+//         auto layout = composition(Swizzle<3, 3, 3>{},
+//                                     Layout<Shape<_32,_32>,
+//                                     Stride<_32, _1>>{});
         print_layout(layout);
     }
     #endif
