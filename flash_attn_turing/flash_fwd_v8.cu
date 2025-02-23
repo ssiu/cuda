@@ -200,6 +200,9 @@ void flash_fwd_v8_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
+        if (thread0()) {
+            print_tensor(tKrK);
+        }
         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
         copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
         copy(copy_K, tKrK, tKsK);
