@@ -205,7 +205,8 @@ void flash_fwd_v8_kernel(
         int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
         copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
         copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
-        
+        __syncthreads();
+
         // compute S = QK^T
         copy(tSsK, tSrK);
 
