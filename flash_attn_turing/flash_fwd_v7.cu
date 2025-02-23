@@ -14,8 +14,8 @@ using namespace cute;
 
 
 #define HEAD_SIZE 128
-#define Q_TILE_SIZE 128
-#define KV_TILE_SIZE 128
+#define Q_TILE_SIZE 64
+#define KV_TILE_SIZE 64
 
 
 
@@ -24,7 +24,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutV, class TiledCopyV,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
-__global__ __launch_bounds__(256)
+__global__ __launch_bounds__(128)
 void flash_fwd_v7_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
@@ -192,13 +192,13 @@ void flash_fwd_v7_kernel(
 
     // clear sO and rO
     clear(tOrO);
-    for (int k = 0; k < 4; k++) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j< 4; j++) {
-                sO(thread_row + 4 * i , thread_col + j + 32 * k) = 0.0f;
-            }
-        }
-    }
+//     for (int k = 0; k < 4; k++) {
+//         for (int i = 0; i < 4; i++) {
+//             for (int j = 0; j< 4; j++) {
+//                 sO(thread_row + 4 * i , thread_col + j + 32 * k) = 0.0f;
+//             }
+//         }
+//     }
 
     // main loop
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
@@ -430,43 +430,43 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     // p : 16 x 16
     // o : 16 x 128
 
-    auto sQ_layout_atom = composition(Swizzle<3, 3, 3>{},
-                                 Layout<Shape<_32,_32>,
-                                 Stride<_32, _1>>{});
-
-    auto sK_layout_atom = composition(Swizzle<3, 3, 3>{},
-                               Layout<Shape<_32,_32>,
-                               Stride<_32, _1>>{});
-
-    auto sV_layout_atom = composition(Swizzle<3, 3, 3>{},
-                             Layout<Shape<_64,_16>,
-                             Stride<_1, _64>>{});
-
-
-    auto sQ_layout = tile_to_shape(sQ_layout_atom,
-                           make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
-
-
-
-    auto sK_layout = tile_to_shape(sK_layout_atom,
-                           make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
-
-
-    auto sV_layout = tile_to_shape(sV_layout_atom,
-                            make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
+//     auto sQ_layout_atom = composition(Swizzle<3, 3, 3>{},
+//                                  Layout<Shape<_32,_32>,
+//                                  Stride<_32, _1>>{});
+//
+//     auto sK_layout_atom = composition(Swizzle<3, 3, 3>{},
+//                                Layout<Shape<_32,_32>,
+//                                Stride<_32, _1>>{});
+//
+//     auto sV_layout_atom = composition(Swizzle<3, 3, 3>{},
+//                              Layout<Shape<_64,_16>,
+//                              Stride<_1, _64>>{});
+//
+//
+//     auto sQ_layout = tile_to_shape(sQ_layout_atom,
+//                            make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+//
+//
+//
+//     auto sK_layout = tile_to_shape(sK_layout_atom,
+//                            make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+//
+//
+//     auto sV_layout = tile_to_shape(sV_layout_atom,
+//                             make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
     
 
-//     auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-//
-//     auto sK_layout = make_layout(make_shape (Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-//
-//
-//
-//     // we should view sV as tranposed
-//     auto sV_layout = make_layout(make_shape (Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}),
-//                         make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
+    auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
+                        make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+
+    auto sK_layout = make_layout(make_shape (Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
+                        make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+
+
+
+    // we should view sV as tranposed
+    auto sV_layout = make_layout(make_shape (Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}),
+                        make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
 
 
     auto sS_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<KV_TILE_SIZE>{}),
@@ -479,30 +479,30 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     // these copy operations need to respect the swizzle layout
     TiledCopy copy_Q = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
+                                Layout<Shape<_16,_8>, Stride<_8,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     TiledCopy copy_K = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_64,_4>, Stride<_4,_1>>{},
+                                Layout<Shape<_16,_8>, Stride<_8,_1>>{},
                                 Layout<Shape< _1,_8>>{});
 
     // 64 threads loading a 128 x 32 tile
     TiledCopy copy_V = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, half_t>{},
-                                Layout<Shape<_8,_32>, Stride<_1,_8>>{},
+                                Layout<Shape<_8,_16>, Stride<_1,_8>>{},
                                 Layout<Shape< _8,_1>>{});
 
     TiledCopy copy_O = make_tiled_copy(Copy_Atom<AutoVectorizingCopy, float>{},
-                                Layout<Shape<_8,_32>, Stride<_32,_1>>{},
+                                Layout<Shape<_16,_8>, Stride<_8,_1>>{},
                                 Layout<Shape< _1,_4>>{});
 
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                        Layout<Shape<_8, _1, _1>>{},
-                                        Tile<_128,_128,_8>{});
+                                        Layout<Shape<_4, _1, _1>>{},
+                                        Tile<_64,_64,_8>{});
 
     TiledMMA mma_O = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
-                                        Layout<Shape<_8, _1, _1>>{},
-                                        Tile<_128,_128,_8>{});
+                                        Layout<Shape<_4, _1, _1>>{},
+                                        Tile<_64,_64,_8>{});
 
 
     torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
@@ -515,7 +515,7 @@ torch::Tensor flash_fwd_v7(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 //     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimGrid(batch_size, num_heads, seq_len / Q_TILE_SIZE);
-    dim3 dimBlock(256);
+    dim3 dimBlock(128);
     int maxbytes = 65536;
 
 
