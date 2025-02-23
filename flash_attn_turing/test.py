@@ -10,7 +10,7 @@ def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
     pass
 
 
-def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
+def get_sad(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 
 
@@ -69,8 +69,9 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
                     #print(i, j, k, l, output[i,j,k,l].item(), output_torch[i,j,k,l].item())
 
 
-    lse = torch.sum(torch.abs(output - output_torch))
-    return lse
+    sad = torch.sum(torch.abs(output - output_torch))
+    avg_sad = sad / (batch_size * seqlen * nheads * headdim)
+    return sad, avg_sad
 
 
 
@@ -84,8 +85,8 @@ def get_lse(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_64 = {lse_64}")
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
-lse_1024 = get_lse(batch_size=4, seqlen=4096, nheads=32, headdim=128)
-print(f"lse_1024 = {lse_1024}")
+sad, sad_avg = get_sad(batch_size=4, seqlen=4096, nheads=32, headdim=128)
+print(f"sad = {sad}, sad_avg = {sad_avg}")
 
 
 # #debug
