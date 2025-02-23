@@ -1,10 +1,17 @@
 from setuptools import setup
 from torch.utils.cpp_extension import CUDAExtension, BuildExtension
+import os
+
+if 'MODAL_IMAGE_ID' in os.environ:
+    cutlass_include_dirs = ["/root/cuda/flash_attn_turing/cutlass/include", "/root/cuda/flash_attn_turing/cutlass/tools/util/include"]
+elif 'COLAB_GPU' in os.environ:
+    cutlass_include_dirs = ["/content/cuda/flash_attn_turing/cutlass/include", "/content/cuda/flash_attn_turing/cutlass/tools/util/include"]
+
 
 #from cpp_extension.setup import nvcc_flags
 
 #modal
-cutlass_include_dirs = ["/root/cuda/flash_attn_turing/cutlass/include", "/root/cuda/flash_attn_turing/cutlass/tools/util/include"]
+#cutlass_include_dirs = ["/root/cuda/flash_attn_turing/cutlass/include", "/root/cuda/flash_attn_turing/cutlass/tools/util/include"]
 
 # colab
 #cutlass_include_dirs = ["/content/cuda/flash_attn_turing/cutlass/include", "/content/cuda/flash_attn_turing/cutlass/tools/util/include"]
