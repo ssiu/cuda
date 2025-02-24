@@ -215,6 +215,12 @@ void flash_fwd_v8_kernel(
 
        __syncthreads();
 
+
+        // no need to load here and use the live register throughout the kernel
+        // e.g.
+        // load V after doing QK^T
+        // store K after doing QK^T
+        // etc
         if (kv_tile + 1 < KV_TILE_MAX) {
             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
             copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
