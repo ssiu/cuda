@@ -24,12 +24,18 @@ int main() {
 
 
         // row major
-//         auto layout_atom = composition(Swizzle<3, 3, 3>{},
-//                                     Layout<Shape<_32,_32>,
-//                                     Stride<_32, _1>>{});
+        // fp 32
         auto layout_atom = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_16,_64>,
-                                    Stride<_64, _1>>{});
+                                    Layout<Shape<_16,_32>,
+                                    Stride<_32, _1>>{});
+// // fp16
+//         auto layout_atom = composition(Swizzle<3, 3, 3>{},
+//                                     Layout<Shape<_16,_64>,
+//                                     Stride<_64, _1>>{});
+
+
+
+
 
         print_layout(layout_atom);
 
