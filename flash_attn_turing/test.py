@@ -10,7 +10,7 @@ def benchmark(batch_size=1, seqlen=16, nheads=1, headdim=128):
     pass
 
 
-def get_sad(batch_size=1, seqlen=16, nheads=1, headdim=128):
+def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 
 
@@ -70,7 +70,7 @@ def get_sad(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 
     sum_of_error = torch.sum(torch.abs(output - output_torch))
-    avg_sum_of_error = sad / (batch_size * seqlen * nheads * headdim)
+    avg_sum_of_error = sum_of_error / (batch_size * seqlen * nheads * headdim)
     max_error = torch.max(torch.abs(output - output_torch))
     return sum_of_error, avg_sum_of_error, max_error
 
@@ -86,7 +86,7 @@ def get_sad(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_64 = {lse_64}")
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
-sum_of_error, avg_sum_of_error, max_error = get_sad(batch_size=4, seqlen=4096, nheads=32, headdim=128)
+sum_of_error, avg_sum_of_error, max_error = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
 print(f"sum of error = {sum_of_error}, avg_sum_of_error = {avg_sum_of_error}, max_error = {max_error}")
 
 
