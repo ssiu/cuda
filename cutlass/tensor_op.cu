@@ -27,5 +27,6 @@ int main()
                            make_coord(1, _));  // (2,2,2,3)
 
     print_tensor(gA);
-    printf("%d\n", size<2>(gA));
+    auto s = size<2>(gA)
+    printf("%d\n", s);
 }
