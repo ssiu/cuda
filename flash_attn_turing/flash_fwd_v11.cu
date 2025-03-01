@@ -205,7 +205,7 @@ void flash_fwd_v11_kernel(
 //         copy(copy_K, tKrK, tKsK);
 //         copy(copy_V, tVrV, tVsV);
 
-        copy(copy_K, tKrK, tKsK);
+        copy(copy_K, tKgK, tKsK);
         __syncthreads();
 
         clear(tSrS);
