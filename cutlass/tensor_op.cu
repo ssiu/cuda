@@ -28,5 +28,5 @@ int main()
 
     print_tensor(gA);
     auto s = size<2>(gA);
-    printf("%d\n", s);
+    print(s);
 }
