@@ -90,9 +90,9 @@ void flash_fwd_v9_kernel(
 
 
     // smem total = 50KB
-    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 32KB
-    Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); // 32KB
-    Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 32KB
+    Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 8KB
+    Tensor sK = make_tensor(sQ.data() + KV_TILE_SIZE * HEAD_SIZE_HALF, sK_layout); // 8KB
+    Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE * HEAD_SIZE_HALF, sV_layout);                  // 16KB
     Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
     Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 64KB
@@ -181,7 +181,7 @@ void flash_fwd_v9_kernel(
     Tensor tOrV = thr_mma_O.make_fragment_B(tOsV);
     Tensor tOrO = thr_mma_O.make_fragment_C(tOgO);
 
-
+    // maybe not correct?
     auto KV_TILE_MAX = size<3>(tKgK);
 
     // prologue
@@ -207,10 +207,10 @@ void flash_fwd_v9_kernel(
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
 
         // load V into shared memory
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+
         clear(tSrS);
 
-        for (int qk_tile =0; qk_tile<2;qk_tile++) {
+        for (int qk_tile =0; qk_tile<2; qk_tile++) {
             //load q,v into shared memory
             copy(copy_Q, tQgQ(_,_,_,qk_tile), tQsQ);
             copy(copy_K, tKgK(_,_,_,kv_tile, qk_tile), tKsK);
@@ -222,6 +222,8 @@ void flash_fwd_v9_kernel(
             __syncthreads();
 
         }
+
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 //         // load K, V into shared memory
 //
 // //         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
@@ -352,7 +354,7 @@ void flash_fwd_v9_kernel(
             }
         }
 
-
+        __syncthreads();
         copy(tOsV, tOrV);
         gemm(mma_O, tOrP, tOrV, tOrO);
 
