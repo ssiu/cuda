@@ -48,15 +48,15 @@ void flash_fwd_v9_kernel(
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
-    Tensor gQ = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<Q_TILE_SIZE>, Int<HEAD_SIZE>>{},
-                           make_coord(blockIdx.z, 0));  // ()
+    Tensor gQ = local_tile(mQ(blockIdx.x, _, blockIdx.y, _), Shape<Int<Q_TILE_SIZE>, Int<HEAD_SIZE_HALF>>{},
+                           make_coord(blockIdx.z, _));  // (64, 64, 2)
 
     Tensor mK = make_tensor(make_gmem_ptr(k),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
                             make_stride(seq_len * num_heads * head_dim, num_heads * head_dim, head_dim, Int<1>{}));
 
-    Tensor gK = local_tile(mK(blockIdx.x, _, blockIdx.y, _), Shape<Int<KV_TILE_SIZE>, Int<HEAD_SIZE>>{},
-                           make_coord(_, 0));  // (16, 128, seq_len / 16)
+    Tensor gK = local_tile(mK(blockIdx.x, _, blockIdx.y, _), Shape<Int<KV_TILE_SIZE>, Int<HEAD_SIZE_HALF>>{},
+                           make_coord(_, _));  // (64, 64, seq_len / 64, 2)
 
     // this is a (seq_len, head_dim) column major matrix, so its V^T in row major
     // for gmem -> smem copy, view it as 16 x 128
@@ -186,12 +186,13 @@ void flash_fwd_v9_kernel(
 
     // prologue
 
-    copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
-    copy(copy_V, tVgV(_,_,_,0), tVrV);
-    __syncthreads();
+//     copy(copy_Q, tQgQ, tQsQ);
+//     copy(copy_K, tKgK(_,_,_,0), tKrK);
+//     copy(copy_V, tVgV(_,_,_,0), tVrV);
+//     __syncthreads();
+//
+//     copy(tSsQ, tSrQ);
 
-    copy(tSsQ, tSrQ);
 
     // clear sO and rO
     clear(tOrO);
@@ -204,38 +205,52 @@ void flash_fwd_v9_kernel(
     // main loop
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
-        // load K, V into shared memory
 
-//         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
-//         copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+        // load V into shared memory
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+        clear(tSrS);
+
+        for (int qk_tile =0; qk_tile<2;qk_tile++) {
+            //load q,v into shared memory
+            copy(copy_Q, tQgQ(_,_,_,qk_tile), tQsQ);
+            copy(copy_K, tKgK(_,_,_,kv_tile, qk_tile), tKsK);
+
+            __syncthreads();
+
+            gemm(mma_S, tSsQ, tSsK, tSrS);
+
+            __syncthreads();
+
+        }
+//         // load K, V into shared memory
+//
+// //         copy(copy_K, tKgK(_,_,_,kv_tile), tKrK);
+// //         copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+// //         copy(copy_K, tKrK, tKsK);
+// //         copy(copy_V, tVrV, tVsV);
+//
 //         copy(copy_K, tKrK, tKsK);
 //         copy(copy_V, tVrV, tVsV);
-
-        copy(copy_K, tKrK, tKsK);
-        copy(copy_V, tVrV, tVsV);
-
-       __syncthreads();
-
-
-        // no need to load here and use the live register throughout the kernel
-        // e.g.
-        // load V after doing QK^T
-        // store K after doing QK^T
-        // etc
-        if (kv_tile + 1 < KV_TILE_MAX) {
-            copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-            copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
-        }
-//         int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-//         copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
-//         copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
-
-
-        // compute S = QK^T
-        copy(tSsK, tSrK);
-
-        clear(tSrS);
-        gemm(mma_S, tSrQ, tSrK, tSrS);
+//
+//        __syncthreads();
+//
+//
+//         // no need to load here and use the live register throughout the kernel
+//         // e.g.
+//         // load V after doing QK^T
+//         // store K after doing QK^T
+//         // etc
+//         if (kv_tile + 1 < KV_TILE_MAX) {
+//             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
+//             copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
+//         }
+//
+//
+//         // compute S = QK^T
+//         copy(tSsK, tSrK);
+//
+//
+//         gemm(mma_S, tSrQ, tSrK, tSrS);
 
 
         for (int i=0;i< tSrS.size();i ++ ) {
@@ -403,12 +418,12 @@ torch::Tensor flash_fwd_v9(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
 
     auto sQ_layout = tile_to_shape(sQ_layout_atom,
-                           make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+                           make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE_HALF>{}));
 
 
 
     auto sK_layout = tile_to_shape(sK_layout_atom,
-                           make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
+                           make_shape(Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE_HALF>{}));
 
 
     auto sV_layout = tile_to_shape(sV_layout_atom,
