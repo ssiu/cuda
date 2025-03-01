@@ -7,8 +7,8 @@ int main()
     int A[24] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
     Tensor a = make_tensor(&A[0], make_shape(Int<4>{}, Int<6>{}), make_stride(Int<6>{}, Int<1>{}));
     print_tensor(a); // (2, 2, 2)
-    print_tensor(a(_,0,_)); // (2, 2)
-    printf("A[2] is %d,  size of A is %d\n", *(a.data()+2), a.size());
+//     print_tensor(a(_,0,_)); // (2, 2)
+//     printf("A[2] is %d,  size of A is %d\n", *(a.data()+2), a.size());
 
 //     Tensor b = make_tensor(&A[0], make_shape(Int<2>{}, Int<3>{}, Int<4>{}), make_stride(Int<1>{}, Int<2>{}, Int<6>{}));
 //     print_tensor(b); // (2, 2, 2)
