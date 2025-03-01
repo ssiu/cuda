@@ -23,9 +23,9 @@ int main()
 //     print_tensor(b);
 
     // A is a 4 x 6 tensor
-    Tensor gA = local_tile(a, Shape<Int<2>, Int<2>>{},
-                           make_coord(_, _));  // (128, 16, seq_len / 16)
-
-    print_tensor(gA);
+//     Tensor gA = local_tile(a, Shape<Int<2>, Int<2>>{},
+//                            make_coord(_, _));  // (128, 16, seq_len / 16)
+//
+//     print_tensor(gA);
 
 }
