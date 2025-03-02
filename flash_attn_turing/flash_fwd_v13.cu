@@ -30,7 +30,7 @@ void flash_fwd_v13_kernel(
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
                      SmemLayoutS sS_layout,
-    float* o,        SmemLayoutO sO_layout, TiledCopyO copy_O,
+    half_t* o,       SmemLayoutO sO_layout, TiledCopyO copy_O,
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
@@ -178,14 +178,13 @@ void flash_fwd_v13_kernel(
     Tensor tOrP = thr_mma_O.make_fragment_A(tOsP);
     Tensor tOrV = thr_mma_O.make_fragment_B(tOsV);
 
+    // tOsO_float is not used, only used to construct the register tensor
     Tensor tOsO_float = thr_mma_O.partition_C(sO_float);
+    Tensor tOrO_float = thr_mma_O.make_fragment_C(tOsO_float);
+
     Tensor tOsO = thr_mma_O.partition_C(sO);
+    Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
 
-
-
-    Tensor tOgO = thr_mma_O.partition_C(gO);
-    Tensor tOrO = thr_mma_O.make_fragment_C(tOgO);
-    //Tensor tOrO_half =
 
     auto KV_TILE_MAX = size<3>(tKgK);
 
@@ -199,7 +198,7 @@ void flash_fwd_v13_kernel(
     copy(tSsQ, tSrQ);
 
     // clear sO and rO
-    clear(tOrO);
+    clear(tOrO_float);
 
 //     if (thread0()) {
 //         print(tSrQ);
@@ -337,14 +336,14 @@ void flash_fwd_v13_kernel(
         // rescale O
 
         for (int i =0; i<2; i++) {
-            for (int j=0; j < tOrO(make_coord(_,i),_,_).size(); j++) {
-                tOrO(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO(make_coord(_,i),_,_)[j];
+            for (int j=0; j < tOrO_float(make_coord(_,i),_,_).size(); j++) {
+                tOrO_float(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO_float(make_coord(_,i),_,_)[j];
             }
         }
 
 
         copy(tOsV, tOrV);
-        gemm(mma_O, tOrP, tOrV, tOrO);
+        gemm(mma_O, tOrP, tOrV, tOrO_float);
 
         // update m and l
         for (int i = 0; i< 2;i++) {
@@ -364,12 +363,18 @@ void flash_fwd_v13_kernel(
 
 
     for (int i =0; i<2; i++) {
-        for (int j=0; j < tOrO(make_coord(_,i),_,_).size(); j++) {
-            tOrO(make_coord(_,i),_,_)[j] /= rL[i];
+        for (int j=0; j < tOrO_float(make_coord(_,i),_,_).size(); j++) {
+            tOrO_float(make_coord(_,i),_,_)[j] /= rL[i];
         }
     }
 
+    for (int i=0; i< tOrO_float.size(); i++) {
+        tOrO[i] = __float2half(tOrO_float[i]);
+    }
+
+
     copy(tOrO, tOsO);
+
     __syncthreads();
 
     copy(copy_O, tOsO_copy, tOgO_copy);
@@ -406,6 +411,10 @@ torch::Tensor flash_fwd_v13(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                              Layout<Shape<_64,_16>,
                              Stride<_1, _64>>{});
 
+    auto sO_layout_atom = composition(Swizzle<3, 3, 3>{},
+                                 Layout<Shape<_16,_64>,
+                                 Stride<_64, _1>>{});
+
 
     auto sQ_layout = tile_to_shape(sQ_layout_atom,
                            make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
@@ -419,26 +428,17 @@ torch::Tensor flash_fwd_v13(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     auto sV_layout = tile_to_shape(sV_layout_atom,
                             make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
 
+    auto sO_layout = tile_to_shape(sO_layout_atom,
+                           make_shape(Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}));
 
-//     auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-//
-//     auto sK_layout = make_layout(make_shape (Int<KV_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
-//
-//
-//
-//     // we should view sV as tranposed
-//     auto sV_layout = make_layout(make_shape (Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}),
-//                         make_stride(Int<1>{}, Int<HEAD_SIZE>{}));
 
 
     auto sS_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<KV_TILE_SIZE>{}),
                         make_stride(Int<KV_TILE_SIZE>{}, Int<1>{}));
 
 
-    auto sO_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-                        make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+//     auto sO_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
+//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
 
 
     // these copy operations need to respect the swizzle layout
@@ -469,7 +469,8 @@ torch::Tensor flash_fwd_v13(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                         Tile<_128,_128,_8>{});
 
 
-    torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
+    //torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
+    torch::Tensor o = torch::empty(q.sizes(), q.options());
 
     half_t* q_ptr = reinterpret_cast<half_t*>(q.data_ptr());
     half_t* k_ptr = reinterpret_cast<half_t*>(k.data_ptr());
