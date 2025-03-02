@@ -99,8 +99,8 @@ void flash_fwd_v13_kernel(
     Tensor sO_float = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 64KB
 
 
-//     int thread_id = threadIdx.x;
-//     int lane_id = thread_id % 32;
+    int thread_id = threadIdx.x;
+    int lane_id = thread_id % 32;
 //     int warp_id = thread_id / 32;
 //     int warp_row = warp_id * 16;
 //     int thread_row = warp_row + (lane_id / 8);
