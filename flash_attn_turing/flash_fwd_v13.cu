@@ -25,7 +25,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
 __global__ __launch_bounds__(256)
-void flash_fwd_v12_kernel(
+void flash_fwd_v13_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
@@ -95,7 +95,8 @@ void flash_fwd_v12_kernel(
     Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
     Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 64KB
-    Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 64KB
+    Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sO_layout); // 64KB
+    Tensor sO_float = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 64KB
 
 
 //     int thread_id = threadIdx.x;
@@ -173,13 +174,18 @@ void flash_fwd_v12_kernel(
     ThrMMA thr_mma_O = mma_O.get_slice(threadIdx.x);
     Tensor tOsP = thr_mma_O.partition_A(sP);
     Tensor tOsV = thr_mma_O.partition_B(sV);
-    Tensor tOgO = thr_mma_O.partition_C(gO);
-    Tensor tOsO = thr_mma_O.partition_C(sO);
 
     Tensor tOrP = thr_mma_O.make_fragment_A(tOsP);
     Tensor tOrV = thr_mma_O.make_fragment_B(tOsV);
-    Tensor tOrO = thr_mma_O.make_fragment_C(tOgO);
 
+    Tensor tOsO_float = thr_mma_O.partition_C(sO_float);
+    Tensor tOsO = thr_mma_O.partition_C(sO);
+
+
+
+    Tensor tOgO = thr_mma_O.partition_C(gO);
+    Tensor tOrO = thr_mma_O.make_fragment_C(tOgO);
+    //Tensor tOrO_half =
 
     auto KV_TILE_MAX = size<3>(tKgK);
 
@@ -345,7 +351,7 @@ void flash_fwd_v12_kernel(
             rM_old[i] = rM[i];
             rL_old[i] = rL[i];
         }
-        
+
 //         __syncthreads();
 //
 //         copy(copy_K, tKrK, tKsK);
@@ -374,7 +380,7 @@ void flash_fwd_v12_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+torch::Tensor flash_fwd_v13(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                 int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
@@ -412,7 +418,7 @@ torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     auto sV_layout = tile_to_shape(sV_layout_atom,
                             make_shape(Int<HEAD_SIZE>{}, Int<KV_TILE_SIZE>{}));
-    
+
 
 //     auto sQ_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
 //                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
@@ -468,7 +474,8 @@ torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     half_t* q_ptr = reinterpret_cast<half_t*>(q.data_ptr());
     half_t* k_ptr = reinterpret_cast<half_t*>(k.data_ptr());
     half_t* v_ptr = reinterpret_cast<half_t*>(v.data_ptr());
-    float* o_ptr = o.data_ptr<float>();
+    half_t* o_ptr = reinterpret_cast<half_t*>(o.data_ptr());
+    //float* o_ptr = o.data_ptr<float>();
 
 
 //     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
@@ -477,14 +484,14 @@ torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     int maxbytes = 65536;
 
 
-    auto kernel = flash_fwd_v12_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
+    auto kernel = flash_fwd_v13_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
                                       decltype(sK_layout), decltype(copy_K), decltype(mma_O),
                                       decltype(sV_layout), decltype(copy_V),
                                       decltype(sS_layout),
                                       decltype(sO_layout), decltype(copy_O)>;
 
     cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-    flash_fwd_v12_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
+    flash_fwd_v13_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                          k_ptr, sK_layout, copy_K, mma_O,
                                                          v_ptr, sV_layout, copy_V,
                                                                 sS_layout,

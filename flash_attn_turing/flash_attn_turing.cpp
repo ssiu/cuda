@@ -33,7 +33,10 @@
 //torch::Tensor flash_fwd_v11(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 //                            int batch_size, int seq_len, int num_heads, int head_dim);
 
-torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+//torch::Tensor flash_fwd_v12(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+//                            int batch_size, int seq_len, int num_heads, int head_dim);
+
+torch::Tensor flash_fwd_v13(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                             int batch_size, int seq_len, int num_heads, int head_dim);
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
@@ -48,5 +51,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     //m.def("flash_fwd_v8", &flash_fwd_v8, "flash fwd v8");
     //m.def("flash_fwd_v9", &flash_fwd_v9, "flash fwd v9");
     //m.def("flash_fwd_v11", &flash_fwd_v11, "flash fwd v11"); DOES NOT WORK
-    m.def("flash_fwd_v12", &flash_fwd_v12, "flash fwd v12");
+    //m.def("flash_fwd_v12", &flash_fwd_v12, "flash fwd v12");
+    m.def("flash_fwd_v13", &flash_fwd_v13, "flash fwd v13");
 }
