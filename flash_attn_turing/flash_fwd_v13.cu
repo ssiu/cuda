@@ -369,7 +369,8 @@ void flash_fwd_v13_kernel(
     }
 
     for (int i=0; i< tOrO_float.size(); i++) {
-        tOrO[i] = __float2half(tOrO_float[i]);
+        //tOrO[i] = __float2half(tOrO_float[i]);
+        tOrO[i] = tOrO_float[i];
     }
 
 
