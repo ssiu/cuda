@@ -9,6 +9,10 @@
 #include "cutlass/util/GPU_Clock.hpp"
 #include "cutlass/util/helper_cuda.hpp"
 
+#include <cutlass/array.h>
+#include <cutlass/cutlass.h>
+#include <cutlass/numeric_conversion.h>
+#include <cutlass/numeric_types.h>
 
 using namespace cute;
 
@@ -183,7 +187,7 @@ void flash_fwd_v13_kernel(
     Tensor tOrO_float = thr_mma_O.make_fragment_C(tOsO_float);
 
     Tensor tOsO = thr_mma_O.partition_C(sO);
-    Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
+    //Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
 
 
     auto KV_TILE_MAX = size<3>(tKgK);
@@ -368,10 +372,14 @@ void flash_fwd_v13_kernel(
         }
     }
 
-    for (int i=0; i< tOrO_float.size(); i++) {
-        //tOrO[i] = __float2half(tOrO_float[i]);
-        tOrO[i] = tOrO_float[i];
-    }
+//     for (int i=0; i< tOrO_float.size(); i++) {
+//         //tOrO[i] = __float2half(tOrO_float[i]);
+//     }
+    constexpr int num_element = decltype(size(tOrO_float))::value;
+
+    cutlass::NumericArrayConverter<half_t, float, num_element> convert_op;
+    auto frag = convert_op(*reinterpret_cast<const cutlass::Array<float, num_element> *>(tOrO_float.data()));
+    Tensor tOrO = make_tensor(make_rmem_ptr<half_t>(&frag), tOrO_float.layout());
 
 
     copy(tOrO, tOsO);
