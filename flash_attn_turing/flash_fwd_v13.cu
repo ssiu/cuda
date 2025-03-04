@@ -333,9 +333,18 @@ void flash_fwd_v13_kernel(
 
 
         // cast sP from float to half_t
-        for (int i=0; i < tSrS.size(); i++) {
-            tOrP[i] = __float2half(tSrS[i]);
-        }
+//         for (int i=0; i < tSrS.size(); i++) {
+//             tOrP[i] = __float2half(tSrS[i]);
+//         }
+
+        constexpr int num_element = decltype(size(tSrS))::value;
+
+        cutlass::NumericArrayConverter<half_t, float, num_element> convert_op;
+        auto frag = convert_op(*reinterpret_cast<const cutlass::Array<float, num_element> *>(tSrS.data()));
+
+        Tensor tOrP = make_tensor(make_rmem_ptr<half_t>(&frag), tSrS.layout());
+
+
 
         // rescale O
 
