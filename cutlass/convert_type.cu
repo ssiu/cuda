@@ -29,8 +29,8 @@ int main()
     constexpr int num_element = decltype(size(a))::value;
     print(num_element);
     cutlass::NumericArrayConverter<float, int, num_element> convert_op;
-    auto frag = convert_op(*reinterpret_cast<const cutlass::Array<int, num_element> *>(tensor.data()));
-    b = make_tensor(make_rmem_ptr<float>(&frag), a.layout());
+    auto frag = convert_op(*reinterpret_cast<const cutlass::Array<int, num_element> *>(a.data()));
+    Tensor b = make_tensor(a.data(), a.layout());
 
     print(b);
     print_tensor(b);
