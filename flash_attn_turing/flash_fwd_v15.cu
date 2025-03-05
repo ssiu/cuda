@@ -19,7 +19,7 @@ using namespace cute;
 
 #define HEAD_SIZE 128
 #define Q_TILE_SIZE 128
-#define KV_TILE_SIZE 128
+#define KV_TILE_SIZE 64
 
 
 
@@ -210,7 +210,7 @@ void flash_fwd_v15_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    //copy(copy_K, tKgK(_,_,_,0), tKrK);
+    copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
     //copy(tSsQ, tSrQ);
@@ -229,19 +229,19 @@ void flash_fwd_v15_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 
-        //copy(copy_K, tKrK, tKsK);
+        copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
         //copy(tSsQ, tSrQ);
         __syncthreads();
 
         clear(tSrS);
 
-//         if (kv_tile + 1 < KV_TILE_MAX) {
-//             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-//             copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
-//         }
+        if (kv_tile + 1 < KV_TILE_MAX) {
+            copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
+            //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
+        }
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
@@ -495,7 +495,7 @@ torch::Tensor flash_fwd_v15(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_8, _1, _1>>{},
-                                        Tile<_128,_128,_8>{}); // (Q_TILE_SIZE, KV_TILE_SIZE, 8)
+                                        Tile<_128,_64,_8>{}); // (Q_TILE_SIZE, KV_TILE_SIZE, 8)
 
     TiledMMA mma_O = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_8, _1, _1>>{},
