@@ -213,7 +213,7 @@ void flash_fwd_v15_kernel(
     //copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
-
+    copy(tSsQ, tSrQ);
     //copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
     //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
@@ -246,14 +246,16 @@ void flash_fwd_v15_kernel(
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
             //copy(s2r_tiled_copy_Q, tSsQ_copy_view(_,_,qk_block), tSrQ_copy_view(_,_,qk_block));
-            copy(tSsQ(_,_,qk_block), tSrQ(_,_,qk_block));
+
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
+
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
 
 //         copy(tSrQ, tSsQ);
 //         __syncthreads();
+
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
