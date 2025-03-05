@@ -94,7 +94,7 @@ void flash_fwd_v15_kernel(
 
     // smem total = 50KB
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 32KB
-    Tensor sK = make_tensor(sQ.data() + Q_TILE_SIZE*HEAD_SIZE), sK_layout); // 32KB
+    Tensor sK = make_tensor(sQ.data() + Q_TILE_SIZE*HEAD_SIZE, sK_layout); // 32KB
     Tensor sV = make_tensor(sK.data(), sV_layout);                  // 32KB
     Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
