@@ -195,12 +195,12 @@ void flash_fwd_v14_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
-    copy(copy_V, tVgV(_,_,_,0), tVrV);
+    //copy(copy_K, tKgK(_,_,_,0), tKrK);
+    //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
     copy(tSsQ, tSrQ);
-    copy(tSsK(_,_,0), tSrK(_,_,0));
+    //copy(tSsK(_,_,0), tSrK(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
     clear(tOrO_float);
@@ -214,44 +214,19 @@ void flash_fwd_v14_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-
-//         copy(copy_K, tKrK, tKsK);
-//         copy(copy_V, tVrV, tVsV);
-//
-//        __syncthreads();
-//         if (kv_tile + 1 < KV_TILE_MAX) {
-//             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-//             copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
-//         }
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 
         clear(tSrS);
         CUTE_UNROLL
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
 
-            if (qk_block == QK_BLOCK_MAX - 1)
-            {
-            // Copy rmem to smem
-                __syncthreads();
-                copy(copy_K, tKrK, tKsK);
-                copy(copy_V, tVrV, tVsV);
-                __syncthreads();
-            }
+            copy(tKsK(_,_,qk_block), tKrK(_,_,qk_block));
+            //copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
 
-            int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
-            //copy(s2r_tiled_copy_a, s2r_tCsA(_,_,k_block_next), tCrA_copy_view(_,_,k_block_next));
-            //copy(s2r_tiled_copy_b, s2r_tCsB(_,_,k_block_next), tCrB_copy_view(_,_,k_block_next));
-            copy(tKsK(_,_,qk_block_next), tKrK(_,_,qk_block_next));
-            copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
-
-            if (qk_block == 0)
-            {
-            // Copy gmem to rmem for k_tile+1
-                int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-                copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
-                copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
-            }
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
+
         }
 
 
