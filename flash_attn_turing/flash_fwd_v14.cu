@@ -241,7 +241,7 @@ void flash_fwd_v14_kernel(
             int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
 
-            if (k_block == 0)
+            if (qk_block == 0)
             {
             // Copy gmem to rmem for k_tile+1
                 int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
