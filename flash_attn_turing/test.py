@@ -44,13 +44,13 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
     return sum_error, avg_error, max_error, output_value, output_torch_value
 
 
-with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+with profile(activities=[ProfilerActivity.CUDA], record_shapes=True) as prof:
 
     sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
 
 
 print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
-print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error},\n max_error output = {output_value}, max_error output torch = {output_torch_value}")
+print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error},\nmax_error output = {output_value}, max_error output torch = {output_torch_value}")
 
 
 
