@@ -247,11 +247,11 @@ void flash_fwd_v13_kernel(
             {
             // Copy gmem to rmem for k_tile+1
                 int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-                copy(copy_K, tKgK(_,_,_,k_tile_next), tKrK);
-                copy(copy_V, tVgV(_,_,_,k_tile_next), tVrV);
+                copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
+                copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
             }
 
-            gemm(mma_S, tSrQ(_,_,k_block), tCrB(_,_,k_block), tSrS);
+            gemm(mma_S, tSrQ(_,_,qk_block), tCrK(_,_,qk_block), tSrS);
         }
 
 
