@@ -189,18 +189,23 @@ void flash_fwd_v14_kernel(
     Tensor tOsO = thr_mma_O.partition_C(sO);
     //Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
 
+    auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
+    auto s2r_thr_copy_K = s2r_tiled_copy_K.get_slice(threadIdx.x);
+    auto tSsK_copy_view = s2r_thr_copy_K.partition_S(sK);
+    auto tSrK_copy_view = s2r_thr_copy_K.retile_D(tSrK);
+
 
     auto KV_TILE_MAX = size<3>(tKgK);
     auto QK_BLOCK_MAX = size<2>(tSsK);
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    //copy(copy_K, tKgK(_,_,_,0), tKrK);
+    copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
     copy(tSsQ, tSrQ);
-    //copy(tSsK(_,_,0), tSrK(_,_,0));
+    copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
     clear(tOrO_float);
@@ -214,26 +219,35 @@ void flash_fwd_v14_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         __syncthreads();
 
         clear(tSrS);
 
 
-        auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
-        auto s2r_thr_copy_K = s2r_tiled_copy_K.get_slice(threadIdx.x);
-        auto tSsK_copy_view = s2r_thr_copy_K.partition_S(sK);
-        auto tSrK_copy_view = s2r_thr_copy_K.retile_D(tSrK);
+
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
 
-            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
-            //copy(tSsK(_,_,qk_block), tSrK(_,_,qk_block));
-            //copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
+            if (qk_block == QK_BLOCK_MAX - 1)
+            {
+            // Copy rmem to smem
+                __syncthreads();
+                copy(copy_a, tKrK, tKsK);
+                copy(copy_b, tBrB, tBsB);
+                __syncthreads();
+            }
 
+            int qk_block_next = (qk_block + 1) % K_BLOCK_MAX;
+            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
 
-
+            if (k_block == 0)
+            {
+            // Copy gmem to rmem for k_tile+1
+                int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
+                copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
+            }
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
