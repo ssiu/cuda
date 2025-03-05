@@ -246,7 +246,6 @@ void flash_fwd_v14_kernel(
 
         }
 
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -355,6 +354,7 @@ void flash_fwd_v14_kernel(
                 tOrO_float(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO_float(make_coord(_,i),_,_)[j];
             }
         }
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 
         __syncthreads();
         for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
