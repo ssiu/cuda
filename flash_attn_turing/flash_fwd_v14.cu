@@ -19,7 +19,7 @@ using namespace cute;
 
 #define HEAD_SIZE 128
 #define Q_TILE_SIZE 128
-#define KV_TILE_SIZE 64
+#define KV_TILE_SIZE 128
 
 
 
@@ -234,41 +234,11 @@ void flash_fwd_v14_kernel(
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
-
-//             if (qk_block == QK_BLOCK_MAX - 1)
-//             {
-//             // Copy rmem to smem
-//                 __syncthreads();
-//                 copy(copy_K, tKrK, tKsK);
-//                 __syncthreads();
-//             }
-//
-//             int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
-//             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
-//
-//             if (qk_block == 0)
-//             {
-//             // Copy gmem to rmem for k_tile+1
-//                 int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-//                 copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
-//             }
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
-
-//         copy(tSsK, tSrK);
-//         gemm(mma_S, tSrQ, tSrK, tSrS);
-
-
-
-        // compute S = QK^T
-//         copy(tSsK, tSrK);
-//
-//         clear(tSrS);
-//         gemm(mma_S, tSrQ, tSrK, tSrS);
-
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -513,11 +483,11 @@ torch::Tensor flash_fwd_v14(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 
     TiledMMA mma_S = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_8, _1, _1>>{},
-                                        Tile<_128,_64,_8>{});
+                                        Tile<_Q_TILE_SIZE,_KV_TILE_SIZE,_8>{});
 
     TiledMMA mma_O = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_8, _1, _1>>{},
-                                        Tile<_128,_128,_8>{});
+                                        Tile<_Q_TILE_SIZE,_HEAD_SIZE,_8>{});
 
 
     //torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
