@@ -230,23 +230,24 @@ void flash_fwd_v14_kernel(
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
 
-            if (qk_block == QK_BLOCK_MAX - 1)
-            {
-            // Copy rmem to smem
-                __syncthreads();
-                copy(copy_K, tKrK, tKsK);
-                __syncthreads();
-            }
-
-            int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
-            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
-
-            if (qk_block == 0)
-            {
-            // Copy gmem to rmem for k_tile+1
-                int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
-                copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
-            }
+//             if (qk_block == QK_BLOCK_MAX - 1)
+//             {
+//             // Copy rmem to smem
+//                 __syncthreads();
+//                 copy(copy_K, tKrK, tKsK);
+//                 __syncthreads();
+//             }
+//
+//             int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
+//             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
+//
+//             if (qk_block == 0)
+//             {
+//             // Copy gmem to rmem for k_tile+1
+//                 int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
+//                 copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
+//             }
+            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block_nex));
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
