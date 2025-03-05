@@ -72,7 +72,18 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
     sum_error = torch.sum(torch.abs(output - output_torch))
     avg_error = sum_error / (batch_size * seqlen * nheads * headdim)
     max_error = torch.max(torch.abs(output - output_torch))
-    return sum_error, avg_error, max_error
+
+    max_error_index = torch.argmax(torch.abs(output - output_torch))
+
+    # Convert the flat index to multi-dimensional indices (if needed)
+    max_error_indices = torch.unravel_index(max_error_index, output.shape)
+
+    # Extract the values at the maximum error location
+    output_value = output[max_error_indices]
+    output_torch_value = output_torch[max_error_indices]
+
+
+    return sum_error, avg_error, max_error, output_value, output_torch_value
 
 
 
@@ -86,8 +97,8 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # print(f"lse_64 = {lse_64}")
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
-sum_error, avg_error, max_error = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
-print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error}")
+sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
+print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error}, max_error output = {output_value}, max_error output torch = {output_torch_value}")
 
 
 # #debug
