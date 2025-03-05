@@ -98,7 +98,7 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
 # lse_128 = get_lse(batch_size=1, seqlen=128, nheads=1, headdim=128)
 # print(f"lse_128 = {lse_128}")
 sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
-print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error}, max_error output = {output_value}, max_error output torch = {output_torch_value}")
+print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error},\n max_error output = {output_value}, max_error output torch = {output_torch_value}")
 
 
 # #debug

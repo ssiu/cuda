@@ -205,7 +205,7 @@ void flash_fwd_v14_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
+    //copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
@@ -224,9 +224,9 @@ void flash_fwd_v14_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
-        //copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-        copy(copy_K, tKrK, tKsK);
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+        //copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
 
         __syncthreads();
@@ -245,7 +245,7 @@ void flash_fwd_v14_kernel(
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
-        clear(tSrK);
+
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -352,9 +352,6 @@ void flash_fwd_v14_kernel(
             }
         }
 
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-
-        __syncthreads();
 
         for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
 
