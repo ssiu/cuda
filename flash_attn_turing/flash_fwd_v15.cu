@@ -38,14 +38,6 @@ void flash_fwd_v15_kernel(
     int batch_size, int seq_len, int num_heads, int head_dim
 )
 {
-//  todo:
-//  do everything in registers from sS -> sP
-//  test tensors are initialized to 0
-
-// 64 threads
-// S -> P in registers
-// tSrS warp shuffling to get M and L
-
 
     Tensor mQ = make_tensor(make_gmem_ptr(q),
                             make_shape(batch_size, seq_len, num_heads, head_dim),
