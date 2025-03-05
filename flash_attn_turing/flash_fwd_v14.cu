@@ -222,7 +222,7 @@ void flash_fwd_v14_kernel(
 
 
         auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
-        auto s2r_thr_copy_K = s2r_tiled_copy_b.get_slice(threadIdx.x);
+        auto s2r_thr_copy_K = s2r_tiled_copy_K.get_slice(threadIdx.x);
         auto tSsK_copy_view = s2r_thr_copy_QK.partition_S(sK);
         auto tSrK_copy_view = s2r_thr_copy_QK.retile_D(tSrK);
 
