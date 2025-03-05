@@ -251,7 +251,7 @@ void flash_fwd_v13_kernel(
                 copy(copy_V, tVgV(_,_,_,kv_tile_next), tVrV);
             }
 
-            gemm(mma_S, tSrQ(_,_,qk_block), tCrK(_,_,qk_block), tSrS);
+            gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
         }
 
 
