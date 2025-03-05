@@ -94,8 +94,8 @@ void flash_fwd_v15_kernel(
 
     // smem total = 50KB
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 32KB
-    Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); // 32KB
-    Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 32KB
+    Tensor sK = make_tensor(sQ.data() + Q_TILE_SIZE*HEAD_SIZE), sK_layout); // 32KB
+    Tensor sV = make_tensor(sK.data(), sV_layout);                  // 32KB
     Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
     Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 64KB
@@ -214,7 +214,7 @@ void flash_fwd_v15_kernel(
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
-    copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
+    //copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
     //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
@@ -230,7 +230,7 @@ void flash_fwd_v15_kernel(
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+
         //copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
         //copy(tSsQ, tSrQ);
@@ -245,14 +245,16 @@ void flash_fwd_v15_kernel(
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
+            copy(s2r_tiled_copy_Q, tSsQ_copy_view(_,_,qk_block), tSrQ_copy_view(_,_,qk_block));
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
-
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
 
 //         copy(tSrQ, tSsQ);
 //         __syncthreads();
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
+        __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
         }
