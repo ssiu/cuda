@@ -25,6 +25,8 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
     torch.cuda.synchronize()
     # (batch_size, nheads, seqlen, headdim)
     output_torch = F.scaled_dot_product_attention(query_torch, key_torch, value_torch)
+    torch.cuda.synchronize()
+
     output_torch = output_torch.permute(0, 2, 1, 3).contiguous().clone()
 
     sum_error = torch.sum(torch.abs(output - output_torch))
