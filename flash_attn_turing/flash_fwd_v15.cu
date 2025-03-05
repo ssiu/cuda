@@ -189,6 +189,11 @@ void flash_fwd_v15_kernel(
     Tensor tOsO = thr_mma_O.partition_C(sO);
     //Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
 
+    auto s2r_tiled_copy_Q = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
+    auto s2r_thr_copy_Q = s2r_tiled_copy_Q.get_slice(threadIdx.x);
+    auto tSsQ_copy_view = s2r_thr_copy_Q.partition_S(sQ);
+    auto tSrQ_copy_view = s2r_thr_copy_Q.retile_D(tSrQ);
+
     auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
     auto s2r_thr_copy_K = s2r_tiled_copy_K.get_slice(threadIdx.x);
     auto tSsK_copy_view = s2r_thr_copy_K.partition_S(sK);
@@ -209,7 +214,7 @@ void flash_fwd_v15_kernel(
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
-
+    copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
     //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
@@ -228,7 +233,7 @@ void flash_fwd_v15_kernel(
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         //copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
-        copy(tSsQ, tSrQ);
+        //copy(tSsQ, tSrQ);
         __syncthreads();
 
         clear(tSrS);
@@ -246,8 +251,8 @@ void flash_fwd_v15_kernel(
 
         }
 
-        copy(tSrQ, tSsQ);
-        __syncthreads()
+//         copy(tSrQ, tSsQ);
+//         __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
         }
