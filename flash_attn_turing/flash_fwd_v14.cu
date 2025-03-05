@@ -245,7 +245,7 @@ void flash_fwd_v14_kernel(
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
-
+        clear(tSrK);
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -288,9 +288,6 @@ void flash_fwd_v14_kernel(
                 tSrS(make_coord(_,i),_,_)[j] = expf(tSrS(make_coord(_,i),_,_)[j] - rM[i]);
             }
         }
-
-
-        //__syncthreads();
 
 
         // rescale l and also reset rD to 0
@@ -354,9 +351,11 @@ void flash_fwd_v14_kernel(
                 tOrO_float(make_coord(_,i),_,_)[j] = expf(rM_old[i] - rM[i]) * tOrO_float(make_coord(_,i),_,_)[j];
             }
         }
+
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 
         __syncthreads();
+
         for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
 
 
