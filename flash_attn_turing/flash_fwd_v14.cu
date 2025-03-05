@@ -219,18 +219,19 @@ void flash_fwd_v14_kernel(
         __syncthreads();
 
         clear(tSrS);
-        CUTE_UNROLL
-        for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
 
-            copy(tKsK(_,_,qk_block), tKrK(_,_,qk_block));
-            //copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
+//         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
+//
+//             copy(tKsK(_,_,qk_block), tKrK(_,_,qk_block));
+//             //copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
+//
+//
+//             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
+//
+//         }
 
-
-            gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
-
-        }
-//         copy(tSsK, tSrK);
-//         gemm(mma_S, tSrQ, tSrK, tSrS);
+        copy(tSsK, tSrK);
+        gemm(mma_S, tSrQ, tSrK, tSrS);
 
 
 
