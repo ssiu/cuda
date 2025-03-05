@@ -194,9 +194,14 @@ void flash_fwd_v14_kernel(
     auto tSsK_copy_view = s2r_thr_copy_K.partition_S(sK);
     auto tSrK_copy_view = s2r_thr_copy_K.retile_D(tSrK);
 
+    auto s2r_tiled_copy_V = make_tiled_copy_B(Copy_Atom<SM75_U16x8_LDSM_T, half_t>{}, mma_O);
+    auto s2r_thr_copy_V = s2r_tiled_copy_V.get_slice(threadIdx.x);
+    auto tOsV_copy_view = s2r_thr_copy_V.partition_S(sV);
+    auto tOrV_copy_view = s2r_thr_copy_V.retile_D(tOrV);
 
     auto KV_TILE_MAX = size<3>(tKgK);
     auto QK_BLOCK_MAX = size<2>(tSsK);
+    auto PV_BLOCK_MAX = size<2>(tOsV);
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
@@ -374,8 +379,17 @@ void flash_fwd_v14_kernel(
         }
 
 
-        copy(tOsV, tOrV);
-        gemm(mma_O, tOrP, tOrV, tOrO_float);
+        for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
+
+
+            copy(s2r_tiled_copy_V, tOsV_copy_view(_,_,pv_block), tOrV_copy_view(_,_,pv_block));
+
+            gemm(mma_O, tOrP(_,_,pv_block), tOrV(_,_,pv_block), tOrO_float);
+
+        }
+
+//         copy(tOsV, tOrV);
+//         gemm(mma_O, tOrP, tOrV, tOrO_float);
 
         // update m and l
         for (int i = 0; i< 2;i++) {
