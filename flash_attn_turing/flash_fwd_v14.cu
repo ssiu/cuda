@@ -200,12 +200,12 @@ void flash_fwd_v14_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
+    //copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
     copy(tSsQ, tSrQ);
-    copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
+    //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
     clear(tOrO_float);
@@ -219,7 +219,7 @@ void flash_fwd_v14_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         __syncthreads();
 
