@@ -255,7 +255,7 @@ void flash_fwd_v15_kernel(
 
 //         copy(tSrQ, tSsQ);
 //         __syncthreads();
-
+        __syncthreads();
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
