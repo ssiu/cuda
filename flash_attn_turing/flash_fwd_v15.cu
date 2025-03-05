@@ -189,10 +189,10 @@ void flash_fwd_v15_kernel(
     Tensor tOsO = thr_mma_O.partition_C(sO);
     //Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
 
-//     auto s2r_tiled_copy_Q = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
-//     auto s2r_thr_copy_Q = s2r_tiled_copy_Q.get_slice(threadIdx.x);
-//     auto tSsQ_copy_view = s2r_thr_copy_Q.partition_S(sQ);
-//     auto tSrQ_copy_view = s2r_thr_copy_Q.retile_D(tSrQ);
+    auto s2r_tiled_copy_Q = make_tiled_copy_A(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
+    auto s2r_thr_copy_Q = s2r_tiled_copy_Q.get_slice(threadIdx.x);
+    auto tSsQ_copy_view = s2r_thr_copy_Q.partition_S(sQ);
+    auto tSrQ_copy_view = s2r_thr_copy_Q.retile_D(tSrQ);
 
     auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
     auto s2r_thr_copy_K = s2r_tiled_copy_K.get_slice(threadIdx.x);
