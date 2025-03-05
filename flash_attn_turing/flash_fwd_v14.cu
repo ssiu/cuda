@@ -238,7 +238,7 @@ void flash_fwd_v14_kernel(
                 __syncthreads();
             }
 
-            int qk_block_next = (qk_block + 1) % K_BLOCK_MAX;
+            int qk_block_next = (qk_block + 1) % QK_BLOCK_MAX;
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block_next), tSrK_copy_view(_,_,qk_block_next));
 
             if (k_block == 0)
