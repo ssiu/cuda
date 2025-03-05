@@ -26,14 +26,12 @@ using namespace cute;
 template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutK, class TiledCopyK, class TiledMmaO,
           class SmemLayoutV, class TiledCopyV,
-          class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
 __global__ __launch_bounds__(256)
 void flash_fwd_v15_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
-                     SmemLayoutS sS_layout,
     half_t* o,       SmemLayoutO sO_layout, TiledCopyO copy_O,
     int batch_size, int seq_len, int num_heads, int head_dim
 )
@@ -88,9 +86,7 @@ void flash_fwd_v15_kernel(
     Tensor sQ = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sQ_layout); // 32KB
     Tensor sK = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sK_layout); // 32KB
     Tensor sV = make_tensor(sK.data() + KV_TILE_SIZE*HEAD_SIZE, sV_layout);                  // 32KB
-    Tensor sP = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sS_layout);
 
-    Tensor sS = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sS_layout); // 64KB
     Tensor sO = make_tensor(make_smem_ptr(reinterpret_cast<half_t*>(&smem_[0])), sO_layout); // 64KB
     Tensor sO_float = make_tensor(make_smem_ptr(reinterpret_cast<float*>(&smem_[0])), sO_layout); // 64KB
 
@@ -505,14 +501,12 @@ torch::Tensor flash_fwd_v15(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     auto kernel = flash_fwd_v15_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
                                       decltype(sK_layout), decltype(copy_K), decltype(mma_O),
                                       decltype(sV_layout), decltype(copy_V),
-                                      decltype(sS_layout),
                                       decltype(sO_layout), decltype(copy_O)>;
 
     cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
     flash_fwd_v15_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                          k_ptr, sK_layout, copy_K, mma_O,
                                                          v_ptr, sV_layout, copy_V,
-                                                                sS_layout,
                                                          o_ptr, sO_layout, copy_O,
                                                          batch_size, seq_len, num_heads, head_dim);
 
