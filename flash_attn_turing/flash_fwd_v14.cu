@@ -220,10 +220,19 @@ void flash_fwd_v14_kernel(
 
         clear(tSrS);
 
+
+        auto s2r_tiled_copy_K = make_tiled_copy_B(Copy_Atom<SM75_U32x4_LDSM_N, half_t>{}, mma_S);
+        auto s2r_thr_copy_K = s2r_tiled_copy_b.get_slice(threadIdx.x);
+        auto tSsK_copy_view = s2r_thr_copy_QK.partition_S(sK);
+        auto tSrK_copy_view = s2r_thr_copy_QK.retile_D(tSrK);
+
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
 
-            copy(tSsK(_,_,qk_block), tSrK(_,_,qk_block));
+            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
+            //copy(tSsK(_,_,qk_block), tSrK(_,_,qk_block));
             //copy(tVsV(_,_,qk_block_next), tVrV(_,_,qk_block_next));
+
+
 
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
