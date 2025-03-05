@@ -209,7 +209,7 @@ void flash_fwd_v15_kernel(
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
-    copy(tSsQ, tSrQ);
+
     //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
     //copy(tSsV(_,_,0), tSrV(_,_,0));
     // clear sO and rO
@@ -228,7 +228,7 @@ void flash_fwd_v15_kernel(
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         //copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
-
+        copy(tSsQ, tSrQ);
         __syncthreads();
 
         clear(tSrS);
@@ -246,7 +246,8 @@ void flash_fwd_v15_kernel(
 
         }
 
-
+        copy(tSrQ, tSsQ);
+        __syncthreads()
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
         }
@@ -388,9 +389,7 @@ void flash_fwd_v15_kernel(
         }
     }
 
-//     for (int i=0; i< tOrO_float.size(); i++) {
-//         //tOrO[i] = __float2half(tOrO_float[i]);
-//     }
+
     constexpr int num_element = decltype(size(tOrO_float))::value;
 
     cutlass::NumericArrayConverter<half_t, float, num_element> convert_op;
@@ -462,8 +461,7 @@ torch::Tensor flash_fwd_v15(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                         make_stride(Int<KV_TILE_SIZE>{}, Int<1>{}));
 
 
-//     auto sO_layout = make_layout(make_shape (Int<Q_TILE_SIZE>{}, Int<HEAD_SIZE>{}),
-//                         make_stride(Int<HEAD_SIZE>{}, Int<1>{}));
+
 
 
     // these copy operations need to respect the swizzle layout
@@ -494,17 +492,14 @@ torch::Tensor flash_fwd_v15(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                         Tile<_128,_128,_8>{}); // (Q_TILE_SIZE, HEAD_SIZE, 8)
 
 
-    //torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat32));
     torch::Tensor o = torch::empty(q.sizes(), q.options().dtype(torch::kFloat16));
 
     half_t* q_ptr = reinterpret_cast<half_t*>(q.data_ptr());
     half_t* k_ptr = reinterpret_cast<half_t*>(k.data_ptr());
     half_t* v_ptr = reinterpret_cast<half_t*>(v.data_ptr());
     half_t* o_ptr = reinterpret_cast<half_t*>(o.data_ptr());
-    //float* o_ptr = o.data_ptr<float>();
 
 
-//     dim3 dimGrid(batch_size, num_heads, seq_len / 16);
     dim3 dimGrid(batch_size, num_heads, seq_len / Q_TILE_SIZE);
     dim3 dimBlock(256);
     int maxbytes = 65536;
