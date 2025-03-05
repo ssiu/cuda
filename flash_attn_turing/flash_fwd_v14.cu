@@ -247,7 +247,7 @@ void flash_fwd_v14_kernel(
 //                 int kv_tile_next = (kv_tile + 1 < KV_TILE_MAX) ? kv_tile + 1 : kv_tile;
 //                 copy(copy_K, tKgK(_,_,_,kv_tile_next), tKrK);
 //             }
-            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block_nex));
+            copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
