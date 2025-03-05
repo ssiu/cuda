@@ -234,8 +234,7 @@ void flash_fwd_v14_kernel(
             {
             // Copy rmem to smem
                 __syncthreads();
-                copy(copy_a, tKrK, tKsK);
-                copy(copy_b, tBrB, tBsB);
+                copy(copy_K, tKrK, tKsK);
                 __syncthreads();
             }
 
