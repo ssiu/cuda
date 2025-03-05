@@ -246,7 +246,7 @@ void flash_fwd_v15_kernel(
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
             //copy(s2r_tiled_copy_Q, tSsQ_copy_view(_,_,qk_block), tSrQ_copy_view(_,_,qk_block));
-            copy(tSsQ, tSrQ);
+            copy(tSsQ(_,_,qk_block), tSrQ(_,_,qk_block));
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
