@@ -230,7 +230,7 @@ void flash_fwd_v16_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 
         copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
