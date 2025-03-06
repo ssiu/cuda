@@ -239,10 +239,10 @@ void flash_fwd_v15_kernel(
 
         clear(tSrS);
 
-        if (kv_tile + 1 < KV_TILE_MAX) {
-            copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-            //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
-        }
+//         if (kv_tile + 1 < KV_TILE_MAX) {
+//             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
+//             //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
+//         }
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
