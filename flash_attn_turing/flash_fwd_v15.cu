@@ -188,7 +188,7 @@ void flash_fwd_v15_kernel(
 
     Tensor tOsO = thr_mma_O.partition_C(sO);
     //Tensor tOrO = thr_mma_O.make_fragment_C(tOsO);
-
+    //  each warp only process 16 rows
     auto s2r_tiled_copy_Q = make_tiled_copy_A(Copy_Atom<SM75_U32x2_LDSM_N, half_t>{}, mma_S);
     auto s2r_thr_copy_Q = s2r_tiled_copy_Q.get_slice(threadIdx.x);
     auto tSsQ_copy_view = s2r_thr_copy_Q.partition_S(sQ);
@@ -210,9 +210,10 @@ void flash_fwd_v15_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
+    //copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
+
     //copy(tSsQ, tSrQ);
     //copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
     //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
@@ -229,9 +230,9 @@ void flash_fwd_v15_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 
-        copy(copy_K, tKrK, tKsK);
+        //copy(copy_K, tKrK, tKsK);
         //copy(copy_V, tVrV, tVsV);
         //copy(tSsQ, tSrQ);
         __syncthreads();
