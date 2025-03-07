@@ -7,7 +7,7 @@ torch.set_printoptions(precision=8)
 
 
 def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
-
+    print(f"Computing error for batch_size={batch_size}, seqlen={seqlen}, nheads={nheads}, headdim={headdim}")
     query = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     key = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
     value = torch.randn(batch_size, seqlen, nheads, headdim, dtype=torch.float16).to("cuda")
