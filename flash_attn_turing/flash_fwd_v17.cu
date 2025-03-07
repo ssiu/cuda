@@ -211,56 +211,41 @@ void flash_fwd_v17_kernel(
 
     copy(copy_Q, tQgQ, tQsQ);
     copy(copy_K, tKgK(_,_,_,0), tKrK);
-    //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
-    //copy(tSsQ, tSrQ);
-    //copy(s2r_tiled_copy_Q, tSsQ_copy_view, tSrQ_copy_view);
-    //copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,0), tSrK_copy_view(_,_,0));
-    //copy(tSsV(_,_,0), tSrV(_,_,0));
-    // clear sO and rO
+
     clear(tOrO_float);
 
-//     if (thread0()) {
-//         print(tSrQ);
-//     }
+
 
 
     // main loop
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
-        // load K, V into shared memory
-        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+
 
         copy(copy_K, tKrK, tKsK);
-        //copy(copy_V, tVrV, tVsV);
-        //copy(tSsQ, tSrQ);
+
         __syncthreads();
 
         clear(tSrS);
 
         if (kv_tile + 1 < KV_TILE_MAX) {
             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-            //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
         }
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
             copy(s2r_tiled_copy_Q, tSsQ_copy_view(_,_,qk_block), tSrQ_copy_view(_,_,qk_block));
-            //copy(tSsQ(_,_,qk_block), tSrQ(_,_,qk_block));
             copy(s2r_tiled_copy_K, tSsK_copy_view(_,_,qk_block), tSrK_copy_view(_,_,qk_block));
 
             gemm(mma_S, tSrQ(_,_,qk_block), tSrK(_,_,qk_block), tSrS);
 
         }
 
-//         copy(tSrQ, tSsQ);
-//         __syncthreads();
-//        __syncthreads();
         __syncthreads();
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-//        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-//        copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -345,11 +330,6 @@ void flash_fwd_v17_kernel(
 
 
 
-        // cast sP from float to half_t
-//         for (int i=0; i < tSrS.size(); i++) {
-//             tOrP[i] = __float2half(tSrS[i]);
-//         }
-
         constexpr int num_element = decltype(size(tSrS))::value;
 
         cutlass::NumericArrayConverter<half_t, float, num_element> convert_op;
@@ -379,8 +359,6 @@ void flash_fwd_v17_kernel(
 
         }
 
-//         copy(tOsV, tOrV);
-//         gemm(mma_O, tOrP, tOrV, tOrO_float);
 
         // update m and l
         for (int i = 0; i< 2;i++) {
@@ -388,11 +366,7 @@ void flash_fwd_v17_kernel(
             rL_old[i] = rL[i];
         }
 
-//         __syncthreads();
-//
-//         copy(copy_K, tKrK, tKsK);
-//         copy(copy_V, tVrV, tVsV);
-//
+
         __syncthreads();
 
     }
