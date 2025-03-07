@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.profiler import profile, record_function, ProfilerActivity
 import flash_attn_turing
+import argparse
 
 torch.set_printoptions(precision=8)
 
@@ -44,16 +45,39 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
     return sum_error, avg_error, max_error, output_value, output_torch_value
 
 
-with profile(activities=[ProfilerActivity.CUDA], record_shapes=True) as prof:
-
-    sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
-
-
-print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
-print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error},\nmax_error output = {output_value}, max_error output torch = {output_torch_value}")
 
 
 
 
 
 
+
+def main():
+    # Create an argument parser
+    parser = argparse.ArgumentParser()
+
+    # Add the 'n'  batch_size=1, seqlen=16, nheads=1, headdim=128
+    parser.add_argument('batch_size', type=int)
+    parser.add_argument('seqlen', type=int)
+    parser.add_argument('nheads', type=int)
+    parser.add_argument('headdim', type=int)
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Access the value of n
+    batch_size=args.batch_size
+    seqlen=args.seqlen
+    nheads=args.nheads
+    headdim=args.headdim
+
+    with profile(activities=[ProfilerActivity.CUDA], record_shapes=True) as prof:
+        sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=batch_size, seqlen=seqlen, nheads=nheads, headdim=headdim)
+
+    print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
+    print(f"sum_error = {sum_error}, avg_error = {avg_error}, max_error = {max_error},\nmax_error output = {output_value}, max_error output torch = {output_torch_value}")
+
+
+
+if __name__ == "__main__":
+    main()

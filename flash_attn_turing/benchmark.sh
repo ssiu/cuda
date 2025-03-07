@@ -13,14 +13,14 @@ pip install wheel
 
 pip install .
 
-#python test.py
+#python benchmark_flash.py
 
 
 
 # colab
 #ncu -f --target-processes all --set full \
 #--import-source on \
-#-o profile_flash_attn python test.py
+#-o profile_flash_attn python benchmark_flash.py
 
 #for size in "${sizes[@]}"; do
 #    echo "Running with size $size..."
@@ -28,15 +28,15 @@ pip install .
 #        --csv ./launch_sm75_gemm.o "$size" "$size" "$size" > "${size}.csv"
 
 
-ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
-#ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test.py
+ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python benchmark_flash.py 4 4096 32 128 > "profile.csv"
+#ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python benchmark_flash.py
 
 # google cloud
 #sudo -s
 #/usr/local/cuda/bin/ncu -f --target-processes all --set full \
 #                        --import-source on \
-#                        -o profile_flash_attn python test.py
+#                        -o profile_flash_attn python benchmark_flash.py
 
-#/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
+#/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python benchmark_flash.py > "profile.csv"
 #sudo su
-#/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test.py
+#/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python benchmark_flash.py
