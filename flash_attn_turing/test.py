@@ -19,7 +19,7 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
     value_torch = value.permute(0, 2, 1, 3).contiguous().clone()
 
 
-    output = flash_attn_turing.flash_fwd_v17(query, key, value,
+    output = flash_attn_turing.flash_fwd_v18(query, key, value,
                                            batch_size, seqlen, nheads, headdim)
 
     # (batch_size, nheads, seqlen, headdim)
@@ -46,7 +46,7 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 with profile(activities=[ProfilerActivity.CUDA], record_shapes=True) as prof:
 
-    sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=8192, nheads=32, headdim=128)
+    sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
 
 
 print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))

@@ -48,7 +48,8 @@ setup(
                      #"flash_fwd_v14.cu"
                      #"flash_fwd_v15.cu"
                      #"flash_fwd_v16.cu"
-                     "flash_fwd_v17.cu"
+                     #"flash_fwd_v17.cu"
+                     "flash_fwd_v18.cu"
                      ],
             include_dirs=cutlass_include_dirs,
             extra_compile_args={'nvcc': nvcc_flags}
