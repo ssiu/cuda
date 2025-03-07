@@ -210,7 +210,7 @@ void flash_fwd_v17_kernel(
     // prologue
 
     copy(copy_Q, tQgQ, tQsQ);
-    copy(copy_K, tKgK(_,_,_,0), tKrK);
+    //copy(copy_K, tKgK(_,_,_,0), tKrK);
     //copy(copy_V, tVgV(_,_,_,0), tVrV);
     __syncthreads();
 
@@ -230,19 +230,19 @@ void flash_fwd_v17_kernel(
     CUTE_NO_UNROLL
     for (int kv_tile = 0; kv_tile < KV_TILE_MAX; ++kv_tile) {
         // load K, V into shared memory
-        //copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
+        copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 
-        copy(copy_K, tKrK, tKsK);
+        //copy(copy_K, tKrK, tKsK);
 
         //copy(tSsQ, tSrQ);
         __syncthreads();
 
         clear(tSrS);
 
-        if (kv_tile + 1 < KV_TILE_MAX) {
-            copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
-            //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
-        }
+//         if (kv_tile + 1 < KV_TILE_MAX) {
+//             copy(copy_K, tKgK(_,_,_,kv_tile + 1), tKrK);
+//             //copy(copy_V, tVgV(_,_,_,kv_tile + 1), tVrV);
+//         }
 
 
         for (int qk_block = 0; qk_block < QK_BLOCK_MAX; qk_block++) {
@@ -257,8 +257,8 @@ void flash_fwd_v17_kernel(
 //         copy(tSrQ, tSsQ);
         __syncthreads();
 
-        (copy_V, tVgV(_,_,_,kv_tile), tVsV);
-//         copy(copy_V, tVrV, tVsV);
+//         (copy_V, tVgV(_,_,_,kv_tile), tVsV);
+        copy(copy_V, tVrV, tVsV);
         __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
