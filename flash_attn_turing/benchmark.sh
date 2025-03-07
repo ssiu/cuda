@@ -31,6 +31,7 @@ pip install .
 # gpu__time_duration.sum
 # sm__throughput.avg.pct_of_peak_sustained_elapsed
 
+# ! ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
 
 ncu --metrics gpu__time_duration.sum sm__throughput.avg.pct_of_peak_sustained_elapsed \
     --csv python test.py > "profile.csv"
