@@ -39,4 +39,5 @@ pip install .
 #                        -o profile_flash_attn python test.py
 
 #/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
+sudo su
 /usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test.py
