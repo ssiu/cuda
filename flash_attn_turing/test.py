@@ -49,7 +49,7 @@ def get_error(batch_size=1, seqlen=16, nheads=1, headdim=128):
 
 with profile(activities=[ProfilerActivity.CUDA], record_shapes=True) as prof:
 
-    sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=4096, nheads=32, headdim=128)
+    sum_error, avg_error, max_error, output_value, output_torch_value = get_error(batch_size=4, seqlen=16384, nheads=32, headdim=128)
 
 
 print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
