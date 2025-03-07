@@ -28,13 +28,9 @@ pip install .
 #    ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed \
 #        --csv ./launch_sm75_gemm.o "$size" "$size" "$size" > "${size}.csv"
 
-# gpu__time_duration.sum
-# sm__throughput.avg.pct_of_peak_sustained_elapsed
 
-# ! ncu --metrics gpu__time_duration.sum --csv python test.py > "profile.csv"
-
-#ncu --metrics sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
 ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
+ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test.py
 
 # google cloud
 #sudo -s
@@ -42,4 +38,5 @@ ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_el
 #                        --import-source on \
 #                        -o profile_flash_attn python test.py
 
-
+/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed --csv python test.py > "profile.csv"
+/usr/local/cuda/bin/ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test.py
