@@ -211,7 +211,7 @@ void flash_fwd_v17_kernel(
 
     copy(copy_Q, tQgQ, tQsQ);
     copy(copy_K, tKgK(_,_,_,0), tKrK);
-    __syncthreads();
+    //__syncthreads();
 
 
     clear(tOrO_float);
@@ -245,7 +245,7 @@ void flash_fwd_v17_kernel(
 
         __syncthreads();
         copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-
+        __syncthreads();
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -348,7 +348,7 @@ void flash_fwd_v17_kernel(
         }
 
 
-        __syncthreads();
+
 
         for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
 
