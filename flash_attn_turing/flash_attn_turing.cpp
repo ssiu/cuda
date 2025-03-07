@@ -48,11 +48,11 @@
 //torch::Tensor flash_fwd_v16(torch::Tensor q, torch::Tensor k, torch::Tensor v,
 //                            int batch_size, int seq_len, int num_heads, int head_dim);
 
-//torch::Tensor flash_fwd_v17(torch::Tensor q, torch::Tensor k, torch::Tensor v,
-//                            int batch_size, int seq_len, int num_heads, int head_dim);
-
-torch::Tensor flash_fwd_v18(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+torch::Tensor flash_fwd_v17(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                             int batch_size, int seq_len, int num_heads, int head_dim);
+
+//torch::Tensor flash_fwd_v18(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+//                            int batch_size, int seq_len, int num_heads, int head_dim);
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     //m.def("flash_fwd_v0", &flash_fwd_v0, "flash fwd v0");
@@ -71,6 +71,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     //m.def("flash_fwd_v14", &flash_fwd_v14, "flash fwd v14");
     //m.def("flash_fwd_v15", &flash_fwd_v15, "flash fwd v15");
     //m.def("flash_fwd_v16", &flash_fwd_v16, "flash fwd v16");
-    //m.def("flash_fwd_v17", &flash_fwd_v17, "flash fwd v17");
-    m.def("flash_fwd_v18", &flash_fwd_v18, "flash fwd v18");
+    m.def("flash_fwd_v17", &flash_fwd_v17, "flash fwd v17");
+    //m.def("flash_fwd_v18", &flash_fwd_v18, "flash fwd v18");
 }
