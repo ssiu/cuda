@@ -37,6 +37,8 @@ for size in "${sizes[@]}"; do
 
     echo "Output saved to ${size}.csv"
 
+done
+
 #ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python benchmark_flash.py
 
 # google cloud
