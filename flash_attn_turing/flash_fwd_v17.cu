@@ -257,9 +257,10 @@ void flash_fwd_v17_kernel(
 //         copy(tSrQ, tSsQ);
 //         __syncthreads();
 //        __syncthreads();
-
+        __syncthreads();
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
 //        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
-        copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
+//        copy(copy_V, tVgV(_,_,_,kv_tile), tVrV);
 
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -366,8 +367,7 @@ void flash_fwd_v17_kernel(
             }
         }
 
-        __syncthreads();
-        copy(copy_V, tVrV, tVsV);
+
         __syncthreads();
 
         for (int pv_block = 0; pv_block < PV_BLOCK_MAX; pv_block++) {
