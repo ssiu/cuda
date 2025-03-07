@@ -29,7 +29,7 @@ template <class SmemLayoutQ, class TiledCopyQ, class TiledMmaS,
           class SmemLayoutS,
           class SmemLayoutO, class TiledCopyO>
 __global__ __launch_bounds__(256)
-void flash_fwd_v17_kernel(
+void flash_fwd_v15_kernel(
     half_t const* q, SmemLayoutQ sQ_layout, TiledCopyQ copy_Q, TiledMmaS mma_S,
     half_t const* k, SmemLayoutK sK_layout, TiledCopyK copy_K, TiledMmaO mma_O,
     half_t const* v, SmemLayoutV sV_layout, TiledCopyV copy_V,
@@ -233,7 +233,7 @@ void flash_fwd_v17_kernel(
         copy(copy_K, tKgK(_,_,_,kv_tile), tKsK);
 
         //copy(copy_K, tKrK, tKsK);
-
+        //copy(copy_V, tVrV, tVsV);
         //copy(tSsQ, tSrQ);
         __syncthreads();
 
@@ -255,10 +255,9 @@ void flash_fwd_v17_kernel(
         }
 
 //         copy(tSrQ, tSsQ);
+//         __syncthreads();
         __syncthreads();
-
-//         (copy_V, tVgV(_,_,_,kv_tile), tVsV);
-        copy(copy_V, tVrV, tVsV);
+        copy(copy_V, tVgV(_,_,_,kv_tile), tVsV);
         __syncthreads();
         for (int i=0;i< tSrS.size();i ++ ) {
             tSrS[i] *= 1.0f / sqrtf(HEAD_SIZE);
@@ -421,7 +420,7 @@ void flash_fwd_v17_kernel(
 // define mQ, mK, mV, mO
 // define gQ, gK, gV, gO
 // how to compute softmax
-torch::Tensor flash_fwd_v17(torch::Tensor q, torch::Tensor k, torch::Tensor v,
+torch::Tensor flash_fwd_v15(torch::Tensor q, torch::Tensor k, torch::Tensor v,
                                 int batch_size, int seq_len, int num_heads, int head_dim)
 {
     //  input : (B, S, NH, HD)
@@ -517,14 +516,14 @@ torch::Tensor flash_fwd_v17(torch::Tensor q, torch::Tensor k, torch::Tensor v,
     int maxbytes = 65536;
 
 
-    auto kernel = flash_fwd_v17_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
+    auto kernel = flash_fwd_v15_kernel<decltype(sQ_layout), decltype(copy_Q), decltype(mma_S),
                                       decltype(sK_layout), decltype(copy_K), decltype(mma_O),
                                       decltype(sV_layout), decltype(copy_V),
                                       decltype(sS_layout),
                                       decltype(sO_layout), decltype(copy_O)>;
 
     cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
-    flash_fwd_v17_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
+    flash_fwd_v15_kernel<<<dimGrid, dimBlock, maxbytes>>>(q_ptr, sQ_layout, copy_Q, mma_S,
                                                          k_ptr, sK_layout, copy_K, mma_O,
                                                          v_ptr, sV_layout, copy_V,
                                                                 sS_layout,
