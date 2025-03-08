@@ -17,7 +17,7 @@ pip install .
 
 
 
-# colab
+# running ncu on colab
 #ncu -f --target-processes all --set full \
 #--import-source on \
 #-o profile_flash_attn python benchmark_flash.py
