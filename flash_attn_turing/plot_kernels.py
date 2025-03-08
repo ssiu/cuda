@@ -21,7 +21,7 @@ def plot_graph(df, metric_value):
     index = np.arange(len(df_flash))  # or len(df_memory_efficient), they should be the same length
 
     # Create the bars for "flash attention" and "memory efficient attention"
-    ax.bar(index, df_memory_efficient[metric_value], bar_width, label='Memory Efficient Attention', color='orange')
+    ax.bar(index, df_memory_efficient[metric_value], bar_width, label='Memory Efficient Attention', color='#2ca02c')
     ax.bar(index + bar_width, df_flash[metric_value], bar_width, label='Flash Attention', color='blue')
 
     # Add labels, title, and adjust x-ticks to match seq_len
