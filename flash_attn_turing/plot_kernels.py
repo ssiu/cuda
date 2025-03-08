@@ -51,7 +51,7 @@ def count_skip_rows(file_path):
 
 
 df_list = []
-NUMS  = [512, 1024, 2048, 4096, 8192]
+NUMS  = [512, 1024, 2048, 4096, 8192, 16384]
 
 for num in NUMS:
     # Path to your CSV file
