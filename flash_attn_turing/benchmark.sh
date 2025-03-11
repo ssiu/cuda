@@ -39,6 +39,9 @@ for size in "${sizes[@]}"; do
 
 done
 
+
+python plot_kernels.py
+
 echo "All done!"
 #ncu --metrics gpu__time_duration.sum,sm__throughput.avg.pct_of_peak_sustained_elapsed python test_flash.py
 

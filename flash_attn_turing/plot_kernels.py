@@ -35,7 +35,9 @@ def plot_graph(df, metric_value):
     # Show the plot
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()
+    #plt.show()
+    plt.savefig(f"{metric_value.replace(' ', '_')}.png", dpi=300, bbox_inches=None)
+
     return 0
 
 
