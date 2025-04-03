@@ -21,8 +21,8 @@ def plot_graph(df, metric_value):
     index = np.arange(len(df_flash))  # or len(df_memory_efficient), they should be the same length
 
     # Create the bars for "flash attention" and "memory efficient attention"
-    ax.bar(index, df_memory_efficient[metric_value], bar_width, label='Memory Efficient Attention', color='#2ca02c')
-    ax.bar(index + bar_width, df_flash[metric_value], bar_width, label='Flash Attention', color='#9467bd')
+    bars_memory = ax.bar(index, df_memory_efficient[metric_value], bar_width, label='Memory Efficient Attention', color='#2ca02c')
+    bars_flash = ax.bar(index + bar_width, df_flash[metric_value], bar_width, label='Flash Attention', color='#9467bd')
 
     # Add labels, title, and adjust x-ticks to match seq_len
     ax.set_xlabel('Seq Len')
@@ -31,6 +31,16 @@ def plot_graph(df, metric_value):
     ax.set_xticks(index + bar_width / 2)
     ax.set_xticklabels(df_flash['seq_len'])
     ax.legend()
+
+    def add_labels(bars):
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.2f}',
+                    ha='center', va='bottom', fontsize=10)#, fontweight='bold')
+
+    add_labels(bars_memory)
+    add_labels(bars_flash)
+
 
     # Show the plot
     plt.xticks(rotation=45)
