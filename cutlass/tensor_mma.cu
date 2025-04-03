@@ -41,20 +41,20 @@ int main()
     for (int i=0; i< tc(make_coord(_,0),_,_).size(); i++) {
         printf("%d\n", tc(make_coord(_,0),_,_)[i]);
     }
-
+    print("=====\n");
     for (int i=0; i< tc(make_coord(_,1),_,_).size(); i++) {
         printf("%d\n", tc(make_coord(_,1),_,_)[i]);
     }
-
+    print("=====\n");
     for (int i=0; i< tc(make_coord(0,_),_,_).size(); i++) {
         printf("%d\n", tc(make_coord(0,_),_,_)[i]);
     }
-
+    print("=====\n");
     for (int i=0; i< tc(make_coord(1,_),_,_).size(); i++) {
         printf("%d\n", tc(make_coord(1,_),_,_)[i]);
     }
+    print("=====\n");
 
-    printf("hello\n");
     Tensor td = tc;
     print(td);
 
