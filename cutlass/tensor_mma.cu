@@ -43,7 +43,7 @@ int main()
     }
 
     for (int i=0; i< tc(make_coord(_,1),_,_).size(); i++) {
-        printf("%d\n", tc(make_coord(_,0),_,_)[i]);
+        printf("%d\n", tc(make_coord(_,1),_,_)[i]);
     }
 
     printf("hello\n");
