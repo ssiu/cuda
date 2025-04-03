@@ -46,6 +46,14 @@ int main()
         printf("%d\n", tc(make_coord(_,1),_,_)[i]);
     }
 
+    for (int i=0; i< tc(make_coord(0,_),_,_).size(); i++) {
+        printf("%d\n", tc(make_coord(0,_),_,_)[i]);
+    }
+
+    for (int i=0; i< tc(make_coord(1,_),_,_).size(); i++) {
+        printf("%d\n", tc(make_coord(1,_),_,_)[i]);
+    }
+
     printf("hello\n");
     Tensor td = tc;
     print(td);
