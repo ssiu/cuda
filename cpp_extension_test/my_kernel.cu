@@ -1,6 +1,7 @@
 #include <torch/extension.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <vector>
 
 __global__ void my_cuda_kernel(float* x, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
