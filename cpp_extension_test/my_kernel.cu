@@ -155,7 +155,7 @@ void mm_new_8_kernel(float* A, float* B, float* C, int N){
 
 
 // torch::Tensor mm_new_8(torch::Tensor a, torch::Tensor b) {
-std::tuple<at::Tensor> mm_new_8(torch::Tensor a, torch::Tensor b) {
+std::vector<at::Tensor> mm_new_8(torch::Tensor a, torch::Tensor b) {
   TORCH_CHECK(a.sizes() == b.sizes());
   TORCH_CHECK(a.dtype() == at::kFloat);
   TORCH_CHECK(b.dtype() == at::kFloat);
