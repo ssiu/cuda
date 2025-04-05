@@ -3,7 +3,6 @@
 #include <cuda_runtime.h>
 #include <vector>
 
-using namespace std;
 
 __global__ void my_cuda_kernel(float* x, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
