@@ -152,8 +152,8 @@ void mm_new_8_kernel(float* A, float* B, float* C, int N){
 }
 
 
-// torch::Tensor mm_new_8(torch::Tensor a, torch::Tensor b) {
-std::vector<at::Tensor> mm_new_8(torch::Tensor a, torch::Tensor b) {
+torch::Tensor mm_new_8(torch::Tensor a, torch::Tensor b) {
+// std::vector<at::Tensor> mm_new_8(torch::Tensor a, torch::Tensor b) {
   TORCH_CHECK(a.sizes() == b.sizes());
   TORCH_CHECK(a.dtype() == at::kFloat);
   TORCH_CHECK(b.dtype() == at::kFloat);
@@ -174,8 +174,10 @@ std::vector<at::Tensor> mm_new_8(torch::Tensor a, torch::Tensor b) {
 
   mm_new_8_kernel<<<gridDim_mm_new_8, blockDim_mm_new_8>>>(a_ptr, b_ptr, c_ptr, N);
 
-  return {c , d};
+  return c;
+//   return {c , d};
 }
+
 
 #undef A
 #undef B
