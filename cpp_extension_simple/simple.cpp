@@ -11,3 +11,4 @@ std::vector<torch::Tensor> Dummy(int const N) {
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("Dummy", &Dummy, "Dummy function.");
+}
