@@ -11,7 +11,7 @@
 
 std::vector<torch::Tensor> Dummy(int const N) {
     std::vector<torch::Tensor> outputs;
-    auto out = torch::zeros({1,2}, torch::dtype(torch::kFloat32));
+    auto out = torch::empty({1,2}, torch::dtype(torch::kFloat32));
     for (int n=0; n<N; n++)
         outputs.push_back(out.clone());
     return {outputs[0], outputs[1]};
