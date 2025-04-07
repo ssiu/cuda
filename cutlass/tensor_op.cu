@@ -36,12 +36,14 @@ using namespace cute;
 int main() {
 
     int A[24] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
-    Tensor mL = make_tensor(&A[0], make_shape(Int<2>{}, Int<12>{}), make_stride(Int<6>{}, Int<1>{}));
+    Tensor mL = make_tensor(&A[0], make_shape(Int<2>{}, Int<12>{}), make_stride(Int<12>{}, Int<1>{}));
 
 
     Tensor gL = local_tile(mL(0, _), Shape<Int<3>>{}, make_coord(_));
 
     print(mL);
+    printf("\n");
+    print_tensor(mL);
     printf("\n");
     print(gL);
     printf("\n");
