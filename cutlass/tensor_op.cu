@@ -39,7 +39,7 @@ int main() {
     Tensor mL = make_tensor(&A[0], make_shape(Int<2>{}, Int<12>{}), make_stride(Int<12>{}, Int<1>{}));
 
 
-    Tensor gL = local_tile(mL(0, _), Shape<Int<3>>{}, make_coord(_));
+    Tensor gL = local_tile(mL(0, _), Shape<Int<3>>{}, make_coord(2));
 
     print(mL);
     printf("\n");
