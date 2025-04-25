@@ -30,7 +30,13 @@ int main()
 
     print(tc);
     print_tensor(tc);
-    print_tensor(tc(make_coord(_,0),0,_));
+    for (int i=0;i<2;i++) {
+        for (int j=0;j<2;j++) {
+            print_tensor(tc(make_coord(_,i),j,_));
+        }
+
+    }
+
 //     printf("%d\n", tc(make_coord(0,0),0,0));
 //     printf("%d\n", tc(make_coord(0,0),0,1));
 //     printf("%d\n", tc(make_coord(1,0),0,0));
