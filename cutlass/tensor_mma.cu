@@ -30,10 +30,11 @@ int main()
 
     print(tc);
     print_tensor(tc);
-    printf("%d\n", tc(make_coord(0,0),0,0));
-    printf("%d\n", tc(make_coord(0,0),0,1));
-    printf("%d\n", tc(make_coord(1,0),0,0));
-    printf("%d\n", tc(make_coord(1,0),0,1));
+    print_tensor(tc(make_coord(_,0),0,_));
+//     printf("%d\n", tc(make_coord(0,0),0,0));
+//     printf("%d\n", tc(make_coord(0,0),0,1));
+//     printf("%d\n", tc(make_coord(1,0),0,0));
+//     printf("%d\n", tc(make_coord(1,0),0,1));
 //     printf("%d %d %d %d\n", int(size<0,0>(tc)), int(size<0,1>(tc)), int(size<1>(tc)), int(size<2>(tc)));
 //
 //     printf("%d\n", tc(make_coord(0,0),0,0));
