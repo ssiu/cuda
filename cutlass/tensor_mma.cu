@@ -27,7 +27,7 @@ int main()
 
     //print_tensor(c);
 
-
+    // ptr[32b](0x7ea2408d8910) o ((_2,_2),_2,_2):((_1,_512),_2048,_32)
     print(tc);
     print_tensor(tc);
     for (int i=0;i<2;i++) {
