@@ -6,6 +6,11 @@ int main() {
 
     #if 1
     //flash backward
+    // -------------------------------------
+    // | Warp 0 | Warp 2 | Warp 4 | Warp 6 |
+    // -------------------------------------
+    // | Warp 1 | Warp 3 | Warp 5 | Warp 7 |
+    // -------------------------------------
     {
         auto mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_2, _4, _1>>{},
