@@ -5,10 +5,11 @@ using namespace cute;
 int main() {
 
     #if 1
+    //flash backward
     {
         auto mmaC = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                         Layout<Shape<_2, _4, _1>>{},
-                                        Tile<_64,_64,_8>{});
+                                        Tile<_32,_32,_8>{});
         print_latex(mmaC);
 
     }
