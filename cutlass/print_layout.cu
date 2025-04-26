@@ -4,6 +4,29 @@ using namespace cute;
 
 
 int main() {
+    #if 1
+    {
+
+        using TiledMma_S = TiledMMA<
+            MMA_Atom_Arch,
+            Layout<Shape<_2, _4, _1>>,
+            Tile<_32, _32, _8>>;
+
+        int q_32_ptr[32*128];
+        int q_64_ptr[64*128];
+        Tensor q_32 = make_tensor(&q_32_ptr[0], make_shape(Int<32>{}, Int<128>{}), make_stride(Int<128>{}, Int<1>{}));
+        Tensor q_64 = make_tensor(&q_64_ptr[0], make_shape(Int<64>{}, Int<128>{}), make_stride(Int<128>{}, Int<1>{}));
+
+        TiledMma_S tiled_mma_S;
+        ThrMMA thr_mma_S = tiled_mma_S.get_slice(0);
+        Tensor tSgQ_32 = thr_mma_S.partition_A(q_32);
+        Tensor tSgQ_64 = thr_mma_S.partition_A(q_64);
+        print(tSgQ_32);
+        print("\n=========================\n")
+        print(tSgQ_64);
+
+    }
+    #endif
 
     #if 1
     {

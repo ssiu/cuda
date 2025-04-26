@@ -4,7 +4,7 @@ using namespace cute;
 
 int main() {
 
-    #if 1
+    #if 0
     //flash backward
     // -------------------------------------
     // | Warp 0 | Warp 2 | Warp 4 | Warp 6 |
