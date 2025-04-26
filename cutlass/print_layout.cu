@@ -11,7 +11,7 @@ int main() {
         using TiledMma_S = TiledMMA<
             MMA_Atom_Arch,
             Layout<Shape<_2, _4, _1>>,
-            Tile<_32, _32, _8>>;
+            Tile<_64, _64, _8>>;
 
         int q_32_ptr[32*128];
         int q_64_ptr[64*128];
@@ -20,9 +20,9 @@ int main() {
 
         TiledMma_S tiled_mma_S;
         ThrMMA thr_mma_S = tiled_mma_S.get_slice(0);
-        Tensor tSgQ_32 = thr_mma_S.partition_A(q_32);
+        //Tensor tSgQ_32 = thr_mma_S.partition_A(q_32);
         Tensor tSgQ_64 = thr_mma_S.partition_A(q_64);
-        print(tSgQ_32);
+        //print(tSgQ_32);
         print("\n=========================\n");
         print(tSgQ_64);
 
