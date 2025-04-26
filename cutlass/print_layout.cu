@@ -8,7 +8,7 @@ int main() {
     {
 
         using TiledMma_S = TiledMMA<
-            MMA_Atom_Arch,
+            SM75_16x8x8_F32F16F16F32_TN{},
             Layout<Shape<_2, _4, _1>>,
             Tile<_32, _32, _8>>;
 
