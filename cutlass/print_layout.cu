@@ -6,9 +6,10 @@ using namespace cute;
 int main() {
     #if 1
     {
+        using MMA_Atom_Arch = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
 
         using TiledMma_S = TiledMMA<
-            SM75_16x8x8_F32F16F16F32_TN{},
+            MMA_Atom_Arch,
             Layout<Shape<_2, _4, _1>>,
             Tile<_32, _32, _8>>;
 
@@ -22,7 +23,7 @@ int main() {
         Tensor tSgQ_32 = thr_mma_S.partition_A(q_32);
         Tensor tSgQ_64 = thr_mma_S.partition_A(q_64);
         print(tSgQ_32);
-        print("\n=========================\n")
+        print("\n=========================\n");
         print(tSgQ_64);
 
     }
