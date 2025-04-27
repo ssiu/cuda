@@ -4,22 +4,22 @@ using namespace cute;
 
 int main()
 {
-
+    int N = 128;
     // need to understand how to call the elements in a register tensor on partition_C when we tile the tensor core multiple times
-    int C[64*64] = {0};
-    for (int i = 0; i < 64*64; ++i) {
+    int C[N*N] = {0};
+    for (int i = 0; i < N*N; ++i) {
         C[i] = i;
     }
 
 
-    auto layout_C = make_layout(make_shape (Int<64>{}, Int<64>{}),
-                            make_stride(Int<64>{}, Int<1>{}));
+    auto layout_C = make_layout(make_shape (Int<N>{}, Int<N>{}),
+                            make_stride(Int<N>{}, Int<1>{}));
 
     Tensor c = make_tensor(&C[0], layout_C);
 
     auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                 Layout<Shape<_2, _4, _1>>{},
-                                Tile<_64,_16,_8>{});
+                                Tile<_32,_32,_8>{});
     ThrMMA thr_mma = mma.get_slice(0);
 
     Tensor tc = thr_mma.partition_C(c);
@@ -30,7 +30,7 @@ int main()
     // ptr[32b](0x7ea2408d8910) o ((_2,_2),_2,_2):((_1,_512),_2048,_32)
     print(tc);
     print_tensor(tc);
-    for (int i=0;i<2;i++) {
+    for (int i=0;i<4;i++) {
         for (int j=0;j<2;j++) {
             print_tensor(tc(make_coord(_,j),i,_));
         }
