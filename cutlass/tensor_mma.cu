@@ -19,7 +19,7 @@ int main()
 
     auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                 Layout<Shape<_2, _4, _1>>{},
-                                Tile<_32,_32,_8>{});
+                                Tile<_128,_128,_8>{});
     ThrMMA thr_mma = mma.get_slice(0);
 
     Tensor tc = thr_mma.partition_C(c);
