@@ -4,7 +4,7 @@ using namespace cute;
 
 int main()
 {
-    int N = 128;
+    constexpr int N = 128;
     // need to understand how to call the elements in a register tensor on partition_C when we tile the tensor core multiple times
     int C[N*N] = {0};
     for (int i = 0; i < N*N; ++i) {
