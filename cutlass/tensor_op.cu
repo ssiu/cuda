@@ -41,7 +41,8 @@ int main() {
 
     Tensor gL = local_tile(mL(0, _), Shape<Int<3>>{}, make_coord(2));
 
-    printf("%d\n", &gL(0));
+    //printf("%d\n", &gL(0));
+    printf("%d\n", &gL[0]);
 //     print(mL);
 //     printf("\n");
 //     print_tensor(mL);
