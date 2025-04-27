@@ -30,11 +30,11 @@ int main()
     // ptr[32b](0x7ea2408d8910) o ((_2,_2),_2,_2):((_1,_512),_2048,_32)
     print(tc);
     print_tensor(tc);
-    for (int i=0;i<4;i++) {
-        for (int j=0;j<2;j++) {
-            print_tensor(tc(make_coord(_,j),i,_));
-        }
-    }
+//     for (int i=0;i<4;i++) {
+//         for (int j=0;j<2;j++) {
+//             print_tensor(tc(make_coord(_,j),i,_));
+//         }
+//     }
 
 //     printf("%d\n", tc(make_coord(0,0),0,0));
 //     printf("%d\n", tc(make_coord(0,0),0,1));
