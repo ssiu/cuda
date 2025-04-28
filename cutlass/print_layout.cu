@@ -4,7 +4,7 @@ using namespace cute;
 
 
 int main() {
-    #if 1
+    #if 0
     {
         using MMA_Atom_Arch = MMA_Atom<SM75_16x8x8_F32F16F16F32_TN>;
 
@@ -49,13 +49,13 @@ int main() {
 
         // row major
         // fp 32
-        auto layout_atom = composition(Swizzle<3, 3, 3>{},
-                                    Layout<Shape<_16,_32>,
-                                    Stride<_32, _1>>{});
-// // fp16
 //         auto layout_atom = composition(Swizzle<3, 3, 3>{},
-//                                     Layout<Shape<_16,_64>,
-//                                     Stride<_64, _1>>{});
+//                                     Layout<Shape<_16,_32>,
+//                                     Stride<_32, _1>>{});
+// fp16
+        auto layout_atom = composition(Swizzle<3, 3, 3>{},
+                                    Layout<Shape<_16,_64>,
+                                    Stride<_64, _1>>{});
 
 
 
@@ -64,9 +64,9 @@ int main() {
         print_layout(layout_atom);
 
 
-        //         auto layout = tile_to_shape(layout_atom,
-        //                                        make_shape(Int<64>{}, Int<16>{}));
-        //print_layout(layout);
+        auto layout = tile_to_shape(layout_atom,
+                                       make_shape(Int<64>{}, Int<64>{}));
+        print_layout(layout);
 
     }
     #endif
