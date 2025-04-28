@@ -7,20 +7,20 @@ int main()
 {
 
     // need to understand how to call the elements in a register tensor on partition_C when we tile the tensor core multiple times
-    int C[64*64] = {0};
-    for (int i = 0; i < 64*64; ++i) {
+    int C[128*128] = {0};
+    for (int i = 0; i < 128*128; ++i) {
         C[i] = i;
     }
 
 
-    auto layout_C = make_layout(make_shape (Int<64>{}, Int<64>{}),
-                            make_stride(Int<64>{}, Int<1>{}));
+    auto layout_C = make_layout(make_shape (Int<128>{}, Int<128>{}),
+                            make_stride(Int<128>{}, Int<1>{}));
 
     Tensor c = make_tensor(&C[0], layout_C);
 
     auto mma = make_tiled_mma(SM75_16x8x8_F32F16F16F32_TN{},
                                 Layout<Shape<_2, _4, _1>>{},
-                                Tile<_64,_64,_8>{});
+                                Tile<_128,_128,_8>{});
     ThrMMA thr_mma = mma.get_slice(0);
 
     Tensor tc = thr_mma.partition_C(c);
