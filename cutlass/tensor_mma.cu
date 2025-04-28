@@ -11,7 +11,7 @@ int main()
     for (int i = 0; i < 128*128; ++i) {
         C[i] = i;
     }
-
+    print("%d\n", C[128*128-1]);
 
     auto layout_C = make_layout(make_shape (Int<128>{}, Int<128>{}),
                             make_stride(Int<128>{}, Int<1>{}));
