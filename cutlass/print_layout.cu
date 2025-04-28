@@ -29,7 +29,7 @@ int main() {
     }
     #endif
 
-    #if 0
+    #if 1
     {
 //         using SmemLayoutAtomA = decltype(composition(
 //             Swizzle<3, 3, 3>{},
