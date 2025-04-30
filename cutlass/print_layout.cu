@@ -28,6 +28,8 @@ int main() {
 
     }
     #endif
+
+    // smem layouts for QKV
     #if 1
     {
 
