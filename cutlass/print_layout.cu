@@ -52,9 +52,15 @@ int main() {
                         Layout<Shape<Int<16>, Int<64>>,
                                Stride<Int<64>, _1>>{}));
 
+        using SmemLayout = decltype(tile_to_shape(
+            // SmemLayoutAtomQdO{},
+            SmemLayoutAtom{},
+            make_shape(Int<64>{}, Int<64>{})));
 
-        using SmemLayoutAtomTransposed = decltype(
-            composition(SmemLayoutAtom{}, make_layout(Shape<Int<64>, Int<64>>{}, GenRowMajor{})));
+        using SmemLayoutTransposed = decltype(
+            composition(SmemLayout{}, make_layout(Shape<Int<64>, Int<64>>{}, GenRowMajor{})));
+
+
 
         SmemLayoutAtom smem_layout_k;
         SmemLayoutAtomTransposed smem_layout_k_t;
