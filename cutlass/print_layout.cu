@@ -33,18 +33,28 @@ int main() {
     #if 1
     {
 
+//         using SmemLayoutAtomKV = decltype(
+//             composition(Swizzle<3, 3, 3>{},
+//                         Layout<Shape<Int<16>, Int<64>>,
+//                                Stride<Int<64>, _1>>{}));
+//
+//         using SmemLayoutKV = decltype(tile_to_shape(
+//             // SmemLayoutAtomQdO{},
+//             SmemLayoutAtomKV{},
+//             make_shape(Int<64>{}, Int<128>{})));
+//
+//         using SmemLayoutKtransposed = decltype(
+//             composition(SmemLayoutKV{}, make_layout(Shape<Int<128>, Int<64>>{}, GenRowMajor{})));
+
+
         using SmemLayoutAtomKV = decltype(
             composition(Swizzle<3, 3, 3>{},
                         Layout<Shape<Int<16>, Int<64>>,
                                Stride<Int<64>, _1>>{}));
 
-        using SmemLayoutKV = decltype(tile_to_shape(
-            // SmemLayoutAtomQdO{},
-            SmemLayoutAtomKV{},
-            make_shape(Int<64>{}, Int<128>{})));
 
         using SmemLayoutKtransposed = decltype(
-            composition(SmemLayoutKV{}, make_layout(Shape<Int<128>, Int<64>>{}, GenRowMajor{})));
+            composition(SmemLayoutAtomKV{}, make_layout(Shape<Int<64>, Int<64>>{}, GenRowMajor{})));
 
         SmemLayoutKV smem_layout_k;
         SmemLayoutKtransposed smem_layout_k_t;
