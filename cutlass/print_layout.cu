@@ -62,8 +62,8 @@ int main() {
 
 
 
-        SmemLayoutAtom smem_layout_k;
-        SmemLayoutAtomTransposed smem_layout_k_t;
+        SmemLayout smem_layout_k;
+        SmemLayoutTransposed smem_layout_k_t;
 
         print_layout(smem_layout_k);
         print_layout(smem_layout_k_t);
