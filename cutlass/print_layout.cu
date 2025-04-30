@@ -54,7 +54,7 @@ int main() {
 
 
         using SmemLayoutAtomTransposed = decltype(
-            composition(SmemLayoutAtomKV{}, make_layout(Shape<Int<64>, Int<64>>{}, GenRowMajor{})));
+            composition(SmemLayoutAtom{}, make_layout(Shape<Int<64>, Int<64>>{}, GenRowMajor{})));
 
         SmemLayoutAtom smem_layout_k;
         SmemLayoutAtomTransposed smem_layout_k_t;
