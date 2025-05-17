@@ -12,7 +12,7 @@ int main()
     for (int i = 0; i < M*N; ++i) {
         C[i] = i;
     }
-    #print("%d\n", C[128*128-1]);
+    //print("%d\n", C[128*128-1]);
 
     auto layout_C = make_layout(make_shape (Int<M>{}, Int<N>{}),
                             make_stride(Int<N>{}, Int<1>{}));
