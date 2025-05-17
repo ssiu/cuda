@@ -27,7 +27,7 @@ int main()
 
     Tensor tc = thr_mma.partition_C(c);
 
-    print_tensor(c);
+    print_tensor(tc);
 
 //     // ptr[32b](0x7ea2408d8910) o ((_2,_2),_2,_2):((_1,_512),_2048,_32)
 //     print(tc);
