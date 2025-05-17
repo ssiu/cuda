@@ -29,6 +29,9 @@ int main()
 
     print_tensor(tc);
     printf("%d\n", tc(make_coord(0,0),0,0));
+    printf("%d\n", tc(make_coord(1,0),0,0));
+    printf("%d\n", tc(make_coord(0,1),0,0));
+    printf("%d\n", tc(make_coord(1,1),0,0));
 
 //     // ptr[32b](0x7ea2408d8910) o ((_2,_2),_2,_2):((_1,_512),_2048,_32)
 //     print(tc);
