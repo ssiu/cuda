@@ -23,7 +23,7 @@ int main()
                                 Layout<Shape<_2, _4, _1>>{},
                                 Tile<_64,_64,_8>{});
 
-    ThrMMA thr_mma = mma.get_slice(0);
+    ThrMMA thr_mma = mma.get_slice(1);
 
     Tensor tc = thr_mma.partition_C(c);
 
