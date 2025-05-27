@@ -23,14 +23,14 @@ int main()
                                 Layout<Shape<_2, _4, _1>>{},
                                 Tile<_64,_64,_8>{});
 
-    ThrMMA thr_mma = mma.get_slice(0);
+    ThrMMA thr_mma = mma.get_slice(255);
 
     Tensor tc = thr_mma.partition_C(c);
 
     print_tensor(tc);
 
-    int warp_id = 0;
-    int lane_id = 0;
+    int warp_id = 7;
+    int lane_id = 31;
     //offset = (warp_id / 4) * 64 * 16 + (warp_id % 4) * 8 + (lane_id / 4) * 64 + (lane_id % 4) * 2;
     int row_offset = (warp_id / 4) * 16 + (lane_id / 4);
     int col_offset = (warp_id % 4) * 8 + (lane_id % 4) * 2;
