@@ -40,7 +40,7 @@ int main()
                 for (int l=0;l<2;l++) {
                     print("((%d, %d), %d, %d)\n", i, j, k, l);
                     print("row = %d, col = %d\n", row_offset + 8 * j + 32 * k, col_offset + i + 32 * l );
-                    print("%d\n", 64 * row_offset + 8 * j + 32 * k + col_offset + i + 32 * l);
+                    print("%d\n", 64 * (row_offset + 8 * j + 32 * k) + col_offset + i + 32 * l);
                     printf("%d\n", tc(make_coord(i,j),k,l));
                     print("====================\n");
                 }
