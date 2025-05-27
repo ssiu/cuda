@@ -38,7 +38,7 @@ int main()
         for (int j=0;j<2;j++) {
             for (int k=0;k<2;k++) {
                 for (int l=0;l<2;l++) {
-                    print("i = %d, j = %d, k = %d, l = %d\n", i, j, k, l);
+                    print("((%d, %d), %d, %d)\n", i, j, k, l);
                     print("row = %d, col = %d\n", row_offset + 8 * j + 32 * l, col_offset + i + 32 * k );
                     printf("%d\n", tc(make_coord(i,j),k,l));
                 }
