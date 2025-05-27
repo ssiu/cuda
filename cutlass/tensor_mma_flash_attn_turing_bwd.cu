@@ -28,6 +28,23 @@ int main()
     Tensor tc = thr_mma.partition_C(c);
 
     print_tensor(tc);
+
+    warp_id = 0;
+    lane_id = 0;
+    //offset = (warp_id / 4) * 64 * 16 + (warp_id % 4) * 8 + (lane_id / 4) * 64 + (lane_id % 4) * 2;
+    int row_offset = (warp_id / 4) * 16 + (lane_id / 4);
+    int col_offset = (warp_id % 4) * 8 + (lane_id % 4) * 2;
+    for (int i=0; i<2; i++) {
+        for (int j=0;j<2;j++) {
+            for (int k=0;k<2;k++) {
+                for (int l=0;l<2;l++) {
+                    print("i = %d, j = %d, k = %d, l = %d\n", i, j, k, l);
+                    print("row = %d, col = %d\n", row_offset + 8 * j + 32 * l, col_offset + i + 32 * k )
+                    printf("%d\n", tc(make_coord(i,j),k,l));
+                }
+            }
+        }
+    }
 //     printf("%d\n", tc(make_coord(0,0),0,0));
 //     printf("%d\n", tc(make_coord(1,0),0,0));
 //     printf("%d\n", tc(make_coord(0,1),0,0));
