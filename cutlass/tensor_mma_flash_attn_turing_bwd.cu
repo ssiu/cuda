@@ -29,8 +29,8 @@ int main()
 
     print_tensor(tc);
 
-    warp_id = 0;
-    lane_id = 0;
+    int warp_id = 0;
+    int lane_id = 0;
     //offset = (warp_id / 4) * 64 * 16 + (warp_id % 4) * 8 + (lane_id / 4) * 64 + (lane_id % 4) * 2;
     int row_offset = (warp_id / 4) * 16 + (lane_id / 4);
     int col_offset = (warp_id % 4) * 8 + (lane_id % 4) * 2;
