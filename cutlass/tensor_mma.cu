@@ -31,6 +31,8 @@ int main()
     printf("tc size %d\n", tc.size());
     printf("tc size %d\n", tc.size());
     print(size<2>(tc));
+    printf("\n");
+    print(size<0>(tc));
 //     printf("%d\n", tc(make_coord(0,0),0,0));
 //     printf("%d\n", tc(make_coord(1,0),0,0));
 //     printf("%d\n", tc(make_coord(0,1),0,0));
