@@ -33,6 +33,10 @@ int main()
     print(size<2>(tc));
     printf("%d\n", size<2>(tc));
     print(size<0>(tc));
+
+    for (int i = 0; i< size<2>(tc); i++) {
+        printf("for loop i = %d\n", i);
+    }
 //     printf("%d\n", tc(make_coord(0,0),0,0));
 //     printf("%d\n", tc(make_coord(1,0),0,0));
 //     printf("%d\n", tc(make_coord(0,1),0,0));
