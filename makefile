@@ -26,7 +26,7 @@ profile: sum/launch_sum.o #matmul_talk/launch_mm.o
 	sudo ncu -f --target-processes all --set full -o $@ ./$<
 
 matrix_multiplication/launch_mm.o: matrix_multiplication/launch_mm.cu
-	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_70 $< \
+	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_120 $< \
 	matrix_multiplication/mm_*.cu matrix_multiplication/yz_mm_*.cu -lcublas
 
 clean_mm:
