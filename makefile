@@ -19,7 +19,7 @@ matmul_talk: matmul_talk/launch_mm.o
 # 	matrix_multiplication/mm_*.cu matrix_multiplication/yz_mm_*.cu -lcublas
 
 matmul_talk/launch_mm.o: matmul_talk/launch_mm.cu
-	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_70 $< \
+	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_120 $< \
 	matmul_talk/mm_*.cu -lcublas
 
 profile: sum/launch_sum.o #matmul_talk/launch_mm.o
