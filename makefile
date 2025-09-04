@@ -41,4 +41,4 @@ matrix_multiplication/test.o: matrix_multiplication/test.cu
 
 
 %.o: %.cu
-	nvcc -lineinfo -o $@ -std=c++17 -arch=sm_70 -I/home/user/cutlass/include $< -lcublas
+	nvcc -O3 -lineinfo -o $@ -std=c++17 -arch=sm_120 -I/home/user/cutlass/include $< -lcublas
