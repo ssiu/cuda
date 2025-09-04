@@ -67,8 +67,8 @@ int main(int argc, char** argv) {
   using namespace cute;
   using Element = float;
 
-  int M = 32768;
-  int N = 16384;
+  int M = 32768 + 1;
+  int N = 16384 + 1;
 
   auto tensor_shape = make_shape(M, N);
 
