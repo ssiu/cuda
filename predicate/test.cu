@@ -67,8 +67,8 @@ int main(int argc, char** argv) {
   using namespace cute;
   using Element = float;
 
-  int M = 32768 + 1;
-  int N = 16384 + 1;
+  int M = 32768;
+  int N = 16384;
 
   auto tensor_shape = make_shape(M, N);
 
@@ -96,6 +96,8 @@ int main(int argc, char** argv) {
       tiled_divide(tensor_S, block_shape);  // ((M, N), m', n')
   Tensor tiled_tensor_D =
       tiled_divide(tensor_D, block_shape);  // ((M, N), m', n')
+
+  print(tiled_tensor_S);
 
   // Thread arrangement
   Layout thr_layout =
