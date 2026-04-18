@@ -4,3 +4,4 @@
 *.ncu-rep
 *.ipynb_checkpoints/
 *.tex
+*.pyc
