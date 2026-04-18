@@ -99,6 +99,22 @@ Constraints:
 """
 
 
+def _setmaxregister_increase(reg_count: int) -> None:
+    """Compat wrapper for CUTLASS DSL register reallocation APIs."""
+    if hasattr(cute.arch, "setmaxregister_increase"):
+        cute.arch.setmaxregister_increase(reg_count)
+    else:
+        cute.arch.warpgroup_reg_alloc(reg_count)
+
+
+def _setmaxregister_decrease(reg_count: int) -> None:
+    """Compat wrapper for CUTLASS DSL register reallocation APIs."""
+    if hasattr(cute.arch, "setmaxregister_decrease"):
+        cute.arch.setmaxregister_decrease(reg_count)
+    else:
+        cute.arch.warpgroup_reg_dealloc(reg_count)
+
+
 # /////////////////////////////////////////////////////////////////////////////
 #  Helpers to parse args
 # /////////////////////////////////////////////////////////////////////////////
@@ -117,7 +133,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--mnkl",
         type=parse_comma_separated_ints,
-        default=(4096, 4096, 4096, 1),
+        default=(192, 192, 128, 1),
         help="mnkl dimensions (comma-separated)",
     )
     parser.add_argument(
@@ -188,6 +204,14 @@ def parse_arguments() -> argparse.Namespace:
         parser.error("--mnkl must contain exactly 4 values")
 
     return args
+
+
+@cute.jit
+def show_layout(tensor, name: str = "tensor"):
+    tidx, _, _ = cute.arch.thread_idx()
+    bidx, bidy, bidz = cute.arch.block_idx()
+    if tidx == 0 and bidx == 0 and bidy == 0 and bidz == 0:
+        cute.printf(f"{name}.layout = {{}}", tensor.layout)
 
 
 # /////////////////////////////////////////////////////////////////////////////
@@ -478,8 +502,18 @@ class Sm120GemmKernel:
         tidx, _, _ = cute.arch.thread_idx()
         warp_idx = cute.arch.warp_idx()
         warp_idx = cute.arch.make_warp_uniform(warp_idx)
-        # bidx, bidy, bidz = cute.arch.block_idx()
+        bidx, bidy, bidz = cute.arch.block_idx()
         # bdimx, bdimy, bdimz = cute.arch.grid_dim()
+
+        # Debug print from a single thread in block (0, 0, 0).
+        show_layout(mA_mkl, "mA_mkl")
+        show_layout(mB_nkl, "mB_nkl")
+        show_layout(mC_mnl, "mC_mnl")
+        # If you also want tensor contents for a tiny problem size, uncomment:
+        # if tidx == 0 and bidx == 0 and bidy == 0 and bidz == 0:
+        #     cute.print_tensor(mA_mkl)
+        #     cute.print_tensor(mB_nkl)
+        #     cute.print_tensor(mC_mnl)
 
         # /////////////////////////////////////////////////////////////////////////////
         #  Prefetch Tma desc
@@ -558,7 +592,9 @@ class Sm120GemmKernel:
         sC = storage.sC.get_tensor(
             epi_smem_layout_staged.outer, swizzle=epi_smem_layout_staged.inner
         )
-
+        show_layout(sA, "sA")
+        show_layout(sB, "sB")
+        show_layout(sC, "sC")
         # ///////////////////////////////////////////////////////////////////////////////
         #  Local_tile partition global tensors
         # ///////////////////////////////////////////////////////////////////////////////
@@ -580,7 +616,9 @@ class Sm120GemmKernel:
             cute.slice_(self.tile_shape_mnk, (None, None, 0)),
             (None, None, None),
         )
-
+        show_layout(gA_mkl, "gA_mkl")
+        show_layout(gB_nkl, "gB_mkl")
+        show_layout(gC_mnl, "gC_mkl")
         # //////////////////////////////////////////////////////////////////////////////
         #  Partition global tensor for TiledMMA_A/B/C
         # //////////////////////////////////////////////////////////////////////////////
@@ -599,7 +637,7 @@ class Sm120GemmKernel:
             cute.group_modes(sA, 0, 2),
             cute.group_modes(gA_mkl, 0, 2),
         )
-
+        
         # TMA load B partition_S/D
         b_cta_layout = cute.make_layout(cute.slice_(cta_layout_mnk, (None, 0, 0)).shape)
         b_cta_crd = cluster_coord_mnk[0]
@@ -611,6 +649,10 @@ class Sm120GemmKernel:
             cute.group_modes(gB_nkl, 0, 2),
         )
 
+        show_layout(tAgA, "tAgA")
+        show_layout(tAsA, "tAsA")
+        show_layout(tBgB, "tBgB")
+        show_layout(tBsB, "tBsB")
         #  Make frangments
         tCsA = thr_mma.partition_A(sA)
         tCsB = thr_mma.partition_B(sB)
@@ -645,7 +687,7 @@ class Sm120GemmKernel:
 
         # MMA warp group
         if warp_idx < self.num_mma_warps:
-            cute.arch.setmaxregister_increase(self.mma_register_requirement)
+            _setmaxregister_increase(self.mma_register_requirement)
 
             num_k_blocks = cute.size(tCrA, mode=[2])
 
@@ -897,7 +939,7 @@ class Sm120GemmKernel:
         # End of MMA warp group
         # Start of DMA warp group
         elif warp_idx == self.num_mma_warps:
-            cute.arch.setmaxregister_decrease(self.load_register_requirement)
+            _setmaxregister_decrease(self.load_register_requirement)
 
             while work_tile.is_valid_tile:
                 tile_coord_mnl = work_tile.tile_idx
@@ -1245,11 +1287,34 @@ def run(
         gemm, a_tensor, b_tensor, c_tensor, max_active_clusters, stream
     )
 
+    # In the default configuration we can reuse the validation launch for timing,
+    # which avoids launching the kernel twice and keeps debug output single-shot.
+    use_ref_launch_for_timing = (
+        not skip_ref_check
+        and not use_cold_l2
+        and warmup_iterations == 0
+        and iterations == 1
+    )
+
+    exec_time = None
+
     if not skip_ref_check:
         print("Reference checking ...")
+        if use_ref_launch_for_timing:
+            start_event = torch.cuda.Event(enable_timing=True)
+            end_event = torch.cuda.Event(enable_timing=True)
+            start_event.record()
+
         # execution
         compiled_gemm(a_tensor, b_tensor, c_tensor, stream)
+
+        if use_ref_launch_for_timing:
+            end_event.record()
+
         torch.cuda.synchronize()
+
+        if use_ref_launch_for_timing:
+            exec_time = start_event.elapsed_time(end_event) * 1000.0
 
         # Ref check
         ref = torch.einsum(
@@ -1290,14 +1355,15 @@ def run(
             one_workspace_bytes, warmup_iterations, iterations
         )
 
-    exec_time = testing.benchmark(
-        compiled_gemm,
-        workspace_generator=generate_tensors,
-        workspace_count=workspace_count,
-        stream=stream,
-        warmup_iterations=warmup_iterations,
-        iterations=iterations,
-    )
+    if exec_time is None:
+        exec_time = testing.benchmark(
+            compiled_gemm,
+            workspace_generator=generate_tensors,
+            workspace_count=workspace_count,
+            stream=stream,
+            warmup_iterations=warmup_iterations,
+            iterations=iterations,
+        )
 
     print(f"Execution time: {exec_time} microseconds per iteration")
 
