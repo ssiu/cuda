@@ -133,13 +133,14 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--mnkl",
         type=parse_comma_separated_ints,
-        default=(192, 192, 128, 1),
+        default=(96, 96, 64, 1),
         help="mnkl dimensions (comma-separated)",
     )
     parser.add_argument(
         "--tile_shape_mnk",
         type=parse_comma_separated_ints,
         choices=[
+            (32, 32, 32),
             (64, 64, 64),
             (64, 128, 64),
             (128, 64, 64),
@@ -147,7 +148,7 @@ def parse_arguments() -> argparse.Namespace:
             (128, 256, 64),
             (128, 128, 128),
         ],
-        default=(64, 64, 64),
+        default=(32, 32, 32),
         help="CTA tile shape (comma-separated)",
     )
     parser.add_argument(
@@ -659,10 +660,20 @@ class Sm120GemmKernel:
         tCrA = tiled_mma.make_fragment_A(tCsA[None, None, None, 0])
         tCrB = tiled_mma.make_fragment_B(tCsB[None, None, None, 0])
 
+        show_layout(tCsA, "tCsA")
+        show_layout(tCrA, "tCrA")
+        show_layout(tCsB, "tCsB")
+        show_layout(tCrB, "tCrB")
+
         tCgC = thr_mma.partition_C(gC_mnl)
         acc_shape = tCgC.shape[:3]
         accumulators = cute.make_rmem_tensor(acc_shape, self.acc_dtype)
 
+        show_layout(tCsA, "tCsA")
+        show_layout(tCrA, "tCrA")
+        show_layout(tCsB, "tCsB")
+        show_layout(tCrB, "tCrB")
+        show_layout(tCgC, "tCgC")
         # cluster wait for barrier init
         if cute.size(self.cluster_shape_mnk) > 1:
             cute.arch.cluster_wait()
