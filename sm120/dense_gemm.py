@@ -133,7 +133,8 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--mnkl",
         type=parse_comma_separated_ints,
-        default=(96, 96, 64, 1),
+        default=(32, 32, 32, 1),
+        # default=(96, 96, 64, 1),
         help="mnkl dimensions (comma-separated)",
     )
     parser.add_argument(
@@ -673,6 +674,8 @@ class Sm120GemmKernel:
         show_layout(tCrA, "tCrA")
         show_layout(tCsB, "tCsB")
         show_layout(tCrB, "tCrB")
+
+        show_layout(accumulators, "accumulators")
         show_layout(tCgC, "tCgC")
         # cluster wait for barrier init
         if cute.size(self.cluster_shape_mnk) > 1:
