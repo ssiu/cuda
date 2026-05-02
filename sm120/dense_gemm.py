@@ -133,7 +133,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--mnkl",
         type=parse_comma_separated_ints,
-        default=(32, 32, 32, 1),
+        default=(64, 64, 32, 1),
         # default=(96, 96, 64, 1),
         help="mnkl dimensions (comma-separated)",
     )
@@ -690,6 +690,27 @@ class Sm120GemmKernel:
             tile_sched_params, cute.arch.block_idx(), cute.arch.grid_dim()
         )
         work_tile = tile_sched.initial_work_tile_info()
+        if tidx == 0 and bidx == 0 and bidy == 0 and bidz == 0:
+            cute.printf(
+                "scheduler initial consumer: tile_idx=({}, {}, {}), valid={}",
+                work_tile.tile_idx[0],
+                work_tile.tile_idx[1],
+                work_tile.tile_idx[2],
+                work_tile.is_valid_tile,
+            )
+        if (
+            tidx == self.num_mma_warps * self.num_threads_per_warp
+            and bidx == 0
+            and bidy == 0
+            and bidz == 0
+        ):
+            cute.printf(
+                "scheduler initial producer: tile_idx=({}, {}, {}), valid={}",
+                work_tile.tile_idx[0],
+                work_tile.tile_idx[1],
+                work_tile.tile_idx[2],
+                work_tile.is_valid_tile,
+            )
 
         # Create the pipeline states for producer and consumer
         mainloop_producer_state = pipeline.make_pipeline_state(
@@ -947,6 +968,14 @@ class Sm120GemmKernel:
                 # Advance to the next work tile
                 tile_sched.advance_to_next_work()
                 work_tile = tile_sched.get_current_work()
+                if tidx == 0 and bidx == 0 and bidy == 0 and bidz == 0:
+                    cute.printf(
+                        "scheduler next consumer: tile_idx=({}, {}, {}), valid={}",
+                        work_tile.tile_idx[0],
+                        work_tile.tile_idx[1],
+                        work_tile.tile_idx[2],
+                        work_tile.is_valid_tile,
+                    )
                 tma_store_pipeline.producer_tail()
                 # End of for k_tile loop
             # End of while loop
@@ -1005,6 +1034,19 @@ class Sm120GemmKernel:
 
                 tile_sched.advance_to_next_work()
                 work_tile = tile_sched.get_current_work()
+                if (
+                    tidx == self.num_mma_warps * self.num_threads_per_warp
+                    and bidx == 0
+                    and bidy == 0
+                    and bidz == 0
+                ):
+                    cute.printf(
+                        "scheduler next producer: tile_idx=({}, {}, {}), valid={}",
+                        work_tile.tile_idx[0],
+                        work_tile.tile_idx[1],
+                        work_tile.tile_idx[2],
+                        work_tile.is_valid_tile,
+                    )
             # end of while loop
 
             # Wait A/B buffer empty
