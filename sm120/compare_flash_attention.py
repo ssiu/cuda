@@ -10,17 +10,26 @@ import cutlass.cute as cute
 from cutlass.cute.runtime import from_dlpack
 import torch
 
-from flash_attention_v2 import FlashAttentionForwardAmpere
+try:
+    from sm120.flash_attention_v0 import FlashAttentionForwardAmpere as FlashAttentionV0
+    from sm120.flash_attention_v1 import FlashAttentionForwardAmpere as FlashAttentionV1
+except ModuleNotFoundError:
+    from flash_attention_v0 import FlashAttentionForwardAmpere as FlashAttentionV0
+    from flash_attention_v1 import FlashAttentionForwardAmpere as FlashAttentionV1
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Run the local CUTE FlashAttention v2 kernel and/or PyTorch cuDNN SDPA "
+            "Run local CUTE FlashAttention kernels and/or PyTorch cuDNN SDPA "
             "on identical inputs."
         )
     )
-    parser.add_argument("--impl", choices=["compare", "fa2", "cudnn"], default="compare")
+    parser.add_argument(
+        "--impl",
+        choices=["compare", "v0", "v1", "cudnn"],
+        default="compare",
+    )
     parser.add_argument("--dtype", type=cutlass.dtype, default=cutlass.BFloat16)
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--seqlen_q", type=int, default=8192)
@@ -48,9 +57,29 @@ def cutlass_to_torch_dtype(dtype: cutlass.Numeric) -> torch.dtype:
     raise ValueError(f"Unsupported attention dtype: {dtype}")
 
 
+def wrap_cute_tensor(
+    torch_tensor: torch.Tensor,
+    dtype: cutlass.Numeric,
+    *,
+    dynamic_layout: bool,
+) -> cute.Tensor:
+    cute_tensor = from_dlpack(torch_tensor, assumed_align=16)
+    if dynamic_layout:
+        cute_tensor = cute_tensor.mark_layout_dynamic(
+            leading_dim=3
+        ).mark_compact_shape_dynamic(
+            mode=3,
+            stride_order=torch_tensor.dim_order(),
+            divisibility=(128 // dtype.width),
+        )
+    return cute_tensor
+
+
 def create_input(
     shape: tuple[int, ...],
     dtype: cutlass.Numeric,
+    *,
+    dynamic_layout: bool = True,
 ) -> tuple[cute.Tensor, torch.Tensor]:
     torch_tensor = (
         torch.empty(*shape, dtype=torch.int32, device="cuda")
@@ -58,30 +87,17 @@ def create_input(
         .to(dtype=cutlass_to_torch_dtype(dtype))
         .contiguous()
     )
-    cute_tensor = (
-        from_dlpack(torch_tensor, assumed_align=16)
-        .mark_layout_dynamic(leading_dim=3)
-        .mark_compact_shape_dynamic(
-            mode=3,
-            stride_order=torch_tensor.dim_order(),
-            divisibility=(128 // dtype.width),
-        )
-    )
-    return cute_tensor, torch_tensor
+    return wrap_cute_tensor(torch_tensor, dtype, dynamic_layout=dynamic_layout), torch_tensor
 
 
-def create_output(shape: tuple[int, ...], dtype: cutlass.Numeric) -> tuple[cute.Tensor, torch.Tensor]:
+def create_output(
+    shape: tuple[int, ...],
+    dtype: cutlass.Numeric,
+    *,
+    dynamic_layout: bool = True,
+) -> tuple[cute.Tensor, torch.Tensor]:
     torch_tensor = torch.empty(*shape, dtype=cutlass_to_torch_dtype(dtype), device="cuda")
-    cute_tensor = (
-        from_dlpack(torch_tensor, assumed_align=16)
-        .mark_layout_dynamic(leading_dim=3)
-        .mark_compact_shape_dynamic(
-            mode=3,
-            stride_order=torch_tensor.dim_order(),
-            divisibility=(128 // dtype.width),
-        )
-    )
-    return cute_tensor, torch_tensor
+    return wrap_cute_tensor(torch_tensor, dtype, dynamic_layout=dynamic_layout), torch_tensor
 
 
 @contextmanager
@@ -149,7 +165,9 @@ def run_cudnn_sdpa(
     return out.permute(0, 2, 1, 3).contiguous()
 
 
-def compile_fa2(
+def compile_flash_attention(
+    kernel_cls,
+    kernel_name: str,
     args: argparse.Namespace,
     q: cute.Tensor,
     k: cute.Tensor,
@@ -157,7 +175,7 @@ def compile_fa2(
     o: cute.Tensor,
     stream: cuda.CUstream,
 ):
-    if not FlashAttentionForwardAmpere.can_implement(
+    if not kernel_cls.can_implement(
         args.dtype,
         args.head_dim,
         args.m_block_size,
@@ -166,20 +184,20 @@ def compile_fa2(
         args.is_causal,
     ):
         raise TypeError(
-            "Unsupported testcase: "
+            f"Unsupported {kernel_name} testcase: "
             f"{args.dtype}, head_dim={args.head_dim}, "
             f"m_block_size={args.m_block_size}, n_block_size={args.n_block_size}, "
             f"num_threads={args.num_threads}, is_causal={args.is_causal}"
         )
 
-    fa2 = FlashAttentionForwardAmpere(
+    kernel = kernel_cls(
         args.head_dim,
         args.m_block_size,
         args.n_block_size,
         args.num_threads,
         args.is_causal,
     )
-    return cute.compile(fa2, q, k, v, o, args.softmax_scale, stream, options="")
+    return cute.compile(kernel, q, k, v, o, args.softmax_scale, stream, options="")
 
 
 def cuda_time_us(fn, warmup_iterations: int, iterations: int):
@@ -213,7 +231,11 @@ def main() -> None:
     q, q_torch = create_input(shape_q, args.dtype)
     k, k_torch = create_input(shape_kv, args.dtype)
     v, v_torch = create_input(shape_kv, args.dtype)
-    o, o_torch = create_output(shape_q, args.dtype)
+    q_v1 = wrap_cute_tensor(q_torch, args.dtype, dynamic_layout=False)
+    k_v1 = wrap_cute_tensor(k_torch, args.dtype, dynamic_layout=False)
+    v_v1 = wrap_cute_tensor(v_torch, args.dtype, dynamic_layout=False)
+    o_v0, o_v0_torch = create_output(shape_q, args.dtype)
+    o_v1, o_v1_torch = create_output(shape_q, args.dtype, dynamic_layout=False)
 
     stream = cuda.CUstream(torch.cuda.current_stream().cuda_stream)
 
@@ -225,30 +247,73 @@ def main() -> None:
     print(f"  softmax_scale: {args.softmax_scale}")
     print(f"  is_causal: {args.is_causal}")
 
-    compiled_fa2 = None
-    if args.impl in ("compare", "fa2"):
-        compiled_fa2 = compile_fa2(args, q, k, v, o, stream)
+    compiled_v0 = None
+    compiled_v1 = None
+    if args.impl in ("compare", "v0"):
+        compiled_v0 = compile_flash_attention(
+            FlashAttentionV0, "v0", args, q, k, v, o_v0, stream
+        )
+    if args.impl in ("compare", "v1"):
+        compiled_v1 = compile_flash_attention(
+            FlashAttentionV1, "v1", args, q_v1, k_v1, v_v1, o_v1, stream
+        )
 
     if args.impl == "compare":
-        compiled_fa2(q, k, v, o, args.softmax_scale, stream)
         cudnn_out = run_cudnn_sdpa(
             q_torch, k_torch, v_torch, args.softmax_scale, args.is_causal
         )
+        compiled_v0(q, k, v, o_v0, args.softmax_scale, stream)
+        compiled_v1(q_v1, k_v1, v_v1, o_v1, args.softmax_scale, stream)
         torch.cuda.synchronize()
-        torch.testing.assert_close(o_torch, cudnn_out, atol=args.atol, rtol=args.rtol)
-        diff = (o_torch.float() - cudnn_out.float()).abs()
-        print(f"max_abs_diff={diff.max().item():.6f}")
-        print(f"mean_abs_diff={diff.mean().item():.6f}")
+
+        for name, actual in (("v0", o_v0_torch), ("v1", o_v1_torch)):
+            torch.testing.assert_close(
+                actual, cudnn_out, atol=args.atol, rtol=args.rtol
+            )
+            diff = (actual.float() - cudnn_out.float()).abs()
+            print(f"{name}_max_abs_diff={diff.max().item():.6f}")
+            print(f"{name}_mean_abs_diff={diff.mean().item():.6f}")
+
+        v0_avg_us, _ = cuda_time_us(
+            lambda: compiled_v0(q, k, v, o_v0, args.softmax_scale, stream),
+            0,
+            1,
+        )
+        v1_avg_us, _ = cuda_time_us(
+            lambda: compiled_v1(q_v1, k_v1, v_v1, o_v1, args.softmax_scale, stream),
+            0,
+            1,
+        )
+        cudnn_avg_us, _ = cuda_time_us(
+            lambda: run_cudnn_sdpa(
+                q_torch, k_torch, v_torch, args.softmax_scale, args.is_causal
+            ),
+            0,
+            1,
+        )
+        print(f"v0_avg_us={v0_avg_us:.3f}")
+        print(f"v1_avg_us={v1_avg_us:.3f}")
+        print(f"cudnn_avg_us={cudnn_avg_us:.3f}")
         print("PASS")
         return
 
-    if args.impl == "fa2":
+    if args.impl == "v0":
         avg_us, _ = cuda_time_us(
-            lambda: compiled_fa2(q, k, v, o, args.softmax_scale, stream),
+            lambda: compiled_v0(q, k, v, o_v0, args.softmax_scale, stream),
             args.warmup_iterations,
             args.iterations,
         )
-        print(f"fa2_avg_us={avg_us:.3f}")
+        print(f"v0_avg_us={avg_us:.3f}")
+        print("PASS")
+        return
+
+    if args.impl == "v1":
+        avg_us, _ = cuda_time_us(
+            lambda: compiled_v1(q_v1, k_v1, v_v1, o_v1, args.softmax_scale, stream),
+            args.warmup_iterations,
+            args.iterations,
+        )
+        print(f"v1_avg_us={avg_us:.3f}")
         print("PASS")
         return
 
