@@ -14,7 +14,7 @@ class TmaRoundTrip:
         self.dtype = cutlass.Float32
         self.shape = (rows, cols)
         self.tile_shape = (rows, cols)
-        self.layout = cute.make_layout(self.shape, stride=(cols, 1))
+        self.tile_elems = rows * cols
         self.threads_per_cta = 32
 
     @cute.jit
@@ -24,19 +24,20 @@ class TmaRoundTrip:
         output_ptr: cute.Pointer,
         stream: cuda.CUstream,
     ):
-        g_input = cute.make_tensor(input_ptr, self.layout)
-        g_output = cute.make_tensor(output_ptr, self.layout)
+        layout = cute.make_layout(self.shape, stride=(self.cols, 1))
+        g_input = cute.make_tensor(input_ptr, layout)
+        g_output = cute.make_tensor(output_ptr, layout)
 
         tma_load_atom, tma_input = cute.nvgpu.cpasync.make_tiled_tma_atom(
             cute.nvgpu.cpasync.CopyBulkTensorTileG2SOp(),
             g_input,
-            self.layout,
+            layout,
             self.tile_shape,
         )
         tma_store_atom, tma_output = cute.nvgpu.cpasync.make_tiled_tma_atom(
             cute.nvgpu.cpasync.CopyBulkTensorTileS2GOp(),
             g_output,
-            self.layout,
+            layout,
             self.tile_shape,
         )
 
@@ -44,7 +45,7 @@ class TmaRoundTrip:
         class SharedStorage:
             tma_barrier: cute.struct.MemRange[cutlass.Int64, 1]
             tile: cute.struct.Align[
-                cute.struct.MemRange[self.dtype, cute.cosize(self.layout)],
+                cute.struct.MemRange[self.dtype, self.tile_elems],
                 1024,
             ]
 
@@ -76,9 +77,11 @@ class TmaRoundTrip:
             cute.nvgpu.cpasync.prefetch_descriptor(tma_load_atom)
             cute.nvgpu.cpasync.prefetch_descriptor(tma_store_atom)
 
+        layout = cute.make_layout(self.shape, stride=(self.cols, 1))
+        tma_copy_bytes = cute.size_in_bytes(self.dtype, layout)
         smem = cutlass.utils.SmemAllocator()
         storage = smem.allocate(self.shared_storage)
-        s_tile = storage.tile.get_tensor(self.layout)
+        s_tile = storage.tile.get_tensor(layout)
         tma_barrier = storage.tma_barrier.data_ptr()
 
         if tidx == 0:
@@ -105,7 +108,9 @@ class TmaRoundTrip:
             g_output_tiled,
         )
 
-        if tidx == 0:
+        if warp_idx == 0:
+            with cute.arch.elect_one():
+                cute.arch.mbarrier_arrive_and_expect_tx(tma_barrier, tma_copy_bytes)
             cute.copy(
                 tma_load_atom,
                 t_gmem_load[(None, 0)],
@@ -120,10 +125,12 @@ class TmaRoundTrip:
 
         store_pipeline = pipeline.PipelineTmaStore.create(
             num_stages=1,
-            producer_group=pipeline.CooperativeGroup(pipeline.Agent.Thread, 1),
+            producer_group=pipeline.CooperativeGroup(
+                pipeline.Agent.Thread, self.threads_per_cta
+            ),
         )
 
-        if tidx == 0:
+        if warp_idx == 0:
             cute.copy(
                 tma_store_atom,
                 t_smem_store,
@@ -131,14 +138,15 @@ class TmaRoundTrip:
             )
             store_pipeline.producer_commit()
             store_pipeline.producer_acquire()
-            store_pipeline.producer_tail()
+        pipeline.sync()
+        store_pipeline.producer_tail()
 
 
 def _device_ptr(ptr_value: int) -> cute.Pointer:
     return make_ptr(
         cutlass.Float32,
         ptr_value,
-        cutlass.AddressSpace.gmem,
+        cute.AddressSpace.gmem,
         assumed_align=16,
     )
 
@@ -160,8 +168,8 @@ def run_demo(rows: int = 4, cols: int = 4) -> None:
         demo = TmaRoundTrip(rows=rows, cols=cols)
         compiled = cute.compile(
             demo,
-            nullptr(cutlass.Float32, cutlass.AddressSpace.gmem, assumed_align=16),
-            nullptr(cutlass.Float32, cutlass.AddressSpace.gmem, assumed_align=16),
+            nullptr(cutlass.Float32, cute.AddressSpace.gmem, assumed_align=16),
+            nullptr(cutlass.Float32, cute.AddressSpace.gmem, assumed_align=16),
             stream,
         )
         compiled(_device_ptr(int(device_input)), _device_ptr(int(device_output)), stream)
